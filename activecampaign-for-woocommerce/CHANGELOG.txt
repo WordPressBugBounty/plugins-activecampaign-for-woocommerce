@@ -1,0 +1,562 @@
+== Changelog ==
+
+**ActiveCampaign for WooCommerce**
+
+= 2.7.3 2024-06-17 =
+* Fix for WCS not always returning all records in historical sync
+* Better error handling for bad records sent to ActiveCampaign
+* WooCommerce 9.0.0 compatibility updates
+
+= 2.7.2 2024-06-10 =
+* Some small bug fixes
+* Resolved bug with historical sync subscriptions halting
+
+= 2.7.1 2024-06-03 =
+* Bug fixes for subscription statuses
+* Adding logging and minor fixes to abandoned carts
+
+= 2.7.0 2024-05-21 =
+* Compatible with WP 6.5.3 & WC 8.9.0
+* Adds AC account feature retrieval
+* Corrects bugs with some status types missing in historical sync
+* Fixing a null error in PHP 8.1
+* Corrects an error when subscriptions is not installed
+* Fix for subscription orders being synced incorrectly
+
+= 2.6.2 2024-04-09 =
+* Fixing historical sync incorrectly reporting stuck
+* Minor improvements
+
+= 2.6.1 2024-03-25 =
+* Adding a manual sync button for subscriptions
+* Fix for contact sync finishing but never saying it is finished
+* Fixing normalized status errors with order sync
+* Fix for subscriptions sending incorrectly to orders
+
+= 2.6.0 2024-03-11 =
+* Release update to sync WooCommerce subscriptions
+
+= 2.5.6 2024-01-26 =
+* Making support items more clear and adding hook checks
+* Fix for GraphQL calls returning 400 errors due to POST-GET redirects
+* Separating historical sync cron from new order cron
+* Resolving some bugs with historical sync when contacts box is checked
+
+= 2.5.5 2024-01-03 =
+* Fixing missing files
+
+= 2.5.4 2023-01-02 =
+* Custom order status mapping added to advanced settings
+* Fixes an issue with deleted or trashed products syncing
+* Adds more catches for data issues in historical sync
+
+= 2.5.3 2023-11-30 =
+* Resolving admin visual issues related to version 2.5.2
+
+= 2.5.2 2023-11-28 =
+* Reskin design of WooCommerce admin
+* Do not product sync drafts
+
+= 2.5.1 2023-11-10 =
+* Bugfix for product types missing from product sync
+* Deprecating connection option id
+
+= 2.5.0 2023-11-02 =
+* Adding save option to support logs
+* Fixing product image URL bug
+* Add new product segment fields
+
+= 2.4.10 2023-10-18 =
+* Fix for customer data causing COFE issues in some cases
+* Improvement for contact sync in historical sync
+
+= 2.4.9 2023-10-09 =
+* Fixing the abandoned cart starter times
+* Adding more clear text for abandoned cart settings
+
+= 2.4.8 2023-10-06 =
+* Workaround for custom checkouts not loading abandoned cart script
+* Limiting extremely large numbers for ints
+
+= 2.4.7 2023-09-29 =
+* Product sync should not disappear
+* Removing product sync beta option
+
+= 2.4.6 2023-09-25 =
+* Product and image URL fix for abandoned carts
+
+= 2.4.5 2023-09-19 =
+* Product and image URL fix orders
+
+= 2.4.4 2023-09-11 =
+* Status is now renamed Support
+* Placing log viewer in the support page
+* Deepdata code removed
+
+= 2.4.3 2023-09-01 =
+* Bugfix workaround for shipping address overwriting contact details
+* Update to order bulk async endpoint
+
+= 2.4.2 2023-08-25 =
+* Minor bugfixes
+* Fix for custom site URLs sometimes causing historical sync to fail
+* Speed enhancements added
+
+= 2.4.1 2023-08-11 =
+* Order status update bugfix
+
+= 2.4.0 2023-08-09 =
+* WooCommerce HPOS compatibility
+* Adds a status checklist to indicate any potential problems
+* Revamp of status page to be more helpful
+* Bugfix for abandoned cart clearing & record cleanup
+* Adding new debug mode to reduce excessive repeat calls
+* Order notes should update any time a record syncs to AC
+* Historical sync reset button now performs table cleanup
+* Remove set_time calls
+* Fixes an abandoned cart request stall bug
+* Bugfix for other plugins throwing a conflict on vendor packages
+
+= 2.3.4 2023-07-21 =
+* Updates to vendor packages and autoload
+* Fixes site match for health check
+* Sync cron unschedules if config is not set
+* Fix for case where cannot activate/deactivate after update
+* Fixes sync updates for all order statuses
+
+= 2.3.3 2023-07-13 =
+* Logging changes
+
+= 2.3.2 2023-07-12 =
+* Bugfix for pending payment status sent as completed
+* Bugfix for when the JS URL contains 2 question mark characters
+
+= 2.3.1 2023-07-06 =
+* Fixes a bug caused by empty billing address
+* Fixes a bug with bad contacts on contact import
+* Fixes a case where get_data() from WooCommerce causes a bool error
+* Removing redundant vendor dependencies
+
+= 2.3.0 2023-06-14 =
+* Connections to ActiveCampaign can now be created from the WordPress plugin
+* Connections created from hosted to WC can be viewed in the plugin for easy verification
+
+= 2.2.4 2023-05-26 =
+* Bugfixes for empty strings sending to COFE or shipping sending empty address
+* Bugfix and logging for abandoned carts not syncing
+
+= 2.2.3 2023-05-19 =
+* Bugfix for empty shipping sent to COFE service.
+* Stops empty fields for accidentally getting written to AC.
+
+= 2.2.2 2023-05-18 =
+* Fixing issues related to non normalized statuses and failed orders in the overall sync process
+* Fix for an issue with get_id in order sync process
+
+= 2.2.1 2023-05-12 =
+* Bugfix for records not syncing due to a get_id error.
+* Bugfix for records having an invalid email address.
+
+= 2.2.0 2023-05-04 =
+* Adding new functionality to allow order syncing through COFE service
+  * Orders can soon sync any order status to ActiveCampaign
+  * Soon webhooks will be removed from WooCommerce as the plugin will utilize WooCommerce hooks instead.
+  * Deepdata will soon be phased out for the new COFE service. Deepdata will still be available but not primarily used for WooCommerce.
+* Order detail pages now have an ActiveCampaign details box
+  * An 'Open Contact' link will take you directly to your contact in your ActiveCampaign account.
+  * View the sync status and data stored for the order
+  * You can sync a specific order as new or historical
+    * This allows you to choose whether or not to run automations on an order
+* Bugfix for orders missing external ID
+
+= 2.1.0 2023-03-03 =
+* Fixing issues with historical sync hanging
+* Updates to settings to include more control over historical sync
+* Simplifies the historical sync page
+
+= 2.0.2 2023-01-27 =
+* Fixing product stock sync
+* Reducing COFE product sync calls and fixing a connection bug
+* Adding a fallback status check for cancelled and failed orders
+* Order notes will note how the sync originated
+
+= 2.0.1 2023-01-26 =
+* Fixing the check email function causing stall in historical sync
+* Reducing memory consumption and process for historical sync
+* Fixing product sync bugs
+
+= 2.0.0 2023-01-13 =
+* Major change to how historical sync process functions
+
+= 1.9.8 2022-12-19 =
+* Bugfix for abandoned cart process
+* Extra security patch
+
+= 1.9.7 2022-12-16 =
+* Patches Up Security Vulnerability
+* Updates Model for COFE Syncs
+
+= 1.9.6 2022-12-07 =
+* Bugfix for abandoned cart sync & add to cart customerid errors
+* Bugfix for products not syncing due to product attribute naming
+* AC Cronjobs will now be removed and re-scheduled on settings save
+
+= 1.9.5 2022-12-02 =
+* Bugfixes for 400 errors in historical sync
+* Bugfix for connection issues and improvements to repair
+* Bugfix for product variations
+
+= 1.9.4 2022-11-21 =
+* Bugfixes for historical sync 400 errors
+
+= 1.9.3 2022-11-18 =
+* Products will now sync to ActiveCampaign on creation, update, or stock change
+* Removing HTML and limiting product descriptions when syncing products
+
+= 1.9.2 2022-11-07 =
+* Various fixes for product sync
+
+= 1.9.1 2022-11-02 =
+* Fix for product sync status
+
+= 1.9.0 2022-11-02 =
+* Adding product sync feature
+
+= 1.8.1 2022-10-31 =
+* Various bugfixes for abandoned cart, customer data, and order syncing.
+* Adding a retry for timeouts and connection failures.
+* Adds a version number to logging to track which version threw specific errors.
+
+= 1.8.0 2022-07-27 =
+* Adds a status for cron jobs
+* Vendor file updates
+* Bugfix for null orders
+* Bugfix for conversion to cents issue
+* Bugfix for order processing hooks not having a session available
+* Bugfix for contacts not syncing
+
+= 1.7.14 2022-09-07 =
+* Bugfix for some accounts not syncing live orders
+
+= 1.7.13 2022-08-31 =
+* Limits how often background services are run
+* Adds a foreground job to trigger functions that are not happening in cron
+* Adding more clarity to abandoned cart status
+* Fixes the source status for sync
+* Cleanup and bug fixes for syncing new orders
+* Bugfixes for abandoned carts not syncing
+* Bugfix for coupon codes
+* Adds simple report info to the status page
+* Add transparency to order sync and health check
+
+= 1.7.14 2022-09-07 =
+* Bugfix for some accounts not syncing live orders
+
+= 1.7.13 2022-08-31 =
+* Limits how often background services are run
+* Adds a foreground job to trigger functions that are not happening in cron
+* Adding more clarity to abandoned cart status
+* Fixes the source status for sync
+* Cleanup and bug fixes for syncing new orders
+* Bugfixes for abandoned carts not syncing
+* Bugfix for coupon codes
+* Adds simple report info to the status page
+* Add transparency to order sync and health check
+
+= 1.7.12 2022-08-09 =
+* Hotfix for new orders wrongly syncing as historical sync
+* Fixes inconsistent automation triggers
+
+= 1.7.11 2022-08-04 =
+* Bugfix for when historical sync is run background without contacts box checked
+
+= 1.7.10 2022-08-03 =
+* Added a cache flush and time extension to historical sync to keep the process from crashing
+* Resolved a bug with the contact sync and phone number lookup
+* Added more detail to the historical sync page
+
+= 1.7.9 2022-07-18 =
+* Added contact syncing to historical sync for all contacts regardless of order status
+* Reverted live order syncing to single record create/update to resolve various bugs
+
+= 1.7.8 2022-06-22 =
+* Bugfix for abandoned carts not syncing
+
+= 1.7.7 2022-06-09 =
+* Bugfix for order totals syncing with the incorrect value
+* Bugfix for abandoned cart date check issues
+
+= 1.7.6 2022-05-25 =
+* Bugfix for serialization error and guzzle handling
+
+= 1.7.5 2022-05-24 =
+* Abandoned cart pricing fix
+* Bugfix for handling Hosted returned errors, better timeout handling
+* Various minor bug fixes
+
+= 1.7.4 2022-05-16 =
+* Bugfix for AC table missing
+* Bugfix for upgrade action called wrongly
+
+= 1.7.3 2022-05-09 =
+* A note will now be added to orders when they are synced to AC
+* Bugfix for historical sync using too many resources
+* Debugging output added to historical sync
+* Corrected table name length issues
+* Bugfix for checking order statuses
+
+= 1.7.2 2022-03-20 =
+* Bugfix for payment pending orders getting synced before they are processed
+
+= 1.7.1 2022-03-19 =
+* Hotfix for a fatal error when an order hook runs but there is no WooCommerce session
+
+= 1.7.0 2022-03-18 =
+* All finished orders are now tracked and synced through a background process and bulk synced every minute
+* Finished orders will no longer send as part of the customer order process speeding up order processing
+* Better tracking for abandoned carts passing to recovered orders
+* Orders that cannot send will be retried every minute until they do send to ActiveCampaign
+* Issues with duplicate orders and abandoned carts should now be resolved
+* Issues with false abandoned carts should no longer happen
+* Changing class checks to method checks to reduce errors on products and orders with unexpected classes from WooCommerce
+* Adds a default option for custom email field and fixes the custom email field fallback for JS plugin conflicts
+
+= 1.6.11 2022-03-16 =
+* A message has been added informing admins that soon the official ActiveCampaign plugin will be required to use this plugin
+
+= 1.6.10 2022-03-14 =
+* Fixing an error when API calls time out and adding retries to historical sync on connection timeout
+* Adding a manual offset for historical sync and limit select box
+* Fixing pagination on abandoned carts
+
+= 1.6.9 - 2022-03-07 =
+* Changing sync to use product short description if filled out and removing html from description field
+* Fix for incorrect abandoned cart dates
+* Fix for historical sync hanging
+* Fixing the accepts marketing nonce error from stopping accepts marketing function
+
+= 1.6.8 - 2022-02-21 =
+* New connection health check will notify admin if there are connection issues and check to make sure ActiveCampaign APIs can be reached
+* Adds various checks for connection issues and better handling for ActiveCampaign APIs
+* Resolves memory overflow issues with object storage in historical sync
+* Bugfix for handling WooCommerce returning null products and orders
+* Bugfix for various errors in historical sync, order sync, and abandoned carts
+
+= 1.6.7 - 2022-02-07 =
+* Hotfix for rounding errors reported in the order syncing process
+
+= 1.6.6 - 2022-01-31 =
+* Bugfix for historical sync hanging
+* Historical sync error fixes for products not being retrieved properly
+
+= 1.6.5 - 2022-01-21 =
+* PHP 7.4 & 8 compatibility fixes
+* Bugfixes for abandoned cart & historical sync
+
+= 1.6.4 - 2022-01-13 =
+* Various compatibility bugfixes
+
+= 1.6.3 - 2022-01-11 =
+* Bugfix for historical sync running but syncing zero records
+
+= 1.6.2 - 2022-01-06 =
+* Bugfixes for abandoned cart syncing duplicates of orders
+* Various bugfixes for historical sync
+
+= 1.6.1 - 2021-12-14 =
+* Bugfix for historical sync date
+* Bugfix for orders with multiple categories
+* Various fixes for abandoned carts
+
+= 1.6.0 - 2021-12-07 =
+* Bulk sync is now available for the historical sync process in the plugin
+* Speeds up the sync process dramatically
+* Resolved a few minor bugs and logging cleanup
+
+= 1.5.4 - 2021-12-02 =
+* Hotfix for finished order process
+
+= 1.5.3 - 2021-11-15 =
+* Hotfix for urgent abandoned cart bug
+
+= 1.5.2 - 2021-11-15 =
+* Hotfix for bad build that caused composer to miss a class that autoload of abandoned cart to be missing
+
+= 1.5.1 - 2021-11-11 =
+* Bugfix for completed orders being marked as abandoned cart orders in ActiveCampaign
+* Adds a backup method to make sure an order that failed to send to ActiveCampaign will resend during the abandoned cart sync
+
+= 1.5.0 - 2021-11-02 =
+* Adds a first version historical sync page where a historical sync can be run as a background process within Wordpress instead of ActiveCampaign.
+* Allows direct sync from WooCommerce to the Hosted API.
+* Allows the admin to view progress of historical sync & cancel/pause the sync process within the ActiveCampaign plugin historical sync page.
+
+= 1.4.10 - 2021-11-01 =
+* Bugfix for checkbox and JS not loading on the checkout page in some cases
+* Bugfix for an abandoned cart that has already been synced becoming a new abandoned cart
+
+= 1.4.9 - 2021-09-22 =
+* Updated activation and setup to make configuration easier
+* Bugfix for numbers with more than 2 decimals & concat error in the stack trace
+
+= 1.4.8 - 2021-09-13 =
+* Bugfix for WooCommerce orders showing as duplicates in ActiveCampaign
+
+= 1.4.7 - 2021-08-20 =
+* Various bug fixes and logging improvements
+
+= 1.4.6 - 2021-08-17 =
+* Adds advanced helper buttons to debug connection issues and clear settings without uninstalling the plugin
+* Bugfix for zero total orders that fail validation but are supposed to be zero
+
+= 1.4.5 - 2021-08-02 =
+* Adds a total value check fallback to double check we have the order total.
+* Adds validation of order before sending to ActiveCampaign.
+* Feature change for debug mode: debug messages will no longer post to the logs if debug mode in the plugin settings is off. Reduces log waste.
+* Bugfix to stop record mismatches when looking up an existing order in ActiveCampaign.
+* Bugfix for UUID reset happening at the wrong time causing some finished orders to record as abandoned carts.
+
+= 1.4.4 - 2021-07-22 =
+* Bugfix to check if undefined functions wc_admin_url() & wp_get_scheduled_event() are available.
+* Bugfix for array_walk issue to make sure the WC_Order is not set to null during checkout.
+* Bugfix for get() on null error on order processing.
+* Bugfix for zero dollar totals
+* Bugfix for error on dropping the table on deletion of the plugin
+* Adds catches for more error conditions
+
+= 1.4.3 - 2021-07-15 =
+* Bugfix for array_walk error.
+* Adding more error handling.
+* Extending the connection timeout so customers with slower connection to ActiveCampaign can send data.
+
+= 1.4.2 - 2021-06-29 =
+* Bugfix for abandoned cart report page errors
+* Allowing admin to force sync an abandoned cart row
+
+= 1.4.1 - 2021-06-23 =
+* Plugin now surfaces errors to admin with a dismissible notice.
+* You can find a list of the last 10 errors related to this plugin in this plugin's status tab to help quickly identify problems.
+* Added an abandon cart manual sync button to allow manual re-running of the abandoned cart sync process.
+* Added the ability to delete individual rows from the abandoned cart page.
+
+= 1.4.0 - 2021-06-14 =
+* New menu item for ActiveCampaign features.
+* Guest abandoned carts now sync as a background process creating more reliable data in ActiveCampaign.
+* All abandoned carts are now synced on an hourly basis.
+* New abandoned carts status page shows abandoned carts in WooCommerce and their current status.
+* Contacts and phone numbers now properly sync to ActiveCampaign when orders are placed.
+* Bugfix for various cases where "place order" hangs or errors and causes orders to not be placed.
+* Bugfix for accepts marketing selection not always being set in ActiveCampaign.
+* Bugfix for duplicate orders appearing in ActiveCampaign.
+* Bugfix for orders marked as abandoned no longer create bad records as both abandoned and completed in ActiveCampaign.
+
+= 1.3.6 - 2021-05-10 =
+* Bugfix for Normalizer fatal error issues, removing Normalizer dependency
+
+= 1.3.5 - 2021-04-22 =
+* Fixes a bug surfaced by the 1.3.4 fix which caused an error when admin updates an order
+
+= 1.3.4 - 2021-04-22 =
+* Fixing a bug that sent orders using external payment methods to ActiveCampaign (Paypal, Stripe) before the order was complete.
+
+= 1.3.3 - 2021-04-20 =
+* Resolving a javascript error with the copy to clipboard function
+* Adds the connection id output to the status tab
+* Bugfix for adding all categories to the abandoned cart product send
+* Adding a new process to manage sync of abandoned carts for registered users
+* Adding more checks and safety points to keep orders from failing to process
+* Resolving a bug that stops orders from finishing
+
+= 1.3.2 - 2021-03-30 =
+* Bugfix for logger error when the plugin isn't configured properly
+* Bugfix for checkbox configuration issues
+* Adding a vendor library to always format money properly when sending to AC
+* Adding a missing package that was causing fatal errors on some installs
+* Add a new customer to ActiveCampaign on registration, also adds a synced to AC time to metadata for users/contacts
+
+= 1.3.1 - 2021-03-18 =
+* Adding an API test button to verify that the connection to the customer's ActiveCampaign account is valid without needing to save
+* Bugfix adding a check to verify the orderProducts exists and is an array.
+* Bugfix for request errors when the plugin is not configured or there are settings issues
+* Bugfix for orders not completing and 500 errors when users try to place an order
+* Bugfix for Javascript syntax errors on iPhone/Safari devices
+
+= 1.3.0 - 2021-03-01 =
+* The admin settings link on the left menu has moved from Settings to WooCommerce
+* New feature - Adding functionality to send orders to AC on order completed instead of waiting for webhooks (webhooks will still run in case this process fails)
+* Upon sending to AC a metadata field will be added to orders to track last sync time for that order to ActiveCampaign
+* New feature - Adding an advanced admin field to customize the email ID we bind on for abandoned cart
+* New feature - Adding an admin status page
+
+= 1.2.16 - 2021-02-17 =
+* Bugfix for abandoned carts not sending product image, sku, or url
+
+= 1.2.15 - 2021-02-03 =
+* Updated description copy
+* Updated WooCommerce compatibility version tested
+
+= 1.2.14 - 2020-12-16 =
+* Bugfix for repeat guest orders not syncing to ActiveCampaign
+* Fix for abandoned carts not being sent to ActiveCampaign due to checkout ID conflicts
+* Adds error logging for marketing checkbox issues
+* Updating compatibility reference for Wordpress 5.6 and WooCommerce 4.8
+
+= 1.2.13 - 2020-11-05 =
+* Resolving errors resulting from files missing in the package
+
+= 1.2.12 - 2020-11-04 =
+* Updating compatibility documentation
+
+= 1.2.11 - 2020-06-02 =
+* Fix bug with abandoned cart when there is no logged in customer
+* Improve logging
+
+= 1.2.10 - 2020-02-17 =
+* Upgrade Guzzle for bug fixes
+* Fix email validation
+* Send first and last name to guest abandoned carts
+
+= 1.2.9 - 2019-12-17 =
+* Improve nonce validation
+
+= 1.2.8 - 2019-07-31 =
+* Register plugin with version number for cache busting purposes
+
+= 1.2.7 =
+* Fixed incompatibility with Aero Checkout plugin
+
+= 1.2.6 =
+* Update Guzzle
+
+= 1.2.5 =
+* Added more info to logs. Fixed imports and doc blocks.
+
+= 1.2.4 =
+* Added WooCommerce version check
+
+= 1.2.3 =
+* Prevent erroneous abandoned carts
+
+= 1.2.2 =
+* Prevent vendor package collisions with other plugins
+* Increased error logging for easier debugging
+
+= 1.2.0 =
+* Accepts Marketing for Guests
+* Local setup and readme updates
+
+= 1.1.0 =
+* Added support for guest abandoned carts
+
+= 1.0.3 =
+* Prevent edgecase where updating the Abandoned Cart time causes an exception
+
+= 1.0.2 =
+* Allow Woocommerce API calls to work when Wordpress is behind a load balancer
+* Fixed a bug where abandoned cart functionality would not work if an item had no categories
+
+= 1.0.1 =
+* Prevent exceptions from breaking WooCommerce cart functionality
+
+= 1.0.0 =
+* Initial Release

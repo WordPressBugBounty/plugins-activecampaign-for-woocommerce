@@ -1,5 +1,7 @@
 <?php
-
+if ( ! isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) || empty( $activecampaign_for_woocommerce_product_sync_data['products'] ) ) {
+	$activecampaign_for_woocommerce_product_sync_data['products'] = 0;
+}
 /**
  * Provide an admin product sync view for the plugin
  *
@@ -39,7 +41,11 @@
 							?>
 
 							<div class="mb-500">
-								Product data sync times vary based on the amount of product you're syncing in. you could check back later when sync is completed
+								Product data sync times vary based on the amount of product you're syncing in. you could check back later when sync is completed.<br/>
+								Product types that will not sync: Grouped, unpublished, private, pending, password protected
+							</div>
+							<div class="mb-500">
+								There are <?php echo esc_html( count( $activecampaign_for_woocommerce_product_sync_data['products'] ) ); ?> products available to sync.
 							</div>
 
 							<div class="mb-500">
@@ -83,7 +89,7 @@
 				<hr/>
 				<div id="sync-run-section">
 					<div id="activecampaign-product-sync-run-shortly" class="sync-run-status" style="border:1px dashed #2271b1; padding:5px 10px; display:none;">
-						<span></span>
+						<span>-</span>
 						<?php
 						esc_html_e(
 							'product sync event(s) scheduled, waiting for cron to run...',
@@ -131,8 +137,7 @@
 					</div>
 					<?php if ( $activecampaign_for_woocommerce_product_sync_data['options']['ac_debug'] ) : ?>
 						<div>
-							<p>Debug info: <span id="activecampaign-run-product-sync-debug">placeholder</span>
-							</p>
+							<p>Debug info: <span id="activecampaign-run-product-sync-debug">placeholder</span></p>
 						</div>
 					<?php endif; ?>
 					</div>
@@ -147,8 +152,16 @@
 						</button>
 					</div>
 				</div>
-
 			</div>
 		</div>
+		<?php
+		if ( $activecampaign_for_woocommerce_product_sync_data['options']['ac_debug'] && isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) && ! empty( $activecampaign_for_woocommerce_product_sync_data['products'] ) ) :
+			;
+			?>
+		<div class="card max-w-none">
+			<p>(Debug) Product IDs visible by the plugin to sync</p>
+			<p style=""><?php echo esc_html( implode( ', ', $activecampaign_for_woocommerce_product_sync_data['products'] ) ); ?></p>
+		</div>
+		<?php endif; ?>
 	</section>
 </div>

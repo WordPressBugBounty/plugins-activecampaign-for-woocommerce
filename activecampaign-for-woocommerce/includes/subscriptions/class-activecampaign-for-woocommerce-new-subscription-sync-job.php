@@ -149,32 +149,34 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 				if ( false === $wc_subscription || ! $this->order_has_required_data( $wc_subscription ) ) {
 					$this->mark_order_as_incompatible( $wc_order_id );
 					return false;
-				}
-
-				$ac_customer_id = $this->get_ac_customer_id( $wc_subscription->get_billing_email() );
-				$ac_order       = $this->single_sync_subscription_cofe_data( $wc_subscription, false, $ac_customer_id );
-
-				if ( ! isset( $ac_order ) || ! $ac_order ) {
-					$this->logger->warning(
-						'The order may have failed to sync to cofe',
-						[
-							'order_id'  => $wc_order_id,
-							'sync_data' => $ac_order,
-							'ac_code'   => 'SSJ_158',
-						]
-					);
-
-					$this->mark_subscription_as_failed( $wc_order_id );
 				} else {
-					$ac_id = null;
 
-					if ( self::validate_object( $ac_order, 'get_id' ) ) {
-						$ac_id = $ac_order->get_id();
+					$ac_customer_id = $this->get_ac_customer_id( $wc_subscription->get_billing_email() );
+					$ac_order       = $this->single_sync_subscription_cofe_data( $wc_subscription, false, $ac_customer_id );
+
+					if ( ! isset( $ac_order ) || ! $ac_order ) {
+						$this->logger->warning(
+							'The order may have failed to sync to cofe',
+							[
+								'order_id'  => $wc_order_id,
+								'sync_data' => $ac_order,
+								'ac_code'   => 'SSJ_158',
+							]
+						);
+
+						$this->mark_subscription_as_failed( $wc_order_id );
+					} else {
+						$ac_id = null;
+
+						if ( self::validate_object( $ac_order, 'get_id' ) ) {
+							$ac_id = $ac_order->get_id();
+						}
+
+						$this->add_meta_to_subscription( $wc_subscription );
+						$this->add_update_notes( $wc_order_id, $ac_id, $wc_subscription->get_status() );
+						$this->mark_single_order_synced( $wc_order_id );
+						$this->update_last_subscription_sync();
 					}
-
-					$this->add_update_notes( $wc_order_id, $ac_id, $wc_subscription->get_status() );
-					$this->mark_single_order_synced( $wc_order_id );
-					$this->update_last_subscription_sync();
 				}
 			}
 		} catch ( Throwable $t ) {
@@ -600,5 +602,30 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 		} else {
 			return false;
 		}
+	}
+
+		/**
+		 * @param WC_Subscription $wc_subscription The WooCommerce order object.
+		 */
+	private function add_meta_to_subscription( $wc_subscription ) {
+		// save the status so update checks do not sync the same data
+		$wc_subscription->add_meta_data( 'ac_last_synced_status', $wc_subscription->get_status(), true );
+
+		$last_sync_time = $wc_subscription->get_meta( 'ac_order_last_synced_time' );
+		$ac_datahash    = $wc_subscription->get_meta( 'ac_datahash' );
+
+		if ( ! empty( $last_sync_time ) ) {
+			$wc_subscription->update_meta_data( 'ac_order_last_synced_time', time() );
+		} else {
+			$wc_subscription->add_meta_data( 'ac_order_last_synced_time', time(), true );
+		}
+
+		if ( ! empty( $ac_datahash ) ) {
+			$wc_subscription->update_meta_data( 'ac_datahash', md5( json_encode( $wc_subscription->get_data() ) ) );
+		} else {
+			$wc_subscription->add_meta_data( 'ac_datahash', md5( json_encode( $wc_subscription->get_data() ) ), true );
+		}
+
+		$wc_subscription->save_meta_data();
 	}
 }

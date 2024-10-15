@@ -73,11 +73,19 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		return $order;
 	}
 
+	/**
+	 * An order update is always processed backend so it will not interrupt customer process.
+	 * Due to that, we should always process immediately and not on a cron to keep data from going stale
+	 * or from losing the data due to quick status changes.
+	 * FYI New orders do not go through this process.
+	 *
+	 * @param string|int $order_id The order id as passed from the hook.
+	 */
 	public function execute_order_updated( $order_id ) {
 		$logger = new Logger();
 
 		if ( isset( $order_id ) && ! empty( $order_id ) ) {
-			$logger->debug(
+			$logger->debug_excess(
 				'Order update triggered',
 				[
 					'order' => $order_id,
@@ -89,7 +97,11 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			// If it's a subscription, route through sub update
 			if ( 'shop_subscription' === $post_type ) {
 				$wc_subscription = $this->get_wc_subscription( $order_id );
-				do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
+
+				if ( $this->check_update_validity( $wc_subscription ) ) {
+					do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
+				}
+
 				return;
 			}
 
@@ -98,19 +110,32 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 				return;
 			}
 
-			set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
-
 			$wc_order = $this->get_wc_order( $order_id );
 
 			// Check if order is valid
-			if ( self::validate_object( $wc_order, 'get_data' ) ) {
-				// This will sync it immediately but also blindly
-				if ( ! wp_get_scheduled_event( 'activecampaign_for_woocommerce_admin_sync_single_order_active', [ 'wc_order_id' => $order_id ] ) ) {
+			if ( self::validate_object( $wc_order, 'get_data' ) && $this->check_update_validity( $wc_order ) ) {
+				set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
+
+				if ( ! wp_get_scheduled_event(
+					'activecampaign_for_woocommerce_admin_sync_single_order_active',
+					[
+						'wc_order_id' => $order_id,
+						'status'      => $wc_order->get_status(),
+					]
+				) &&
+					! wp_get_scheduled_event(
+						'activecampaign_for_woocommerce_admin_sync_single_order_status',
+						[
+							'wc_order_id' => $order_id,
+							'status'      => $wc_order->get_status(),
+						]
+					) ) {
 					wp_schedule_single_event(
-						time() + 30,
+						time() + 10,
 						'activecampaign_for_woocommerce_admin_sync_single_order_active',
 						[
 							'wc_order_id' => $order_id,
+							'status'      => $wc_order->get_status(),
 						]
 					);
 				}
@@ -126,33 +151,168 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 	}
 
 	/**
-	 * @param object   $stripe_response The stripe response.
-	 * @param WC_Order $order The order.
+	 * Order status updates are processed through this function.
+	 *
+	 * @param int|string $order_id The order id.
+	 * @param string     $from_status The status the order changed from.
+	 * @param string     $to_status The status the order is changing to.
 	 */
-	public function execute_order_updated_stripe( $stripe_response, $order ) {
+	public function execute_order_status_changed( $order_id, $from_status, $to_status ) {
 		$logger = new Logger();
 
-		$order_id = null;
+		if ( isset( $order_id ) && ! empty( $order_id ) ) {
+			$logger->debug_excess(
+				'Order status update triggered',
+				[
+					'order'        => $order_id,
+					'order_status' => $from_status,
+					'new_status'   => $to_status,
+				]
+			);
 
-		try {
-			$order_id = $order->get_id();
+			$post_type = get_post_type( $order_id );
 
-			if ( isset( $order_id ) && ! empty( $order_id ) ) {
-				$logger->debug(
-					'Stripe verified order triggered',
+			// If it's a subscription, route through subscription update.
+			if ( 'shop_subscription' === $post_type ) {
+				$wc_subscription = $this->get_wc_subscription( $order_id );
+
+				do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
+				return;
+			}
+
+			// If it's not an order do nothing, this could be anything
+			if ( 'shop_order' !== $post_type ) {
+				$logger->debug_excess(
+					'Order status update was triggered but the post is not a shop order type.',
 					[
-						'order_id' => $order_id,
+						'order_id'   => $order_id,
+						'post_type'  => $post_type,
+						'new_status' => $to_status,
 					]
 				);
 
-				$this->execute_order_updated( $order_id );
+				return;
+			}
+
+			$wc_order = $this->get_wc_order( $order_id );
+
+			// Check if order is valid
+			if ( self::validate_object( $wc_order, 'get_data' ) ) {
+				set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
+
+				if ( ! wp_get_scheduled_event(
+					'activecampaign_for_woocommerce_admin_sync_single_order_status',
+					[
+						'wc_order_id' => $order_id,
+						'status'      => $to_status,
+					]
+				) ) {
+					wp_schedule_single_event(
+						time() + 10,
+						'activecampaign_for_woocommerce_admin_sync_single_order_status',
+						[
+							'wc_order_id' => $order_id,
+							'status'      => $to_status,
+						]
+					);
+				}
+			}
+		} else {
+			$logger->warning(
+				'The updated order does not appear to be valid for sync to AC.',
+				[
+					'order_id' => $order_id,
+				]
+			);
+		}
+	}
+
+	public function woocommerce_order_edit_status( $order_id, $new_status ) {
+		$wc_order = $this->get_wc_order( $order_id );
+
+		if ( self::validate_object( $wc_order, 'get_data' ) ) {
+			set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
+
+			if ( ! wp_get_scheduled_event(
+				'activecampaign_for_woocommerce_admin_sync_single_order_status',
+				[
+					'wc_order_id' => $order_id,
+					'event_type'  => 'status_' . $new_status,
+				]
+			) ) {
+				wp_schedule_single_event(
+					time() + 10,
+					'activecampaign_for_woocommerce_admin_sync_single_order_status',
+					[
+						'wc_order_id' => $order_id,
+						'status'      => $new_status,
+					]
+				);
+			}
+		}
+	}
+
+	/**
+	 * The process used for an order refund. Technically this is the same as an order update.
+	 * We pass this through a different function to note it in debug until we have relevant handling.
+	 *
+	 * @param string|int $order_id The order id.
+	 * @param string|int $refund_id Refund id is passed and required but not used here.
+	 */
+	public function execute_order_updated_refund( $order_id, $refund_id ) {
+		$logger = new Logger();
+
+		try {
+			$logger->debug_excess(
+				'Refund order update triggered',
+				[
+					'order_id' => $order_id,
+				]
+			);
+
+			$this->execute_order_updated( $order_id );
+		} catch ( Throwable $t ) {
+			$logger->warning(
+				'There was an issue updating the order from a refund trigger.',
+				[
+					'order_id' => $order_id,
+					'message'  => $t->getMessage(),
+				]
+			);
+		}
+	}
+
+	/**
+	 * Stripe documentation is unhelpful but we need to process its updates. We do not use the response but it must be
+	 * included in the function args.
+	 *
+	 * @param object|string   $sripe_response Stripe response, unused.
+	 * @param string|WC_Order $order Could be order object or order id, stripe does not say.
+	 */
+	public function execute_order_updated_stripe( $sripe_response, $order ) {
+		$logger = new Logger();
+
+		try {
+			if ( isset( $sripe_response ) && isset( $order ) ) {
+				$wc_order = $this->get_wc_order( $order ); // Be sure we have the WC Order
+				$order_id = $wc_order->get_id();
+				if ( isset( $order_id ) && ! empty( $order_id ) ) {
+					$logger->debug_excess(
+						'Stripe verified order update triggered',
+						[
+							'order_id' => $order_id,
+						]
+					);
+
+					$this->execute_order_updated( $order_id );
+				}
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue updating the order from stripe.',
 				[
-					'order_id' => $order_id,
-					'message'  => $t->getMessage(),
+					'order'   => $order,
+					'message' => $t->getMessage(),
 				]
 			);
 		}
@@ -234,5 +394,30 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			global $wpdb;
 			$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, [ 'wc_order_id' => $order_id ] );
 		}
+	}
+
+	/**
+	 * Check to make sure we are not double syncing the same data.
+	 *
+	 * @param WC_Subscription|WC_Order $wc_order The order or subscription. Both carry these functions.
+	 *
+	 * @return bool
+	 */
+	private function check_update_validity( $wc_order ) {
+		$ac_datahash      = $wc_order->get_meta( 'ac_datahash' );
+		$current_datahash = md5( json_encode( $wc_order->get_data() ) );
+		$last_synced      = $wc_order->get_meta( 'ac_order_last_synced_time' );
+		$last_status      = $wc_order->get_meta( 'ac_last_synced_status' );
+
+		if (
+		time() - $last_synced > 120 &&
+		isset( $last_status ) &&
+		$last_status === $wc_order->get_status() &&
+		$ac_datahash === $current_datahash
+		) {
+			return false;
+		}
+
+		return true;
 	}
 }

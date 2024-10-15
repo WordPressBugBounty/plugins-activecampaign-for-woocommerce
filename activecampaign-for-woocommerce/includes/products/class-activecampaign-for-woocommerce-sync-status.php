@@ -50,7 +50,7 @@ class Activecampaign_For_Woocommerce_Sync_Status {
 			$data['start_time'],
 			$data['last_update'],
 			$data['end_time'],
-			$data['failed_order_id_array'],
+			$data['failed_id_array'],
 			$data['is_running'],
 			$data['status_name']
 		);

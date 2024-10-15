@@ -27,7 +27,8 @@ use AcVendor\Brick\Math\BigDecimal;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
-	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Data_Validation,
+		Activecampaign_For_Woocommerce_Arg_Data_Gathering;
 	/**
 	 * The custom ActiveCampaign logger
 	 *
@@ -228,58 +229,6 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			}
 			set_transient( $updating_product_id, $product_id, 5 ); // change 2 seconds if not enough
 		}
-	}
-
-	/**
-	 * Gets the product IDs in the format we need.
-	 *
-	 * @param int  $limit The limit.
-	 * @param int  $offset The offset.
-	 * @param bool $return_id_only Marker for return IDs only.
-	 *
-	 * @return array|stdClass
-	 */
-	private function get_products_by_offset( $limit, $offset, $return_id_only ) {
-		// types available 'external', 'grouped', 'simple', 'variable'
-		// Do not include groups for now.
-		try {
-			$safe_product_types = $this->get_cofe_safe_product_types();
-
-			$data = [
-				'limit'   => (int) $limit,
-				'offset'  => (int) $offset,
-				'type'    => $safe_product_types,
-				'orderby' => 'none',
-				'order'   => 'ASC',
-			];
-
-			if ( $return_id_only ) {
-				$data['return'] = 'ids';
-			}
-
-			$this->logger->debug(
-				'Getting products by offset',
-				[
-					'producttypes'   => $safe_product_types,
-					'data'           => $data,
-					'return_id_only' => $return_id_only,
-				]
-			);
-
-			$products = wc_get_products( $data );
-
-			return $products;
-		} catch ( Throwable $t ) {
-			$this->logger->warning(
-				'There was an issue getting products for the product sync',
-				[
-					'message'        => $t->getMessage(),
-					'request data'   => $data,
-					'return_id_only' => $return_id_only,
-				]
-			);
-		}
-		return null;
 	}
 
 	/**
@@ -624,9 +573,13 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	public function add_product_data( Sync_Status $status, WC_Product $product, $connection_id, array &$product_data, $parent = null ) {
 		global $activecampaign_for_woocommerce_product_sync_status;
 		try {
-			$p_data = Ecom_Cofe_Product::product_array_for_cofe( $product, $connection_id, $parent );
-			if ( ! is_null( $p_data ) ) {
-				$product_data[] = $p_data;
+			if ( $product->is_type( 'grouped' ) || $product->is_type( 'draft' ) ) {
+				$this->add_failed_product_to_status( $status, $product );
+			} else {
+				$p_data = Ecom_Cofe_Product::product_array_for_cofe( $product, $connection_id, $parent );
+				if ( ! is_null( $p_data ) ) {
+					$product_data[] = $p_data;
+				}
 			}
 		} catch ( Throwable $t ) {
 			$this->add_failed_product_to_status( $status, $product );
@@ -691,9 +644,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 */
 	private function add_failed_product_to_status( Sync_Status $status, ?WC_Product $product = null ) {
 		if ( $product && self::validate_object( $product, 'get_id' ) && ! empty( $product->get_id() ) ) {
-			$status->failed_order_id_array[] = $product->get_id();
+			$status->failed_id_array[] = $product->get_id();
 		} else {
-			$status->failed_order_id_array[] = 'Unknown WC Product';
+			$status->failed_id_array[] = 'Unknown WC Product';
 		}
 	}
 
@@ -786,27 +739,6 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME );
 		Sync_Status::reset( $status );
 		wp_send_json_success( 'Product sync data reset.' );
-	}
-
-	/**
-	 * Gets the safe COFE product types. This is a blacklist to remove any types that cause duplicates, conflicts, or issues with sync.
-	 *
-	 * @return int[]|string[]
-	 */
-	private function get_cofe_safe_product_types() {
-		$product_types = wc_get_product_types();
-
-		// Blacklist certain types that cause conflicts & duplicates
-		if ( isset( $product_types['grouped'] ) ) {
-			unset( $product_types['grouped'] );
-		}
-
-		if ( isset( $product_types['draft'] ) ) {
-			unset( $product_types['draft'] );
-		}
-
-		// WC returns array as type_name: type readable so return only the keys
-		return array_keys( $product_types );
 	}
 
 	public function execute_product_deleted( $product_id ) {

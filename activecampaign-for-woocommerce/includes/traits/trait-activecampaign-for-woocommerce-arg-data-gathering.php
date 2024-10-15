@@ -107,4 +107,80 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 		return null;
 
 	}
+
+	/**
+	 * Gets the product IDs in the format we need.
+	 *
+	 * @param int  $limit The limit.
+	 * @param int  $offset The offset.
+	 * @param bool $return_id_only Marker for return IDs only.
+	 *
+	 * @return array|stdClass
+	 */
+	public static function get_products_by_offset( $limit, $offset, $return_id_only ) {
+		// types standard available 'external', 'grouped', 'simple', 'variable'
+		// Do not include groups for now.
+		$logger = new Logger();
+		try {
+			$safe_product_types = self::get_cofe_safe_product_types(); // This may be causing an issue with some 3rd party plugins due to custom product types.
+
+			$data = [
+				'limit'   => (int) $limit,
+				'offset'  => (int) $offset,
+				'orderby' => 'ID',
+				'status'  => 'publish',
+				'order'   => 'ASC',
+			];
+
+			if ( isset( $safe_product_types ) && ! empty( $safe_product_types ) ) {
+				$data['type'] = $safe_product_types;
+			}
+
+			if ( $return_id_only ) {
+				$data['return'] = 'ids';
+			}
+
+			$logger->debug(
+				'Getting products by offset',
+				[
+					'producttypes'   => $safe_product_types,
+					'data'           => $data,
+					'return_id_only' => $return_id_only,
+				]
+			);
+
+			$products = wc_get_products( $data );
+
+			return $products;
+		} catch ( Throwable $t ) {
+			$logger = new Logger();
+			$logger->warning(
+				'There was an issue getting products for the product sync',
+				[
+					'message'        => $t->getMessage(),
+					'return_id_only' => $return_id_only,
+				]
+			);
+		}
+		return null;
+	}
+
+
+
+	public static function get_cofe_safe_product_types() {
+		$product_types = wc_get_product_types();
+
+		// Blacklist certain types that cause conflicts & duplicates
+		if ( isset( $product_types['grouped'] ) ) {
+			unset( $product_types['grouped'] ); // Grouped products are bundles of existing single products. These cause duplicate records.
+		}
+
+		if ( isset( $product_types['draft'] ) ) {
+			unset( $product_types['draft'] ); // Never sync drafts
+		}
+
+		// WC returns array as type_name: type readable so return only the keys
+		return array_keys( $product_types );
+	}
+
 }

@@ -544,4 +544,5 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 
 		$this->schedule_recurring_order_sync_task();
 	}
+
 }

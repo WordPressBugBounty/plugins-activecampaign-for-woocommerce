@@ -111,6 +111,101 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 	}
 
 	/**
+	 * Sync any orders triggered from a status update.
+	 * Triggered from a hook call.
+	 *
+	 * @param     mixed ...$args The passed args.
+	 */
+	public function execute_from_status( ...$args ) {
+		$wc_order_status = null;
+
+		try {
+			if ( isset( $args[0] ) && is_int( $args[0] ) ) {
+				$wc_order_id = $args[0];
+			}
+
+			if ( isset( $args[0]['wc_order_id'] ) ) {
+				$wc_order_id = $args[0]['wc_order_id'];
+			}
+
+			if ( isset( $args['wc_order_id'] ) ) {
+				$wc_order_id = $args['wc_order_id'];
+			}
+
+			// get status
+			if ( isset( $args[1] ) && is_string( $args[1] ) ) {
+				$wc_order_status = $args[1];
+			}
+
+			if ( isset( $args[0]['status'] ) ) {
+				$wc_order_status = $args[0]['status'];
+			}
+
+			if ( isset( $args['status'] ) ) {
+				$wc_order_status = $args['status'];
+			}
+		} catch ( Throwable $t ) {
+			$this->logger->error(
+				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data by wc_order_id.',
+				[
+					'args'        => $args,
+					'message'     => $t->getMessage(),
+					'stack_trace' => $t->getTrace(),
+				]
+			);
+			if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
+				$this->mark_order_as_incompatible( $wc_order_id );
+			}
+		}
+		try {
+			if ( isset( $wc_order_id ) ) {
+				// We're just syncing one row by order id
+				$wc_order = $this->get_wc_order( $wc_order_id );
+
+				if ( false === $wc_order || ! $this->order_has_required_data( $wc_order ) ) {
+					$this->mark_order_as_incompatible( $wc_order_id );
+
+					return false;
+				}
+
+				$this->add_meta_to_order( $wc_order );
+
+				$ac_customer_id = $this->get_ac_customer_id( $wc_order->get_billing_email() );
+				$ac_order       = $this->single_sync_cofe_data( $wc_order, false, $ac_customer_id, $wc_order_status );
+
+				if ( ! isset( $ac_order ) || ! $ac_order ) {
+					$this->logger->warning(
+						'The order may have failed to sync to cofe',
+						[
+							$ac_order,
+						]
+					);
+
+					$this->mark_order_as_failed( $wc_order_id );
+				} else {
+					$ac_id = null;
+
+					if ( self::validate_object( $ac_order, 'get_id' ) ) {
+						$ac_id = $ac_order->get_id();
+					}
+
+					$this->add_update_notes( $wc_order_id, $ac_id, $wc_order_status );
+					$this->mark_single_order_synced( $wc_order_id );
+					$this->update_last_order_sync();
+				}
+			}
+		} catch ( Throwable $t ) {
+			$this->logger->warning(
+				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data.',
+				[
+					'message'     => $t->getMessage(),
+					'stack_trace' => $t->getTrace(),
+				]
+			);
+		}
+	}
+
+	/**
 	 * Sync any new/live orders.
 	 * Triggered from a hook call.
 	 *
@@ -319,6 +414,8 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 							$ac_id = $ac_order->get_id();
 						}
 
+						$this->add_meta_to_order( $wc_order );
+
 						$this->add_update_notes( $prep_order->wc_order_id, $ac_id, $wc_order->get_status() );
 
 						$this->mark_single_order_synced( $prep_order->wc_order_id );
@@ -379,6 +476,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 						$ac_id = $ac_order->get_id();
 					}
 
+					$this->add_meta_to_order( $wc_order );
 					$this->add_update_notes( $unsynced_recovered_order->wc_order_id, $ac_id, $wc_order->get_status() );
 
 					$this->mark_single_order_synced( $unsynced_recovered_order->wc_order_id );
@@ -397,7 +495,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 	 *
 	 * @return false|void
 	 */
-	public function single_sync_cofe_data( $wc_order, $externalcheckoutid = false, $ac_customer_id = null ) {
+	public function single_sync_cofe_data( $wc_order, $externalcheckoutid = false, $ac_customer_id = null, $status = null ) {
 		if ( ! isset( $wc_order ) ) {
 			return false;
 		}
@@ -415,7 +513,9 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		if ( isset( $wc_order ) && self::validate_object( $wc_order, 'get_id' ) && ! empty( $wc_order->get_id() ) ) {
 			// Data for cofe order sync
 			$ecom_order = $cofe_order_builder->setup_cofe_order_from_table( $wc_order, 1 );
-
+			if ( ! is_null( $status ) ) {
+				$ecom_order->set_wc_status( $status );
+			}
 			if ( is_null( $ecom_order ) ) {
 				$this->logger->warning( 'Setup COFE order returned null. Something may have gone wrong or the data may not be missing/incompatible with AC.' );
 				return false;
@@ -547,6 +647,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			if ( ! empty( $ac_order_id ) ) {
 				$data['ac_order_id']  = $ac_order_id;
 				$data['synced_to_ac'] = self::STATUS_SYNCED;
+
 				$this->add_update_notes( $unsynced_order->wc_order_id, $ac_order_id );
 				$this->update_last_order_sync();
 			}
@@ -716,5 +817,30 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		}
 
 		return $ac_customer_id;
+	}
+
+	/**
+	 * @param WC_Order $wc_order The WooCommerce order object.
+	 */
+	private function add_meta_to_order( $wc_order ) {
+		// save the status so update checks do not sync the same data
+		$wc_order->add_meta_data( 'ac_last_synced_status', $wc_order->get_status(), true );
+
+		$last_sync_time = $wc_order->get_meta( 'ac_order_last_synced_time' );
+		$ac_datahash    = $wc_order->get_meta( 'ac_datahash' );
+
+		if ( ! empty( $last_sync_time ) ) {
+			$wc_order->update_meta_data( 'ac_order_last_synced_time', time() );
+		} else {
+			$wc_order->add_meta_data( 'ac_order_last_synced_time', time(), true );
+		}
+
+		if ( ! empty( $ac_datahash ) ) {
+			$wc_order->update_meta_data( 'ac_datahash', md5( json_encode( $wc_order->get_data() ) ) );
+		} else {
+			$wc_order->add_meta_data( 'ac_datahash', md5( json_encode( $wc_order->get_data() ) ), true );
+		}
+
+		$wc_order->save_meta_data();
 	}
 }

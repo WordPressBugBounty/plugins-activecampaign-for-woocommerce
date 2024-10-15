@@ -23,6 +23,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 trait Activecampaign_For_Woocommerce_Admin_Product_Sync {
+	use Activecampaign_For_Woocommerce_Admin_Utilities;
 
 	/**
 	 * Logger class.
@@ -64,6 +65,7 @@ trait Activecampaign_For_Woocommerce_Admin_Product_Sync {
 				'array'
 			);
 
+			$data['products']     = $this->get_products_by_offset( -1, 15, true );
 			$data['event_status'] = wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME );
 			$data['page_url']     = esc_url( admin_url( 'admin.php?page=' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '_product_sync&activesync=1' ) );
 			$data['page_nonce']   = wp_create_nonce( 'activecampaign_for_woocommerce_product_sync_form' );

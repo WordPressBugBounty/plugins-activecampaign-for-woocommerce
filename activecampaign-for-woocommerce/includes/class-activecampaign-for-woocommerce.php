@@ -593,15 +593,25 @@ class Activecampaign_For_Woocommerce {
 			'woocommerce_process_shop_order_meta',
 			$this->order_events,
 			'execute_order_updated',
-			20,
+			90,
 			1
 		);
 
 		$this->loader->add_action(
 			'woocommerce_order_status_changed',
 			$this->order_events,
-			'execute_order_updated',
-			20
+			'execute_order_status_changed',
+			10,
+			3
+		);
+
+		// needed for stripe
+		$this->loader->add_action(
+			'woocommerce_order_edit_status',
+			$this->order_events,
+			'execute_order_edit_status',
+			20,
+			2
 		);
 
 		$this->loader->add_action(
@@ -611,13 +621,14 @@ class Activecampaign_For_Woocommerce {
 			9,
 			2
 		);
+
 		// On order refund
 		$this->loader->add_action(
 			'woocommerce_order_refunded',
 			$this->order_events,
-			'execute_order_updated',
+			'execute_order_updated_refund',
 			20,
-			1
+			2
 		);
 
 		if ( ! $this->is_configured() || ! $this->is_connected() ) {
@@ -636,6 +647,14 @@ class Activecampaign_For_Woocommerce {
 			'activecampaign_for_woocommerce_admin_sync_single_order_active',
 			$this->new_order_sync,
 			'execute',
+			1,
+			2
+		);
+
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_admin_sync_single_order_status',
+			$this->new_order_sync,
+			'execute_from_status',
 			1,
 			2
 		);

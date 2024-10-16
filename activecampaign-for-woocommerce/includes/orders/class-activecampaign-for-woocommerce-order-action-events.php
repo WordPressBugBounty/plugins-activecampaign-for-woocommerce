@@ -227,7 +227,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		}
 	}
 
-	public function woocommerce_order_edit_status( $order_id, $new_status ) {
+	public function execute_order_edit_status( $order_id, $new_status ) {
 		$wc_order = $this->get_wc_order( $order_id );
 
 		if ( self::validate_object( $wc_order, 'get_data' ) ) {

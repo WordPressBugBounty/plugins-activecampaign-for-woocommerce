@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.6.2
-Stable tag: 2.7.9
+Stable tag: 2.7.10
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -93,6 +93,10 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.7.10 2024-10-28 =
+* Bugfix - Solving various issues with order update
+* Bugfix - Abandoned cart created date error resolved
 
 = 2.7.9 2024-10-16 =
 * Bugfix - Issue with our order action event has been resolved

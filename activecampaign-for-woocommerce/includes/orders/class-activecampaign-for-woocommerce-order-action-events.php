@@ -398,24 +398,63 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 	/**
 	 * Check to make sure we are not double syncing the same data.
+	 * True means that it is valid for update.
 	 *
 	 * @param WC_Subscription|WC_Order $wc_order The order or subscription. Both carry these functions.
 	 *
 	 * @return bool
 	 */
 	private function check_update_validity( $wc_order ) {
-		$ac_datahash      = $wc_order->get_meta( 'ac_datahash' );
-		$current_datahash = md5( json_encode( $wc_order->get_data() ) );
+		$logger = new Logger();
 		$last_synced      = $wc_order->get_meta( 'ac_order_last_synced_time' );
 		$last_status      = $wc_order->get_meta( 'ac_last_synced_status' );
+		$ac_datahash      = $wc_order->get_meta( 'ac_datahash' );
+		try {
+			$current_datahash = md5( wp_json_encode( $wc_order->get_data() ) );
+		} catch ( Throwable $t ) {
+			$logger->warning(
+				'There was an issue attempting to create a datahash for the update validity on the order update.',
+				[
+					'order_id' => $wc_order->get_id(),
+				]
+			);
+			// If this fails return true. Better to double sync than miss it entirely.
+		}
 
-		if (
-		time() - $last_synced > 120 &&
-		isset( $last_status ) &&
-		$last_status === $wc_order->get_status() &&
-		$ac_datahash === $current_datahash
-		) {
-			return false;
+		try {
+			if ( ! empty( $last_synced ) && time() - intval( $last_synced ) < 120 ) {
+				$last_synced_too_soon = true;
+			} else {
+				$last_synced_too_soon = false;
+			}
+		} catch ( Throwable $t ) {
+			$logger->warning(
+				'There was an issue attempting to validate the order update.',
+				[
+					'order_id' => $wc_order->get_id(),
+				]
+			);
+			// If this fails return true. Better to double sync than miss it entirely.
+		}
+
+		try {
+			if (
+				isset( $last_status ) &&
+				$last_status === $wc_order->get_status() &&
+				$last_synced_too_soon &&
+				$ac_datahash === $current_datahash
+			) {
+				return false;
+			}
+		} catch ( Throwable $t ) {
+
+			$logger->warning(
+				'There was an issue attempting to validate the order update.',
+				[
+					'order_id' => $wc_order->get_id(),
+				]
+			);
+			// If this fails return true. Better to double sync than miss it entirely.
 		}
 
 		return true;

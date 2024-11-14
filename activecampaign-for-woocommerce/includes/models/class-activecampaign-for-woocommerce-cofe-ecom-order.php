@@ -28,8 +28,7 @@ use AcVendor\Brick\Math\BigDecimal;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_Id, Has_Email {
-	use Activecampaign_For_Woocommerce_Data_Validation ,
-		Api_Serializable {
+	use Activecampaign_For_Woocommerce_Data_Validation, Api_Serializable {
 		serialize_to_array as serialize_all_but_products_to_array;
 		set_properties_from_serialized_array as set_all_but_products_as_properties_from_serialized_array;
 	}
@@ -39,7 +38,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'connectionid'           => 'connectionId',
 		'legacy_connectionid'    => 'legacyConnectionId', // how is this different from connectionId?
 		'ac_status'              => 'normalizedStatus', // add fixed selections (PENDING, COMPLETED, ABANDONED, RECOVERED, WAITING, CANCELLED, REFUNDED, FAILED, RETURNED)
@@ -66,7 +65,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		'customer_note'          => 'notes',
 		'customer_data_override' => 'customerData',
 		'is_subscription'        => 'createdByRecurringPayment',
-	];
+	);
 
 	// customerLocale ? - can this be gathered maybe get_user_locale( int|WP_User $user )
 
@@ -75,18 +74,18 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 *
 	 * @var array The discount mapping array.
 	 */
-	private $discount_mappings = [
+	private $discount_mappings = array(
 		'name'            => 'name',
 		'type'            => 'type',
 		'discount_amount' => 'discountAmount',
-	];
+	);
 
 	/**
 	 * The required fields for an ecom order
 	 *
 	 * @var array
 	 */
-	private $required_fields = [
+	private $required_fields = array(
 		'externalid',
 		'connectionid',
 		'legacy_connectionid',
@@ -96,7 +95,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		'order_number',
 		'currency',
 		'external_created_date',
-	];
+	);
 
 	/**
 	 * The abandoned date.
@@ -194,7 +193,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 *
 	 * @var Activecampaign_For_Woocommerce_Ecom_Product[]
 	 */
-	private $order_products = [];
+	private $order_products = array();
 
 	/**
 	 * The source (1 or 0).
@@ -558,7 +557,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 * @param Enumish $source The source (1 or 0).
 	 */
 	public function set_source( $source ) {
-		if ( in_array( $source, [ 0, '0' ], false ) ) {
+		if ( in_array( $source, array( 0, '0' ), false ) ) {
 			$this->source = new Enumish( 'HISTORICAL' );
 		} else {
 			$this->source = new Enumish( 'REAL_TIME' );
@@ -952,13 +951,13 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue setting properties from serialized array for the cofe ecom order',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'passed_array'     => $array,
 					'ac_code'          => 'CEO_886',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -966,9 +965,10 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	/**
 	 * Sets all the properties directly available in order data.
 	 *
-	 * @param     array $order_data The order data from WC.
+	 * @param     array    $order_data The order data from WC.
+	 * @param     WC_Order $wc_order The order object used as a fallback.
 	 */
-	public function set_properties_from_order_data( $order_data ) {
+	public function set_properties_from_order_data( $order_data, $wc_order ) {
 		if ( ! isset( $order_data['id'] ) ) {
 			throw new RuntimeException( 'Order data is not available on order id ' . $order_data );
 		}
@@ -1023,15 +1023,84 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 
 		$this->set_accepts_marketing( $this->get_order_metadata( $order_data, 'activecampaign_for_woocommerce_accepts_marketing' ) );
 
-		if ( isset( $order_data['date_created'] ) ) {
-			$created_date = new DateTime( $order_data['date_created'], new DateTimeZone( 'UTC' ) );
-			$this->set_order_date( $created_date->format( DATE_ATOM ) );
-			$this->set_external_created_date( $created_date->format( DATE_ATOM ) );
+		if ( ! empty( $order_data['date_created'] ) ) {
+			try {
+				$created_date = new DateTime( $order_data['date_created'], new DateTimeZone( 'UTC' ) );
+				$this->set_order_date( $created_date->format( DATE_ATOM ) );
+				$this->set_external_created_date( $created_date->format( DATE_ATOM ) );
+			} catch ( Throwable $t ) {
+				$logger->error(
+					'There was an error formatting created date. This field is required. This order may fail to sync to ActiveCampaign.',
+					array(
+						'order_id' => $order_data['id'],
+					)
+				);
+			}
 		}
 
-		if ( isset( $order_data['date_modified'] ) ) {
-			$modified_date = new DateTime( $order_data['date_modified'], new DateTimeZone( 'UTC' ) );
-			$this->set_external_updated_date( $modified_date->format( DATE_ATOM ) );
+		// If somehow the date field is not populated use a fallback
+		if ( empty( $this->get_external_created_date() ) ) {
+			try {
+				$created_date = new DateTime( $wc_order->get_date_created(), new DateTimeZone( 'UTC' ) );
+				$this->set_order_date( $created_date->format( DATE_ATOM ) );
+				$this->set_external_created_date( $created_date->format( DATE_ATOM ) );
+			} catch ( Throwable $t ) {
+				$logger->error(
+					'There was an error formatting created date. This field is required. This order may fail to sync to ActiveCampaign.',
+					array(
+						'order_id' => $order_data['id'],
+					)
+				);
+			}
+		}
+
+		// If all else fails add now as the date otherwise this will fail to sync.
+		if ( empty( $this->get_external_created_date() ) ) {
+			$logger->error(
+				'Created date could not be gathered for this order. This field is required. This order may fail to sync to ActiveCampaign.',
+				array(
+					'order_id' => $order_data['id'],
+				)
+			);
+		}
+
+		if ( ! empty( $order_data['date_modified'] ) ) {
+			try {
+				$modified_date = new DateTime( $order_data['date_modified'], new DateTimeZone( 'UTC' ) );
+				$this->set_external_updated_date( $modified_date->format( DATE_ATOM ) );
+			} catch ( Throwable $t ) {
+				$logger->error(
+					'There was an error formatting updated date. This field is required. This order may fail to sync to ActiveCampaign.',
+					array(
+						'order_id' => $order_data['id'],
+					)
+				);
+			}
+		}
+
+		// If somehow the date field is not populated use a fallback
+		if ( empty( $this->get_external_updated_date() ) ) {
+			try {
+				$modified_date = new DateTime( $wc_order->get_date_modified(), new DateTimeZone( 'UTC' ) );
+				$this->set_order_date( $modified_date->format( DATE_ATOM ) );
+				$this->set_external_updated_date( $modified_date->format( DATE_ATOM ) );
+			} catch ( Throwable $t ) {
+				$logger->error(
+					'There was an error formatting updated date. This field is required. This order may fail to sync to ActiveCampaign.',
+					array(
+						'order_id' => $order_data['id'],
+					)
+				);
+			}
+		}
+
+		if ( empty( $this->get_external_updated_date() ) ) {
+			$logger->error(
+				'Modified date could not be gathered for this order. This field is required. This order may fail to sync to ActiveCampaign.',
+				array(
+					'order_id' => $order_data['id'],
+				)
+			);
 		}
 
 		$billing_address = new Activecampaign_For_Woocommerce_Ecom_Address();
@@ -1111,7 +1180,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		try {
 			$array = $this->serialize_all_but_products_to_array();
 
-			$order_products = [];
+			$order_products = array();
 
 			foreach ( $this->order_products as $order_product ) {
 				$order_products[] = $order_product->serialize_to_array();
@@ -1124,10 +1193,10 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 			$logger = new Logger();
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Ecom_Order: The serialize_to_array function encountered an issue. A valid order object may not exist.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;
@@ -1141,18 +1210,18 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 */
 	public function validate_model() {
 		$logger   = new Logger();
-		$bad_data = [];
+		$bad_data = array();
 
 		try {
 			// One of these is required
 			if ( empty( $this->externalcheckoutid ) && empty( $this->externalid ) ) {
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Ecom_Order: No external ID has been set. This is required.',
-					[
+					array(
 						'email'        => $this->email,
 						'order_number' => $this->order_number,
 
-					]
+					)
 				);
 			}
 
@@ -1202,13 +1271,13 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 			if ( count( $bad_data ) > 0 ) {
 				$logger->error(
 					'The following required fields may be missing from the data order data.',
-					[
+					array(
 						'suggested_action'    => 'If you would like this record synced, please verify the data for the order exists.',
 						'ac_code'             => 'CEOM_1113',
 						'email'               => $this->email,
 						'order_number'        => $this->order_number,
 						'missing or bad data' => $bad_data,
-					]
+					)
 				);
 
 				return false;
@@ -1216,10 +1285,10 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Ecom_Order: There was an error validating the ecom order model.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 

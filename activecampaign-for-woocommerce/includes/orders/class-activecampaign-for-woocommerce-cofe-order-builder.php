@@ -134,16 +134,16 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 
 			// Normal order, do the standard method
 			$ecom_order = new Cofe_Ecom_Order();
-			$ecom_order->set_properties_from_order_data( $wc_order_data );
+			$ecom_order->set_properties_from_order_data( $wc_order_data, $wc_order );
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
 			$logger->debug(
 				'Cofe order builder: There was an error setting the order properties, the order data may not be viable to sync to AC:',
-				[
+				array(
 					'wc_order id' => self::validate_object( $wc_order, 'get_id' ) ? $wc_order->get_id() : null,
 					'message'     => $t->getMessage(),
 					'trace'       => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;

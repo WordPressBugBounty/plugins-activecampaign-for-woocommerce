@@ -246,7 +246,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 
 		try {
 			if ( ! wp_next_scheduled( 'activecampaign_for_woocommerce_cart_updated_recurring_event' ) ) {
-				wp_schedule_event( time() + 10, 'hourly', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+				wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
 			} else {
 				if ( function_exists( 'wp_get_scheduled_event' ) ) {
 					$logger->debug_excess(

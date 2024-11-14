@@ -25,6 +25,12 @@ use Activecampaign_For_Woocommerce_Ecom_Customer as Ecom_Customer;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_User_Registered_Event implements Triggerable {
+	/**
+	 * The admin object class.
+	 *
+	 * @var Admin
+	 */
+	private $admin;
 
 	/**
 	 * The custom ActiveCampaign logger

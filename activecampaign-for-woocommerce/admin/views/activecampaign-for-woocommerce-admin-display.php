@@ -230,7 +230,7 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 							<span>3</span><?php esc_html_e( 'Activate a cross-sell automation', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 						</li>
 					</ul>
-					<a href="https://www.activecampaign.com/apps/woocommerce" target="_blank" rel="noopener noreferrer"
+					<a href="https://www.activecampaign.com/apps/woocommerce-integration" target="_blank" rel="noopener noreferrer"
 					   class="activecampaign-for-woocommerce button"><span><?php esc_html_e( 'Complete setup in ActiveCampaign', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span>
 						<svg class="is-styled css-ws9hmn" height="16px" width="16px" role="img" viewBox="0 0 16 16"
 							 xmlns="http://www.w3.org/2000/svg">

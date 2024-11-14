@@ -21,7 +21,7 @@
 		<p>
 			<?php esc_html_e( 'Complete your setup by connecting the WooCommerce integration in ActiveCampaign.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 		</p>
-		<a href="https://www.activecampaign.com/apps/woocommerce" target="_blank" rel="noopener noreferrer"
+		<a href="https://www.activecampaign.com/apps/woocommerce-integration" target="_blank" rel="noopener noreferrer"
 		   class="activecampaign-for-woocommerce button"><span><?php esc_html_e( 'Complete setup in ActiveCampaign', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span>
 			<svg class="is-styled css-ws9hmn" height="16px" width="16px" role="img" viewBox="0 0 16 16"
 				 xmlns="http://www.w3.org/2000/svg">

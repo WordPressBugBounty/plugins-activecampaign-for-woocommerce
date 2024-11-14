@@ -343,6 +343,23 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 			$this->check_for_error( $wpdb );
 		}
 
+		// v1.1.4 version skip inconsistency. //
+		// v1.1.5 //
+		try {
+			wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+			// erase and reconfigure to use a faster time sequence.
+			wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+		} catch ( Throwable $t ) {
+			$this->logger->error(
+				'There was an error upgrading the table for v1.1.5.',
+				[
+					'message' => $t->getMessage(),
+					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
+				]
+			);
+			$this->check_for_error( $wpdb );
+		}
+
 		$this->logger->info( 'Plugin Upgrade Command: Table upgrade finished!' );
 		$this->disable_old_webhooks();
 	}

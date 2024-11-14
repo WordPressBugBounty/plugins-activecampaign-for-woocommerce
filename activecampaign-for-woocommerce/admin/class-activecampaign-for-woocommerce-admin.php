@@ -1135,7 +1135,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				$this->is_connected() &&
 				$this->is_configured()
 			) {
-				wp_schedule_event( time() + 10, 'hourly', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+				wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
 				wp_schedule_event( time() + 10, 'every_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
 				wp_schedule_event( time() + 15, 'every_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
 			}

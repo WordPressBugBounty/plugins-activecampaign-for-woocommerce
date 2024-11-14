@@ -108,7 +108,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function emergency( $message, array $context = array() ) {
+	public function emergency( $message, array $context = array() ): void {
 		// The system is in an unusable state, unfixable
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
@@ -118,7 +118,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function alert( $message, array $context = array() ) {
+	public function alert( $message, array $context = array() ): void {
 		// This is a security related notice
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
@@ -128,7 +128,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function critical( $message, array $context = array() ) {
+	public function critical( $message, array $context = array() ): void {
 		// Things are broken and causing issues
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
@@ -138,7 +138,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function error( $message, array $context = array() ) {
+	public function error( $message, array $context = array() ): void {
 		// Unstable issues
 		$this->plugin_subname = 'errors';
 		$this->add_wc_error_log_entry($message, $context, 'error');
@@ -150,7 +150,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function warning( $message, array $context = array() ) {
+	public function warning( $message, array $context = array() ): void {
 		// Unwanted behavior by the code
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
@@ -160,7 +160,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function notice( $message, array $context = array() ) {
+	public function notice( $message, array $context = array() ): void {
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
 		$this->logger->notice( $message, $context );
@@ -169,7 +169,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function info( $message, array $context = array() ) {
+	public function info( $message, array $context = array() ): void {
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
 		$this->logger->info( $message, $context );
@@ -178,7 +178,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function debug( $message, array $context = array() ) {
+	public function debug( $message, array $context = array() ): void {
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
 		if ( $this->ac_debug ) {
@@ -234,7 +234,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	/**
 	 * {@inheritdoc}
 	 */
-	public function log( $level, $message, array $context = array() ) {
+	public function log( $level, $message, array $context = array() ): void {
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
 		$this->logger->log( $level, $message, $context );

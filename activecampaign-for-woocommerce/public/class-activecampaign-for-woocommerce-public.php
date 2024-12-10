@@ -164,6 +164,26 @@ class Activecampaign_For_Woocommerce_Public {
 
 			wp_enqueue_script( $this->plugin_name );
 		}
+
+		try {
+			$options = $this->admin->get_local_settings();
+
+			if (
+				isset( $options['browse_tracking'] ) &&
+				in_array( $options['browse_tracking'], [ 1, '1' ], true ) &&
+				isset( $options['tracking_id'] )
+			) {
+				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'] );
+			}
+		} catch ( Throwable $t ) {
+			$this->logger->warning(
+				'Activecampaign_For_Woocommerce_Public: There was an issue with enabling site tracking.',
+				[
+					'message' => $t->getMessage(),
+					'ac_code' => 'PUB_180',
+				]
+			);
+		}
 	}
 
 	/**
@@ -329,10 +349,95 @@ class Activecampaign_For_Woocommerce_Public {
 				'There may be an issue checking for the checkout page',
 				[
 					'message' => $t->getMessage(),
+					'ac_code' => 'PUB_350',
 				]
 			);
 		}
 
 		return false;
 	}
+
+	/**
+	 * Hook to load the site tracking script. Can be called from any place on the site.
+	 * Call `activecampaign_for_woocommerce_load_sitetracking` to load this hook.
+	 *
+	 * @action activecampaign_for_woocommerce_load_sitetracking
+	 */
+	public function activecampaign_load_sitetracking() {
+		try {
+			$options = $this->admin->get_local_settings();
+
+			if (
+				isset( $options['browse_tracking'] ) &&
+				in_array( $options['browse_tracking'], [ 1, '1', 2, '2' ], true ) &&
+				isset( $options['tracking_id'] )
+			) {
+				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'] );
+			}
+		} catch ( Throwable $t ) {
+			$this->logger->warning(
+				'Activecampaign_For_Woocommerce_Public: There was an issue with loading site tracking.',
+				[
+					'message' => $t->getMessage(),
+					'ac_code' => 'PUB_380',
+				]
+			);
+		}
+	}
+
+	/**
+	 * Loads in the site tracking script.
+	 *
+	 * @param string $tracking_id the tracking ID to use.
+	 */
+	public function activecampaign_frontend_sitetracking_scripts( $tracking_id ) {
+		$ac_forms_settings = get_option( 'settings_activecampaign' ); // This is the setting from the other AC plugin
+
+		if (
+			isset( $ac_forms_settings['activecampaign_site_tracking_default'], $ac_forms_settings['site_tracking'] ) &&
+			in_array( $ac_forms_settings['site_tracking'], [ '1', 1 ] )
+		) {
+			// Don't perform this stuff, the other plugin will do it
+			return;
+		}
+
+		wp_register_script(
+			'activecampaign-for-woocommerce-site-tracking',
+			plugins_url( '/js/site_tracking.js', __FILE__ ),
+			array( 'jquery' ),
+			$this->version,
+			true
+		);
+
+		unset( $ac_forms_settings['api_url'] );
+		unset( $ac_forms_settings['api_key'] );
+		$current_user = wp_get_current_user();
+		$user_email   = '';
+		if ( isset( $current_user->data->user_email ) ) {
+			$user_email = $current_user->data->user_email;
+		}
+
+		// any data we need to access in JavaScript.
+		if ( empty( $tracking_id ) || ! empty( $ac_forms_settings['tracking_actid'] ) ) {
+			$tracking_id = $ac_forms_settings['tracking_actid'];
+		}
+
+		$data = array(
+			'ac_settings' => array(
+				'tracking_actid'        => $tracking_id,
+				'site_tracking_default' => 1,
+				'site_tracking'         => 1,
+			),
+			'user_email'  => $user_email,
+		);
+
+		if ( isset( $ac_forms_settings['activecampaign_site_tracking_default'] ) ) {
+			$data['ac_settings']['site_tracking_default'] = (int) $ac_forms_settings['activecampaign_site_tracking_default'];
+		}
+
+		wp_localize_script( 'activecampaign-for-woocommerce-site-tracking', 'php_data', $data );
+		wp_enqueue_script( 'activecampaign-for-woocommerce-site-tracking' );
+
+	}
+
 }

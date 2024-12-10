@@ -45,10 +45,6 @@ if ( ! isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) ||
 								Product types that will not sync: Grouped, unpublished, private, pending, password protected
 							</div>
 							<div class="mb-500">
-								There are <?php echo esc_html( count( $activecampaign_for_woocommerce_product_sync_data['products'] ) ); ?> products available to sync.
-							</div>
-
-							<div class="mb-500">
 								<button type="button" id="activecampaign-run-product-sync" class="activecampaign-for-woocommerce button button-primary" style="padding: 0 10px">
 									<?php
 									esc_html_e(
@@ -67,6 +63,11 @@ if ( ! isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) ||
 								</button>
 							</div>
 							<div>
+								<div class="mb-500">
+									<label>If these values match please choose the safe option.</label><br/>
+									<input type="radio" class="activecampaign-product-sync-direct-mode" name="activecampaign-product-sync-direct-mode" value="0" checked /> <?php echo esc_html( count( $activecampaign_for_woocommerce_product_sync_data['products_wc'] ) ); ?> records via WooCommerce safe methods<br/>
+									<input type="radio" class="activecampaign-product-sync-direct-mode" name="activecampaign-product-sync-direct-mode" value="1" /> <?php echo esc_html( count( $activecampaign_for_woocommerce_product_sync_data['products'] ) ); ?> records via direct data pull<br/>
+								</div>
 								<div>
 									<label>Batch Limit: </label>
 									<select name="activecampaign-product-sync-limit"

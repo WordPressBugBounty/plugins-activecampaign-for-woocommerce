@@ -290,6 +290,7 @@ return array(
     'Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities' => $baseDir . '/includes/abandoned_carts/trait-activecampaign-for-woocommerce-abandoned-cart-utilities.php',
     'Activecampaign_For_Woocommerce_Ac_Features' => $baseDir . '/includes/features/class-activecampaign-for-woocommerce-ac-features.php',
     'Activecampaign_For_Woocommerce_Ac_Features_Repository' => $baseDir . '/includes/repositories/class-activecampaign-for-woocommerce-ac-features-repository.php',
+    'Activecampaign_For_Woocommerce_Ac_Tracking_Repository' => $baseDir . '/includes/repositories/class-activecampaign-for-woocommerce-ac-tracking-repository.php',
     'Activecampaign_For_Woocommerce_Activator' => $baseDir . '/includes/class-activecampaign-for-woocommerce-activator.php',
     'Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Command' => $baseDir . '/includes/commands/class-activecampaign-for-woocommerce-add-accepts-marketing-to-customer-meta-command.php',
     'Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command' => $baseDir . '/includes/commands/class-activecampaign-for-woocommerce-add-cart-id-to-order-command.php',

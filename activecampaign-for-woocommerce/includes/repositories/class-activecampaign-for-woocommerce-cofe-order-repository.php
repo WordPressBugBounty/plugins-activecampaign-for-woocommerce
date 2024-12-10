@@ -174,7 +174,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 				[
 					'message' => $t->getMessage(),
 					'code'    => $t->getCode(),
-					'ac_code' => 'COR_195',
+					'ac_code' => 'COR_172',
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 				]
 			);
@@ -210,7 +210,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 				[
 					'message' => $t->getMessage(),
 					'code'    => $t->getCode(),
-					'ac_code' => 'COR_195',
+					'ac_code' => 'COR_209',
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 				]
 			);

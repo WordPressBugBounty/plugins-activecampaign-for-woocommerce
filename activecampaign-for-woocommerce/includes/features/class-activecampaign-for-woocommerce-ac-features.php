@@ -52,6 +52,7 @@ class Activecampaign_For_Woocommerce_Ac_Features implements Ecom_Model {
 		'ecom-historical-sync',
 		'ecom-product-catalog',
 		'ecom-recurring-payments',
+		'ecom-browse-abandonment',
 	];
 
 	/**

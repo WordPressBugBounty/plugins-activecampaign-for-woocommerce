@@ -136,7 +136,7 @@ return array(
 		$contact_repository = new Contact_Repository( $api_client );
 		$event = new Activecampaign_For_Woocommerce_Admin_Settings_Updated_Event();
 
-		return new Admin( $plugin_name, $version, $validator, $event, $connection_repository, $contact_repository );
+		return new Admin( $plugin_name, $version, $validator, $event, $connection_repository, $contact_repository, $api_client );
 	},
 
 	Api_Client::class                                 => static function ( Logger $logger ) {

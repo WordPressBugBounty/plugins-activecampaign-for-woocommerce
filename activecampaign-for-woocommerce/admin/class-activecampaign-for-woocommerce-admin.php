@@ -17,10 +17,12 @@ use Activecampaign_For_Woocommerce_Connection as Connection;
 use Activecampaign_For_Woocommerce_Connection_Repository as Connection_Repository;
 use Activecampaign_For_Woocommerce_AC_Contact_Repository as Contact_Repository;
 use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
+use Activecampaign_For_Woocommerce_Api_Client as Api_Client;
+use Activecampaign_For_Woocommerce_Ac_Tracking_Repository as AC_Tracking;
 
 /**
  * The admin-specific functionality of the plugin.
- *
+ * AC_User
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
@@ -93,6 +95,13 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	private $contact_repository;
 
 	/**
+	 * The class for the API client to connect to AC.
+	 *
+	 * @var Activecampaign_For_Woocommerce_Api_Client The client.
+	 */
+	private $api_client;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @param     string                                               $plugin_name     The name of this plugin.
@@ -104,13 +113,14 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct( $plugin_name, $version, Validator $validator, Admin_Settings_Updated $event, Connection_Repository $connection_repository, Contact_Repository $contact_repository ) {
+	public function __construct( $plugin_name, $version, Validator $validator, Admin_Settings_Updated $event, Connection_Repository $connection_repository, Contact_Repository $contact_repository, Api_Client $api_client ) {
 		$this->plugin_name           = $plugin_name;
 		$this->version               = $version;
 		$this->validator             = $validator;
 		$this->event                 = $event;
 		$this->connection_repository = $connection_repository;
 		$this->contact_repository    = $contact_repository;
+		$this->api_client            = $api_client;
 	}
 
 	/**
@@ -840,6 +850,18 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		$api_url_changing = $this->api_url_is_changing( $data, $current_settings );
 
+		if (
+			isset( $current_settings['browse_tracking'] ) &&
+			in_array( $current_settings['browse_tracking'], [ 1, '1' ] ) &&
+			(
+				! isset( $current_settings['tracking_id'] ) ||
+				empty( $current_settings['tracking_id'] )
+			)
+		) {
+			$tracking_id         = $this->activecampaign_fetch_accountid();
+			$data['tracking_id'] = $tracking_id;
+		}
+
 		if ( $current_settings ) {
 			$data = array_merge( $current_settings, $data );
 		}
@@ -1386,5 +1408,32 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function clear_entitlements_cache() {
 		delete_transient( 'activecampaign_for_woocommerce_features' );
 		wp_send_json_success( 'Entitlement ready for refresh' );
+	}
+
+
+	/**
+	 * Gets the tracking/account ID from AC.
+	 *
+	 * @return string tracking ID returned.
+	 */
+	private function activecampaign_fetch_accountid() {
+		$logger = new Logger();
+
+		try {
+			$ac_user     = new AC_Tracking( $this->api_client );
+			$tracking_id = $ac_user->find_sitetracking_code();
+
+			// $result = $this->api_client->get( 'user/me' )->execute();
+
+			return $tracking_id;
+		} catch ( Throwable $t ) {
+			$logger->warning(
+				'Could not fetch tracking ID from ActiveCampaign.',
+				[
+					'message' => $t->getMessage(),
+					'code'    => 'ADMIN_1435',
+				]
+			);
+		}
 	}
 }

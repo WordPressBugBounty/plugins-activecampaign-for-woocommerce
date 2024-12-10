@@ -116,6 +116,17 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 	 */
 	private $tags;
 
+	public function __construct() {
+
+		// Start completely empty
+		$this->id         = null;
+		$this->externalid = '';
+		$this->email      = '';
+		$this->first_name = '';
+		$this->last_name  = '';
+		$this->phone      = '';
+	}
+
 	/**
 	 * Returns a connection id.
 	 *
@@ -303,43 +314,44 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 	/**
 	 * Creates the contact model from an order object.
 	 *
-	 * @param     WC_Order $order The WC Order.
+	 * @param     WC_Order $wc_order_or_subscription The WC Order or Subscription.
 	 *
 	 * @return bool
 	 */
-	public function create_ecom_contact_from_order( $order ) {
+	public function create_ecom_contact_from_order( $wc_order_or_subscription ) {
 		$logger = new Logger();
-		if ( isset( $order ) && self::validate_object( $order, 'get_id' ) && $order->get_id() ) {
-			$customer = null;
-			if ( $order->get_customer_id() ) {
+		if ( isset( $wc_order_or_subscription ) && self::validate_object( $wc_order_or_subscription, 'get_id' ) && $wc_order_or_subscription->get_id() ) {
+			$wc_customer = null;
+			if ( $wc_order_or_subscription->get_customer_id() ) {
 				try {
 					// Use the customer information
-					$customer = new WC_Customer( $order->get_customer_id(), false );
+					$wc_customer = new WC_Customer( $wc_order_or_subscription->get_customer_id(), false );
 
-					if ( $customer->get_id() ) {
-						$this->externalid = $customer->get_id();
+					if ( $wc_customer->get_id() ) {
+						// Note this is for WC customer ID specifically.
+						$this->externalid = $wc_customer->get_id();
 					}
 
-					if ( $customer->get_email() ) {
-						$this->email = $customer->get_email();
-					} elseif ( $customer->get_billing_email() ) {
-						$this->email = $customer->get_billing_email();
+					if ( $wc_customer->get_email() ) {
+						$this->email = $wc_customer->get_email();
+					} elseif ( $wc_customer->get_billing_email() ) {
+						$this->email = $wc_customer->get_billing_email();
 					}
 
-					if ( $customer->get_first_name() ) {
-						$this->first_name = $customer->get_first_name();
-					} elseif ( $customer->get_billing_first_name() ) {
-						$this->first_name = $customer->get_billing_first_name();
+					if ( $wc_customer->get_first_name() ) {
+						$this->first_name = $wc_customer->get_first_name();
+					} elseif ( $wc_customer->get_billing_first_name() ) {
+						$this->first_name = $wc_customer->get_billing_first_name();
 					}
 
-					if ( $customer->get_last_name() ) {
-						$this->last_name = $customer->get_last_name();
-					} elseif ( $customer->get_billing_last_name() ) {
-						$this->last_name = $customer->get_billing_last_name();
+					if ( $wc_customer->get_last_name() ) {
+						$this->last_name = $wc_customer->get_last_name();
+					} elseif ( $wc_customer->get_billing_last_name() ) {
+						$this->last_name = $wc_customer->get_billing_last_name();
 					}
 
-					if ( $customer->get_billing_phone() ) {
-						$this->phone = $customer->get_billing_phone();
+					if ( $wc_customer->get_billing_phone() ) {
+						$this->phone = $wc_customer->get_billing_phone();
 					}
 
 					return true;
@@ -353,14 +365,14 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 				}
 			}
 
-			if ( ! $customer || ! $order->get_customer_id() || ! $customer->get_email() ) {
+			if ( ! $wc_customer || ! $wc_order_or_subscription->get_customer_id() || ! $wc_customer->get_email() ) {
 				try {
 					$this->externalid = 0;
-					if ( self::validate_object( $order, 'get_billing_email' ) ) {
-						$this->email      = $order->get_billing_email();
-						$this->first_name = $order->get_billing_first_name();
-						$this->last_name  = $order->get_billing_last_name();
-						$this->phone      = $order->get_billing_phone();
+					if ( self::validate_object( $wc_order_or_subscription, 'get_billing_email' ) ) {
+						$this->email      = $wc_order_or_subscription->get_billing_email();
+						$this->first_name = $wc_order_or_subscription->get_billing_first_name();
+						$this->last_name  = $wc_order_or_subscription->get_billing_last_name();
+						$this->phone      = $wc_order_or_subscription->get_billing_phone();
 
 						return true;
 					}
@@ -368,7 +380,7 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 					$logger->warning(
 						'AC Contact: There was a problem preparing data for a record.',
 						[
-							'customer_email' => self::validate_object( $order, 'get_billing_email' ) ? $order->get_billing_email() : null,
+							'customer_email' => self::validate_object( $wc_order_or_subscription, 'get_billing_email' ) ? $wc_order_or_subscription->get_billing_email() : null,
 							'message'        => $t->getMessage(),
 						]
 					);

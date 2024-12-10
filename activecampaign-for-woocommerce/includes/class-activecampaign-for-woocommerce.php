@@ -505,10 +505,11 @@ class Activecampaign_For_Woocommerce {
 	 * @access private
 	 */
 	private function define_admin_commands() {
-		if ( $this->verify_ac_features( 'historical' ) ) {
+		if ( $this->is_configured() && $this->is_connected() && $this->verify_ac_features( 'historical' ) ) {
 			$this->define_historical_sync_commands();
 		}
-		if ( $this->verify_ac_features( 'product' ) ) {
+
+		if ( $this->is_configured() && $this->is_connected() && $this->verify_ac_features( 'product' ) ) {
 			$this->define_product_sync();
 		}
 
@@ -609,7 +610,7 @@ class Activecampaign_For_Woocommerce {
 		$this->loader->add_action(
 			'woocommerce_order_edit_status',
 			$this->order_events,
-			'execute_order_edit_status',
+			'execute_order_edit_status_event',
 			20,
 			2
 		);
@@ -673,7 +674,7 @@ class Activecampaign_For_Woocommerce {
 			$this->product_sync,
 			'execute',
 			1,
-			1
+			2
 		);
 
 		$this->loader->add_action(
@@ -913,6 +914,14 @@ class Activecampaign_For_Woocommerce {
 			2
 		);
 
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_miscat_order_to_subscription_historical',
+			$this->subscription_events,
+			'trigger_historical_order_to_historical_subscription',
+			2,
+			2
+		);
+
 		// $this->loader->add_action(
 		// 'woocommerce_subscription_payment_complete',
 		// $this->subscription_events,
@@ -946,6 +955,12 @@ class Activecampaign_For_Woocommerce {
 		);
 
 		$this->define_subscription_commands();
+
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_load_sitetracking',
+			$this->admin,
+			'activecampaign_load_sitetracking'
+		);
 
 		// custom hook for hourly abandoned cart
 		$this->loader->add_action(

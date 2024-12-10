@@ -310,9 +310,10 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 				}
 
 				try {
-					if ( isset( $prep_order->ac_customer_id ) && ! empty( $prep_order->ac_customer_id ) ) {
-						$ac_customer_id = $prep_order->ac_customer_id;
-					} else {
+					$extract_email = $this->extract_email_from_order( $wc_order );
+					if ( ! empty( $extract_email ) ) {
+						$ac_customer_id = $this->get_ac_customer_id( $extract_email );
+					} elseif ( isset( $prep_order->customer_email ) && ! empty( $prep_order->customer_email ) ) {
 						$ac_customer_id = $this->get_ac_customer_id( $prep_order->customer_email );
 					}
 
@@ -360,9 +361,10 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 
 				try {
 					// RECOVERED
-					if ( isset( $unsynced_recovered_order->ac_customer_id ) && ! empty( $unsynced_recovered_order->ac_customer_id ) ) {
-						$ac_customer_id = $unsynced_recovered_order->ac_customer_id;
-					} else {
+					$extract_email = $this->extract_email_from_order( $wc_order );
+					if ( ! empty( $extract_email ) ) {
+						$ac_customer_id = $this->get_ac_customer_id( $extract_email );
+					} elseif ( isset( $unsynced_recovered_order->customer_email ) && ! empty( $unsynced_recovered_order->customer_email ) ) {
 						$ac_customer_id = $this->get_ac_customer_id( $unsynced_recovered_order->customer_email );
 					}
 

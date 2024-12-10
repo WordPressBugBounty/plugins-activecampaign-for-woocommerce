@@ -205,7 +205,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 					array( '%d' ), // format
 					'%d' // where format
 				);
-			} else {
+			} else if (false === $sync_response ) {
 				$wpdb->update(
 					( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME ), // table
 					array( 'synced_to_ac' => self::STATUS_FAIL ), // data
@@ -392,9 +392,25 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				$cofe_ecom_order = $this->cofe_order_builder->setup_cofe_order_from_table( $wc_order, 0 );
 
 				if ( is_null( $cofe_ecom_order ) ) {
-					$this->logger->debug( 'Ecom order builder returned null. Something may have gone wrong with the sync.' );
+					$this->logger->debug(
+						'Ecom order builder returned null. Something may have gone wrong with the sync or the order may have been miscategorized.',
+						[
+							'order_id' => isset( $order_id ) ? $order_id : null,
+						]
+					);
+
 					$this->add_incompatible_order_to_status( $order_id );
 					$this->mark_order_as_historical_incompatible( $order_id );
+					unset( $order_ids[ $k ] );
+					continue;
+				} elseif (30 === $cofe_ecom_order ) {
+					$this->logger->debug(
+						'Ecom order builder returned miscat. This order is actually a subscription.',
+						[
+							'order_id' => isset( $order_id ) ? $order_id : null,
+						]
+					);
+
 					unset( $order_ids[ $k ] );
 					continue;
 				}
@@ -442,6 +458,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 					}
 				}
 			}
+
+			if ( false === $r ) {
+				return null;
+			}
 		}
 
 		return true;
@@ -480,7 +500,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 					// These will be put back in the queue
 					self::wpdb_update_in(
 						( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME ), // table
-						array( 'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_PREP ), // data
+						array( 'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_QUEUE ), // data
 						array( 'wc_order_id' => $order_ids ), // where
 						array( '%d' ), // format
 						'%d' // where format

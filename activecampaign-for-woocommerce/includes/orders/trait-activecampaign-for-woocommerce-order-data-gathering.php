@@ -474,4 +474,22 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 
 		return get_site_url();
 	}
+
+	/**
+	 * Extract the email from an order.
+	 *
+	 * @param WC_Order $wc_order The WC Order.
+	 *
+	 * @return mixed|null
+	 */
+	public function extract_email_from_order( $wc_order ) {
+		if ( self::validate_object( $wc_order, 'get_billing_email' ) && $wc_order->get_billing_email() && ! empty( $wc_order->get_billing_email() ) ) {
+			return $wc_order->get_billing_email();
+		} elseif ( self::validate_object( $wc_order, 'get_user' ) && $wc_order->get_user() && ! empty( $wc_order->get_user()->user_email ) ) {
+			// If we can't find the billing email for whatever reason look for the user email.
+			return $wc_order->get_user()->user_email;
+		} else {
+			return null;
+		}
+	}
 }

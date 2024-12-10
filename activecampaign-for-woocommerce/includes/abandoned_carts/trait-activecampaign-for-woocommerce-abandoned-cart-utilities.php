@@ -127,7 +127,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		$customer_util = new Customer_Utilities();
 		$logger        = new Logger();
 		if ( isset( $order ) && ! empty( $order ) ) {
-			$customer_id = $customer_util->get_customer_id( $order );
+			$customer_id = $customer_util->get_wc_customer_id( $order );
 		}
 
 		if ( empty( $customer_id ) ) {
@@ -153,7 +153,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 	 */
 	public function delete_abandoned_cart_by_customer() {
 		$customer_util = new Customer_Utilities();
-		$customer_id   = $customer_util->get_customer_id();
+		$customer_id   = $customer_util->get_wc_customer_id();
 		$logger        = new Logger();
 
 		if ( empty( $customer_id ) ) {

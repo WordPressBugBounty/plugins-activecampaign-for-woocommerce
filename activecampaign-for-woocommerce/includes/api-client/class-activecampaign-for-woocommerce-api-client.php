@@ -162,6 +162,9 @@ class Activecampaign_For_Woocommerce_Api_Client {
 		'import/bulk_import',
 		'ecom/graphql',
 		'account/entitlements',
+		'user/me',
+		'siteTracking/code',
+		'account/info',
 	);
 
 	/**
@@ -692,6 +695,30 @@ class Activecampaign_For_Woocommerce_Api_Client {
 				);
 
 				return false;
+			}
+		}
+
+		if (
+			(
+				'siteTracking/code' === $this->endpoint ||
+				'siteTracking\/code' === $this->endpoint
+			)
+		) {
+			$this->logger->debug_calls(
+				'SiteTracking Code Response',
+				array(
+					'endpoint'             => $this->endpoint,
+					'method'               => $this->method,
+					'response_status_code' => self::validate_object( $response, 'getStatusCode' ) ? $response->getStatusCode() : null,
+					'response_headers'     => self::validate_object( $response, 'getHeaders' ) ? $response->getHeaders() : null,
+					'response_body'        => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
+					'response_contents'    => self::validate_object( $response, 'getBody' ) ? $response->getBody()->getContents() : null,
+					'response_string'      => self::validate_object( $response, 'getBody' ) ? $response->getBody()->__toString() : null,
+				)
+			);
+
+			if ( self::validate_object( $response->getBody(), '__toString' ) ) {
+				return $response->getBody()->__toString();
 			}
 		}
 

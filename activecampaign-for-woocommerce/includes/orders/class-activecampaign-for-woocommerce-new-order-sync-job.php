@@ -397,9 +397,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				}
 
 				try {
-					if ( isset( $prep_order->ac_customer_id ) && ! empty( $prep_order->ac_customer_id ) ) {
-						$ac_customer_id = $prep_order->ac_customer_id;
-					} else {
+					$extract_email = $this->extract_email_from_order( $wc_order );
+					if ( ! empty( $extract_email ) ) {
+						$ac_customer_id = $this->get_ac_customer_id( $extract_email );
+					} elseif ( isset( $prep_order->customer_email ) && ! empty( $prep_order->customer_email ) ) {
 						$ac_customer_id = $this->get_ac_customer_id( $prep_order->customer_email );
 					}
 
@@ -449,9 +450,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 
 				try {
 					// RECOVERED
-					if ( isset( $unsynced_recovered_order->ac_customer_id ) && ! empty( $unsynced_recovered_order->ac_customer_id ) ) {
-						$ac_customer_id = $unsynced_recovered_order->ac_customer_id;
-					} else {
+					$extract_email = $this->extract_email_from_order( $wc_order );
+					if ( ! empty( $extract_email ) ) {
+						$ac_customer_id = $this->get_ac_customer_id( $extract_email );
+					} elseif ( isset( $unsynced_recovered_order->customer_email ) && ! empty( $unsynced_recovered_order->customer_email ) ) {
 						$ac_customer_id = $this->get_ac_customer_id( $unsynced_recovered_order->customer_email );
 					}
 
@@ -513,11 +515,23 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		if ( isset( $wc_order ) && self::validate_object( $wc_order, 'get_id' ) && ! empty( $wc_order->get_id() ) ) {
 			// Data for cofe order sync
 			$ecom_order = $cofe_order_builder->setup_cofe_order_from_table( $wc_order, 1 );
-			if ( ! is_null( $status ) ) {
+
+			if ( ! is_null( $status ) && ! is_null( $ecom_order ) ) {
 				$ecom_order->set_wc_status( $status );
 			}
+
 			if ( is_null( $ecom_order ) ) {
 				$this->logger->warning( 'Setup COFE order returned null. Something may have gone wrong or the data may not be missing/incompatible with AC.' );
+
+				return false;
+			} elseif (30 === $ecom_order ) {
+				$this->logger->debug(
+					'Ecom order builder returned miscat. This order is actually a subscription.',
+					[
+						'order_id' => ! empty( $wc_order->get_id() ) ? $wc_order->get_id() : null,
+					]
+				);
+
 				return false;
 			}
 

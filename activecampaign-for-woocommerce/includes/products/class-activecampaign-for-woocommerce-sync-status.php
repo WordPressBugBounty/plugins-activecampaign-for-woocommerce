@@ -25,7 +25,8 @@ class Activecampaign_For_Woocommerce_Sync_Status {
 		$is_running = true,
 		$status_name = 'none',
 		$is_halted = false,
-		$is_cancelled = false
+		$is_cancelled = false,
+		$direct_mode = false
 	) {
 		$this->start_record    = $start_record; // Required
 		$this->current_record  = $current_record;
@@ -39,6 +40,7 @@ class Activecampaign_For_Woocommerce_Sync_Status {
 		$this->status_name     = $status_name; // Required
 		$this->is_halted       = $is_halted; // Required
 		$this->is_cancelled    = $is_cancelled; // Required
+		$this->direct_mode     = $direct_mode;
 	}
 
 	public static function from_map( $data ): Activecampaign_For_Woocommerce_Sync_Status {
@@ -52,7 +54,8 @@ class Activecampaign_For_Woocommerce_Sync_Status {
 			$data['end_time'],
 			$data['failed_id_array'],
 			$data['is_running'],
-			$data['status_name']
+			$data['status_name'],
+			$data['direct_mode']
 		);
 	}
 
@@ -152,6 +155,10 @@ class Activecampaign_For_Woocommerce_Sync_Status {
 	 */
 	public $failed_order_id_array;
 
+	/**
+	 * @var false|mixed
+	 */
+	public $direct_mode;
 
 	/**
 	 * @param Activecampaign_For_Woocommerce_Sync_Status $status

@@ -363,17 +363,23 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 					self::STATUS_HISTORICAL_SYNC_INCOMPATIBLE,
 					self::STATUS_HISTORICAL_SYNC_PREP,
 					self::STATUS_HISTORICAL_SYNC_QUEUE,
+					self::STATUS_SYNC_INCOMPATIBLE,
 					self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_FINISH,
 					self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_PREP,
 					self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_QUEUE,
 					self::STATUS_SUBSCRIPTION_INCOMPATIBLE,
+					self::STATUS_SUBSCRIPTION_EXPIRED,
+					self::STATUS_SUBSCRIPTION_FAILED_SYNC,
+					self::STATUS_SUBSCRIPTION_FAILED_BILLING,
+					self::STATUS_FAIL,
+					self::STATUS_SYNCED,
 				]
 			);
 
 			// phpcs:disable
 			$delete_count = $wpdb->query(
 				'DELETE FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME .
-				' WHERE (order_date < "' . $expire_2week . '" AND synced_to_ac IN (' . $synced_to_ac_implode . ') ) OR (order_date < "' . $expire_4week . '" AND synced_to_ac = 1) OR (order_date IS NULL AND abandoned_date IS NULL AND last_access_time IS NULL)'
+				' WHERE (synced_to_ac IN (' . $synced_to_ac_implode . ') ) OR (order_date < "' . $expire_4week . '" AND synced_to_ac = 0) OR (order_date IS NULL AND abandoned_date IS NULL AND last_access_time IS NULL)'
 			);
 
 			// phpcs:enable

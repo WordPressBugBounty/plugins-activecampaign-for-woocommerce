@@ -20,6 +20,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
+
 	/**
 	 * Checks both post and get for values. WC seems to pass nonce as GET but fields pass as POST.
 	 *
@@ -121,6 +122,7 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 		// types standard available 'external', 'grouped', 'simple', 'variable'
 		// Do not include groups for now.
 		$logger = new Logger();
+
 		try {
 			$safe_product_types = self::get_cofe_safe_product_types(); // This may be causing an issue with some 3rd party plugins due to custom product types.
 
@@ -162,21 +164,108 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 				]
 			);
 		}
+
 		return null;
 	}
 
+	/**
+	 * Get product data directly from the database bypassing WooCommerce functions.
+	 *
+	 * @param int|string $limit The limit.
+	 * @param int|string $offset The offset.
+	 * @param bool       $return_id_only Return only IDs or not.
+	 *
+	 * @return array
+	 */
+	public function get_products_direct_by_offset( $limit, $offset, $return_id_only = true ) {
+		global $wpdb;
 
+		try {
+			$product_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' AND post_status = 'publish' LIMIT %d OFFSET %d",
+					array( $limit, $offset )
+				)
+			);
+		} catch ( Throwable $t ) {
+			$logger = new Logger();
+			$logger->warning(
+				'There was an issue getting products for the product sync',
+				[
+					'message'        => $t->getMessage(),
+					'return_id_only' => $return_id_only,
+				]
+			);
+		}
+		try {
+			if ($return_id_only ) {
+				return $product_ids;
+			} else {
+				$products = array();
 
-	public static function get_cofe_safe_product_types() {
-		$product_types = wc_get_product_types();
+				foreach ($product_ids as $product_id ) {
+								$products[] = wc_get_product( $product_id );
+				}
 
-		// Blacklist certain types that cause conflicts & duplicates
-		if ( isset( $product_types['grouped'] ) ) {
-			unset( $product_types['grouped'] ); // Grouped products are bundles of existing single products. These cause duplicate records.
+				return $products;
+			}
+		} catch ( Throwable $t ) {
+			$logger = new Logger();
+			$logger->warning(
+				'There was an issue getting products for the product sync',
+				[
+					'message'        => $t->getMessage(),
+					'return_id_only' => $return_id_only,
+				]
+			);
 		}
 
-		if ( isset( $product_types['draft'] ) ) {
-			unset( $product_types['draft'] ); // Never sync drafts
+		return null;
+	}
+
+	/**
+	 * Gets all product data directly from the database.
+	 *
+	 * @return array WC_Products array
+	 */
+	public function get_all_products_direct() {
+		global $wpdb;
+		$product_ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' AND post_status = 'publish'" );
+
+		$products = array();
+		foreach ($product_ids as $product_id ) {
+			$products[] = wc_get_product( $product_id );
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Gets all product IDs directly from the database.
+	 *
+	 * @return array
+	 */
+	public function get_all_product_ids_direct() {
+		global $wpdb;
+		$product_ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' AND post_status = 'publish'" );
+
+		return $product_ids;
+	}
+
+	/**
+	 * Fetch the safe product types. These are going to blacklist the below items.
+	 *
+	 * @return int[]|string[]
+	 */
+	public static function get_cofe_safe_product_types() {
+		$product_types           = wc_get_product_types();
+		$product_types_blacklist = array( 'grouped', 'draft' );
+
+		// Blacklist certain types that cause conflicts & duplicates
+		foreach ( $product_types_blacklist as $product_type ) {
+			if ( isset( $product_types[ $product_type ] ) ) {
+				unset( $product_types[ $product_type ] ); // Never sync this type
+			}
 		}
 
 		// WC returns array as type_name: type readable so return only the keys

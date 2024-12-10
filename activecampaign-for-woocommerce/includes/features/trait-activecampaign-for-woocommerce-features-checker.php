@@ -44,12 +44,13 @@ trait Activecampaign_For_Woocommerce_Features_Checker {
 	public function verify_ac_features( $feature ) {
 		$logger   = new Logger();
 		$features = array(
-			'historical' => 'ecom-historical-sync',
-			'abandon'    => 'ecom-core',
-			'activesync' => 'ecom-core',
-			'recurring'  => 'ecom-recurring-payments',
-			'product'    => 'ecom-product-catalog',
-			'ecommerce'  => 'ecommerce',
+			'historical'     => 'ecom-historical-sync',
+			'abandon'        => 'ecom-core',
+			'activesync'     => 'ecom-core',
+			'recurring'      => 'ecom-recurring-payments',
+			'product'        => 'ecom-product-catalog',
+			'ecommerce'      => 'ecommerce',
+			'browsetracking' => 'ecom-browse-abandonment',
 		);
 
 		// core features

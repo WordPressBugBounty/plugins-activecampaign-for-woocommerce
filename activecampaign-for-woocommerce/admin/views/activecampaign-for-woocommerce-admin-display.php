@@ -36,6 +36,7 @@ $activecampaign_for_woocommerce_optin_checkbox_display_option = 'visible_checked
 $activecampaign_for_woocommerce_custom_email_field            = esc_html__( 'billing_email', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 $activecampaign_for_woocommerce_debug_excess                  = 0;
 $activecampaign_for_woocommerce_desc_select                   = '0';
+$activecampaign_for_woocommerce_browse_tracking               = '0';
 
 if ( is_array( $activecampaign_for_woocommerce_options ) ) {
 	if ( isset( $activecampaign_for_woocommerce_options['api_url'], $activecampaign_for_woocommerce_options['api_key'] ) ) {
@@ -149,6 +150,11 @@ if ( is_array( $activecampaign_for_woocommerce_storage ) ) {
 		$activecampaign_for_woocommerce_custom_email_field = $activecampaign_for_woocommerce_settings['custom_email_field'];
 	}
 	$activecampaign_for_woocommerce_custom_email_field = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_custom_email_field ) );
+
+	if ( isset( $activecampaign_for_woocommerce_settings['browse_tracking'] ) ) {
+		$activecampaign_for_woocommerce_browse_tracking = $activecampaign_for_woocommerce_settings['browse_tracking'];
+	}
+	$activecampaign_for_woocommerce_browse_tracking = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_browse_tracking ) );
 }
 
 $activecampaign_for_woocommerce_ab_cart_options = array(
@@ -179,8 +185,15 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 		ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN
 	),
 );
+
 ?>
 <?php settings_errors(); ?>
+<style>
+	.helptext {
+		padding-left: 23px;
+		font-style: italic;
+	}
+</style>
 <div id="activecampaign-for-woocommerce-app">
 	<?php
 	require plugin_dir_path( __FILE__ ) . '../partials/activecampaign-for-woocommerce-header.php';
@@ -240,9 +253,9 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 						</svg>
 					</a>
 					<div>
-					<div id="activecampaign-manual-mode-container">
-						or, <span id="activecampaign-manual-mode">manually configure the API</span>
-					</div>
+						<div id="activecampaign-manual-mode-container">
+							or, <span id="activecampaign-manual-mode">manually configure the API</span>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -321,235 +334,277 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 					</svg>
 					</span><?php esc_html_e( 'ActiveCampaign Configurations', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 				</label>
-					<div id="activecampaign_store" class="accordion-content">
+				<div id="activecampaign_store" class="accordion-content">
+					<div>
 						<div>
-							<div>
-								<?php
-								wp_nonce_field( 'activecampaign_for_woocommerce_settings_form', 'activecampaign_for_woocommerce_settings_nonce_field' );
-								?>
-								<section id="activecampaign_connection_list">
-									<div>
-										<div id="activecampaign_connection_modal" class="hidden">
-											<div class="modal-content">
-												<div class="notice notice-success inline" style="display:none;">
-													Connection Status
-												</div>
-												<input type="hidden" id="connection_id" name="connection_id" value="">
-												<label>Site URL <small>(Your WordPress Address URL: <?php echo esc_html( site_url() ); ?>)</small></label>
-												<input type="text" id="connection_external_id" name="connection_external_id" value="">
-												<label>Integration Name <small>(Used to identify your stores in ActiveCampaign. By default this is your Site Title.)</small></label>
-												<input type="text" id="connection_integration_name" name="connection_integration_name" value="">
-												<label>Store URL <small>(Your main store page: <?php echo esc_html( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>)</small></label>
-												<input type="text" id="connection_integration_link" name="connection_integration_link" value="">
-												<input type="hidden" id="connection_integration_logo" name="connection_integration_logo" placeholder="Using default WooCommerce logo" value="">
-												<div class="activecampaign-block-inputs">
-													<a href="#" id="activecampaign-send-update-connection-button"
-													   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-													   class="activecampaign-for-woocommerce button secondary" style="display:none;">
+							<?php
+							wp_nonce_field( 'activecampaign_for_woocommerce_settings_form', 'activecampaign_for_woocommerce_settings_nonce_field' );
+							?>
+							<section id="activecampaign_connection_list">
+								<div>
+									<div id="activecampaign_connection_modal" class="hidden">
+										<div class="modal-content">
+											<div class="notice notice-success inline" style="display:none;">
+												Connection Status
+											</div>
+											<input type="hidden" id="connection_id" name="connection_id" value="">
+											<label>Site URL <small>(Your WordPress Address URL: <?php echo esc_html( site_url() ); ?>)</small></label>
+											<input type="text" id="connection_external_id" name="connection_external_id" value="">
+											<label>Integration Name <small>(Used to identify your stores in ActiveCampaign. By default this is your Site Title.)</small></label>
+											<input type="text" id="connection_integration_name" name="connection_integration_name" value="">
+											<label>Store URL <small>(Your main store page: <?php echo esc_html( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>)</small></label>
+											<input type="text" id="connection_integration_link" name="connection_integration_link" value="">
+											<input type="hidden" id="connection_integration_logo" name="connection_integration_logo" placeholder="Using default WooCommerce logo" value="">
+											<div class="activecampaign-block-inputs">
+												<a href="#" id="activecampaign-send-update-connection-button"
+												   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+												   class="activecampaign-for-woocommerce button secondary" style="display:none;">
 									<span>
 										<?php esc_html_e( 'Update connection', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 									</span>
-													</a>
-													<a href="#" id="activecampaign-send-create-connection-button"
-													   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-													   class="activecampaign-for-woocommerce button secondary" style="display:none;">
+												</a>
+												<a href="#" id="activecampaign-send-create-connection-button"
+												   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+												   class="activecampaign-for-woocommerce button secondary" style="display:none;">
 									<span>
 										<?php esc_html_e( 'Create new connection', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 									</span>
-													</a>
-													<a href="#" id="activecampaign-cancel-connection-button"
-													   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-													   class="activecampaign-for-woocommerce button secondary">
+												</a>
+												<a href="#" id="activecampaign-cancel-connection-button"
+												   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+												   class="activecampaign-for-woocommerce button secondary">
 									<span>
 										Cancel
 									</span>
-													</a>
-												</div>
+												</a>
 											</div>
 										</div>
-										<div>
-											<h2 style="float:left;">WooCommerce Connections</h2>
-											<div style="float:right">
-												<a href="#" id="activecampaign-new-connection-button"
-												   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-												   class="activecampaign-for-woocommerce">
+									</div>
+									<div>
+										<h2 style="float:left;">WooCommerce Connections</h2>
+										<div style="float:right">
+											<a href="#" id="activecampaign-new-connection-button"
+											   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+											   class="activecampaign-for-woocommerce">
 						<span>
 							<?php esc_html_e( 'Create a new connection', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 						</span>
-												</a>
-											</div>
-											<table class="wp-list-table widefat striped table-view-list comments">
-												<thead>
-												<tr>
-													<th scope="col" >
-														Connection ID
-													</th>
-													<th scope="col">
-														Site URL
-													</th>
-													<th scope="col">
-														Integration Name
-													</th>
-													<th scope="col">
-														Store URL
-													</th>
-													<th scope="col">
-														Options
-													</th>
-													<th scope="col">
-														Status
-													</th>
-												</tr>
-												</thead>
-
-												<tbody id="the-connection-list" data-wp-lists="list:connection">
-												<tr><td colspan="6">Loading...</td></tr>
-												</tbody>
-
-												<tbody id="the-extra-comment-list" data-wp-lists="list:comment" style="display: none;">
-												<tr class="no-items"><td class="colspanchange" colspan="5">No comments found.</td></tr>	</tbody>
-											</table>
+											</a>
 										</div>
+										<table class="wp-list-table widefat striped table-view-list comments">
+											<thead>
+											<tr>
+												<th scope="col" >
+													Connection ID
+												</th>
+												<th scope="col">
+													Site URL
+												</th>
+												<th scope="col">
+													Integration Name
+												</th>
+												<th scope="col">
+													Store URL
+												</th>
+												<th scope="col">
+													Options
+												</th>
+												<th scope="col">
+													Status
+												</th>
+											</tr>
+											</thead>
+
+											<tbody id="the-connection-list" data-wp-lists="list:connection">
+											<tr><td colspan="6">Loading...</td></tr>
+											</tbody>
+
+											<tbody id="the-extra-comment-list" data-wp-lists="list:comment" style="display: none;">
+											<tr class="no-items"><td class="colspanchange" colspan="5">No comments found.</td></tr>	</tbody>
+										</table>
 									</div>
-								</section>
-							</div>
-							<?php if ( $this->verify_ac_features( 'abandon' ) ) : ?>
-								<h2>
-									<?php esc_html_e( 'Abandoned Cart', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</h2>
-								<p>
-									<?php esc_html_e( 'How long should the store will wait before considering a cart abandoned to send to ActiveCampaign?', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</p>
-								<p>
-									<?php esc_html_e( 'For example a 1 hour setting would wait until 1 hour after the last activity on the cart and then queue the cart for abandoned cart sync to ActiveCampaign. This relies on a cron job that runs hourly. It may be longer before an abandoned cart goes from ready to synced depending on your cron frequency.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</p>
-								<label>
-									<?php esc_html_e( 'Select wait time:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</label>
-								<?php foreach ( $activecampaign_for_woocommerce_ab_cart_options as $activecampaign_for_woocommerce_ab_cart_options_value => $activecampaign_for_woocommerce_ab_cart_options_option ) : ?>
-									<label class="radio">
-										<input type="radio"
-											   id="abcart_wait<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart_options_value ); ?>"
-											   name="abcart_wait"
-											   value="<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart_options_value ); ?>"
-											<?php
-											if ( (string) $activecampaign_for_woocommerce_ab_cart_options_value === $activecampaign_for_woocommerce_abcart_wait ) {
-												echo 'checked';
-											}
-											?>
-										>
-										<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart_options_option ); ?>
-									</label>
-								<?php endforeach; ?>
-							<?php endif; ?>
+								</div>
+							</section>
 						</div>
-						<hr/>
-						<div>
+						<?php if ( $this->verify_ac_features( 'abandon' ) ) : ?>
 							<h2>
-								<?php esc_html_e( 'Opt-in Checkbox', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+								<?php esc_html_e( 'Abandoned Cart', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 							</h2>
 							<p>
-								<?php esc_html_e( 'Configure what text should appear next to the opt-in checkbox, and whether that checkbox should be visible and checked by default.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+								<?php esc_html_e( 'How long should the store will wait before considering a cart abandoned to send to ActiveCampaign?', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 							</p>
-							<div>
-								<label for="optin_checkbox_text">
-									<?php esc_html_e( 'Checkbox text:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</label>
-								<input type="text" name="optin_checkbox_text" id="optin_checkbox_text"
-									   value="<?php echo esc_html( $activecampaign_for_woocommerce_optin_checkbox_text ); ?>">
-							</div>
-							<h3>
-								<?php esc_html_e( 'Checkbox display options:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-							</h3>
-							<?php foreach ( $activecampaign_for_woocommerce_checkbox_display_options as $activecampaign_for_woocommerce_checkbox_display_options_value => $activecampaign_for_woocommerce_checkbox_display_options_option ) : ?>
-								<label class="radio"
-									   for="checkbox_display_option_<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_value ); ?>">
+							<p>
+								<?php esc_html_e( 'For example a 1 hour setting would wait until 1 hour after the last activity on the cart and then queue the cart for abandoned cart sync to ActiveCampaign. This relies on a cron job that runs hourly. It may be longer before an abandoned cart goes from ready to synced depending on your cron frequency.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</p>
+							<label>
+								<?php esc_html_e( 'Select wait time:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</label>
+							<?php foreach ( $activecampaign_for_woocommerce_ab_cart_options as $activecampaign_for_woocommerce_ab_cart_options_value => $activecampaign_for_woocommerce_ab_cart_options_option ) : ?>
+								<label class="radio">
 									<input type="radio"
-										   id="checkbox_display_option_<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_value ); ?>"
-										   name="checkbox_display_option"
-										   value="<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_value ); ?>"
+										   id="abcart_wait<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart_options_value ); ?>"
+										   name="abcart_wait"
+										   value="<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart_options_value ); ?>"
 										<?php
-										if ( $activecampaign_for_woocommerce_checkbox_display_options_value === $activecampaign_for_woocommerce_optin_checkbox_display_option ) {
-											echo esc_html( 'checked' );
+										if ( (string) $activecampaign_for_woocommerce_ab_cart_options_value === $activecampaign_for_woocommerce_abcart_wait ) {
+											echo 'checked';
 										}
 										?>
 									>
-									<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_option ); ?>
+									<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart_options_option ); ?>
 								</label>
 							<?php endforeach; ?>
-						</div>
-						<hr/>
-						<?php if ( $this->verify_ac_features( 'abandon' ) ) : ?>
-							<div>
-								<h2>
-									<?php esc_html_e( 'Historical Sync Options', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</h2>
-								<div>
-									Change these settings according to your hosting capabilities. Lower numbers will take longer but consume less resources.
-								</div>
-								<div>
-									<label>Runs Per Batch: <span class="help"> (ex: Every time the sync runs 10 batch groups of 50 will run)</span></label>
-									<input type="number" name="sync_batch_runs" id="sync_batch_runs" min="1" max="40"
-										   value="<?php echo esc_html( $activecampaign_for_woocommerce_sync_batch_runs ); ?>">
-								</div>
-								<div>
-									<label>Bulk Sync Batch Limit: <span class="help">(num of records synced to ActiveCampaign at a time)</span></label>
-									<input type="number" name="sync_batch_limit" id="sync_batch_limit" min="1" max="50"
-										   value="<?php echo esc_html( $activecampaign_for_woocommerce_sync_batch_limit ); ?>"> Max 50
-								</div>
-							</div>
-						<?php endif; ?>
-						<hr/>
-						<?php if ( $this->verify_ac_features( 'product' ) ) : ?>
-							<div>
-								<h2>
-									<?php esc_html_e( 'Product Sync Options', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</h2>
-								<label>
-									<?php esc_html_e( 'Product Description:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-								</label>
-								<label class="radio">
-									<input type="radio" id="ac_desc_select0" name="ac_desc_select" value="0"
-										<?php
-										if ( '0' === $activecampaign_for_woocommerce_desc_select ) {
-											echo 'checked';
-										}
-										?>
-									> Use full description only
-									<div style="padding-left: 23px;font-style:italic;">
-										My product descriptions can be assumed to be readable in a small email content block
-									</div>
-								</label>
-								<label class="radio">
-									<input type="radio" id="ac_desc_select1" name="ac_desc_select" value="1"
-										<?php
-										if ( '1' === $activecampaign_for_woocommerce_desc_select ) {
-											echo 'checked';
-										}
-										?>
-									> Use short description only
-
-									<div style="padding-left: 23px;font-style:italic;">
-										(Will sync with description empty if short description is not included)<br/>
-										My full length descriptions are too long for a small email content block, I need the short description
-									</div>
-								</label>
-								<label class="radio">
-									<input type="radio" id="ac_desc_select2" name="ac_desc_select" value="2"
-										<?php
-										if ( '2' === $activecampaign_for_woocommerce_desc_select ) {
-											echo 'checked';
-										}
-										?>
-									> Use short description but fall back to full description. <small>[Suggested]</small>
-									<div style="padding-left: 23px;font-style:italic;">
-										(If the short description is not included it will fall back to the full description.)<br/>
-										I prefer the short description, but don’t want anything showing up empty
-									</div>
-								</label>
-							</div>
 						<?php endif; ?>
 					</div>
+					<hr/>
+					<div>
+						<h2>
+							<?php esc_html_e( 'Opt-in Checkbox', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+						</h2>
+						<p>
+							<?php esc_html_e( 'Configure what text should appear next to the opt-in checkbox, and whether that checkbox should be visible and checked by default.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+						</p>
+						<div>
+							<label for="optin_checkbox_text">
+								<?php esc_html_e( 'Checkbox text:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</label>
+							<input type="text" name="optin_checkbox_text" id="optin_checkbox_text"
+								   value="<?php echo esc_html( $activecampaign_for_woocommerce_optin_checkbox_text ); ?>">
+						</div>
+						<h3>
+							<?php esc_html_e( 'Checkbox display options:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+						</h3>
+						<?php foreach ( $activecampaign_for_woocommerce_checkbox_display_options as $activecampaign_for_woocommerce_checkbox_display_options_value => $activecampaign_for_woocommerce_checkbox_display_options_option ) : ?>
+							<label class="radio"
+								   for="checkbox_display_option_<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_value ); ?>">
+								<input type="radio"
+									   id="checkbox_display_option_<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_value ); ?>"
+									   name="checkbox_display_option"
+									   value="<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_value ); ?>"
+									<?php
+									if ( $activecampaign_for_woocommerce_checkbox_display_options_value === $activecampaign_for_woocommerce_optin_checkbox_display_option ) {
+										echo esc_html( 'checked' );
+									}
+									?>
+								>
+								<?php echo esc_html( $activecampaign_for_woocommerce_checkbox_display_options_option ); ?>
+							</label>
+						<?php endforeach; ?>
+					</div>
+					<hr/>
+					<?php if ( $this->verify_ac_features( 'abandon' ) ) : ?>
+						<div>
+							<h2>
+								<?php esc_html_e( 'Historical Sync Options', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</h2>
+							<div>
+								Change these settings according to your hosting capabilities. Lower numbers will take longer but consume less resources.
+							</div>
+							<div>
+								<label>Runs Per Batch: <span class="help"> (ex: Every time the sync runs 10 batch groups of 100 will run)</span></label>
+								<input type="number" name="sync_batch_runs" id="sync_batch_runs" min="1" max="40"
+									   value="<?php echo esc_html( $activecampaign_for_woocommerce_sync_batch_runs ); ?>">
+							</div>
+							<div>
+								<label>Bulk Sync Batch Limit: <span class="help">(num of records synced to ActiveCampaign at a time)</span></label>
+								<input type="number" name="sync_batch_limit" id="sync_batch_limit" min="1" max="50"
+									   value="<?php echo esc_html( $activecampaign_for_woocommerce_sync_batch_limit ); ?>"> Max 50
+							</div>
+						</div>
+					<?php endif; ?>
+					<hr/>
+					<?php if ( $this->verify_ac_features( 'product' ) ) : ?>
+						<div>
+							<h2>
+								<?php esc_html_e( 'Product Sync Options', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</h2>
+							<label>
+								<?php esc_html_e( 'Product Description:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</label>
+							<label class="radio">
+								<input type="radio" id="ac_desc_select0" name="ac_desc_select" value="0"
+									<?php
+									if ( '0' === $activecampaign_for_woocommerce_desc_select ) {
+										echo 'checked';
+									}
+									?>
+								> Use full description only
+								<div style="padding-left: 23px;font-style:italic;">
+									My product descriptions can be assumed to be readable in a small email content block
+								</div>
+							</label>
+							<label class="radio">
+								<input type="radio" id="ac_desc_select1" name="ac_desc_select" value="1"
+									<?php
+									if ( '1' === $activecampaign_for_woocommerce_desc_select ) {
+										echo 'checked';
+									}
+									?>
+								> Use short description only
+
+								<div style="padding-left: 23px;font-style:italic;">
+									(Will sync with description empty if short description is not included)<br/>
+									My full length descriptions are too long for a small email content block, I need the short description
+								</div>
+							</label>
+							<label class="radio">
+								<input type="radio" id="ac_desc_select2" name="ac_desc_select" value="2"
+									<?php
+									if ( '2' === $activecampaign_for_woocommerce_desc_select ) {
+										echo 'checked';
+									}
+									?>
+								> Use short description but fall back to full description. <small>[Suggested]</small>
+								<div style="padding-left: 23px;font-style:italic;">
+									(If the short description is not included it will fall back to the full description.)<br/>
+									I prefer the short description, but don’t want anything showing up empty
+								</div>
+							</label>
+						</div>
+					<?php endif; ?>
+					<?php if ( $this->verify_ac_features( 'browsetracking' ) ) : ?>
+						<div>
+							<h2>
+								<?php esc_html_e( 'Tracking &amp; Browse Abandonment', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</h2>
+							<label class="radio">
+								<input type="radio" id="browse_tracking1" name="browse_tracking" value="1"
+									<?php
+									if ( '1' === $activecampaign_for_woocommerce_browse_tracking ) {
+										echo 'checked';
+									}
+									?>
+								> Enabled (Track by default)
+								<p class="helptext">
+									This option will track all known contacts by default, and will not provide an additional tracking consent notice to your contacts.
+								</p>
+							</label>
+							<label class="radio">
+								<input type="radio" id="browse_tracking2" name="browse_tracking" value="2"
+									<?php
+									if ( '2' === $activecampaign_for_woocommerce_browse_tracking ) {
+										echo 'checked';
+									}
+									?>
+								> Enabled (Do not track by default)
+								<p class="helptext">
+									This option will not track all known contacts by default.
+									Your contacts will only be tracked after they confirm tracking consent.
+									You must develop a tracking consent notice, and connect it to this plugin, to use this option. You can call the hook [activecampaign_for_woocommerce_load_sitetracking] to then load the tracking.
+								</p>
+							</label>
+							<label class="radio">
+								<input type="radio" id="browse_tracking0" name="browse_tracking" value="0"
+									<?php
+									if ( '0' === $activecampaign_for_woocommerce_browse_tracking ) {
+										echo 'checked';
+									}
+									?>
+								> Off
+							</label>
+						</div>
+					<?php endif; ?>
+				</div>
 			</section>
 
 			<section id="activecampaign_connection" class="advanced bg-white border-solid border-slate-200 p-800"

@@ -255,14 +255,14 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			$customer_data = $customer_utilities->build_customer_data( $wc_order->get_data() );
 
 			if ( ! isset( $customer_data['id'] ) || empty( $customer_data['id'] ) ) {
-				$found_customer_id = $customer_utilities->get_customer_id( $wc_order );
+				$found_customer_id = $customer_utilities->get_wc_customer_id( $wc_order );
 				if ( isset( $found_customer_id ) && ! empty( $found_customer_id ) ) {
-					$customer_data['id'] = $customer_utilities->get_customer_id( $wc_order );
+					$customer_data['id'] = $customer_utilities->get_wc_customer_id( $wc_order );
 				}
 			}
 
 			if ( empty( $customer_data['id'] ) ) {
-				$customer_data['id'] = 0;
+				$customer_data['id'] = null;
 			}
 
 			$cart_uuid = $this->get_or_generate_uuid();
@@ -292,6 +292,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			);
 
 			if ( isset( $stored_row->wc_order_id ) && ! empty( $stored_row->wc_order_id ) ) {
+				$this->schedule_sync_job( $order_id );
 				return;
 			}
 
@@ -306,6 +307,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 
 			if ( isset( $stored_row->wc_order_id ) && ! empty( $stored_row->wc_order_id ) ) {
 				// If we've saved the order we do not need to save again to stop redundant events
+				$this->schedule_sync_job( $order_id );
 				return;
 			}
 
@@ -515,7 +517,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		try {
 			if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'row_id' => $row_id ] ) ) {
 				wp_schedule_single_event(
-					time() + 30,
+					time() + 10,
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME,
 					[
 						'row_id' => $row_id,
@@ -527,8 +529,8 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				'Schedule finished order for immediate sync.',
 				[
 					'row_id'       => $row_id,
-					'current_time' => time() + 30,
-					'schedule'     => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'id' => $row_id ] ),
+					'current_time' => time() + 10,
+					'schedule'     => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'row_id' => $row_id ] ),
 				]
 			);
 		} catch ( Throwable $t ) {

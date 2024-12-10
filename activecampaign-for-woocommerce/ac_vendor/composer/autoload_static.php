@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitdd516b1c42b8adb957397bd81974f415
+class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -373,6 +373,7 @@ class ComposerStaticInitdd516b1c42b8adb957397bd81974f415
         'Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities' => __DIR__ . '/../..' . '/includes/abandoned_carts/trait-activecampaign-for-woocommerce-abandoned-cart-utilities.php',
         'Activecampaign_For_Woocommerce_Ac_Features' => __DIR__ . '/../..' . '/includes/features/class-activecampaign-for-woocommerce-ac-features.php',
         'Activecampaign_For_Woocommerce_Ac_Features_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-features-repository.php',
+        'Activecampaign_For_Woocommerce_Ac_Tracking_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-tracking-repository.php',
         'Activecampaign_For_Woocommerce_Activator' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce-activator.php',
         'Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-add-accepts-marketing-to-customer-meta-command.php',
         'Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-add-cart-id-to-order-command.php',
@@ -486,9 +487,9 @@ class ComposerStaticInitdd516b1c42b8adb957397bd81974f415
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitdd516b1c42b8adb957397bd81974f415::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitdd516b1c42b8adb957397bd81974f415::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitdd516b1c42b8adb957397bd81974f415::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitd69e46321af071c131c0b9948fe62b79::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitd69e46321af071c131c0b9948fe62b79::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitd69e46321af071c131c0b9948fe62b79::$classMap;
 
         }, null, ClassLoader::class);
     }

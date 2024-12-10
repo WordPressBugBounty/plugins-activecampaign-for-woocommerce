@@ -132,13 +132,13 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 	}
 
 	/**
-	 * Returns a customer ID if we can find one.
+	 * Returns a WooCommerce customer ID if we can find one.
 	 *
 	 * @param     WC_Order|null $order The order object.
 	 *
 	 * @return bool|string
 	 */
-	public function get_customer_id( $order = null ) {
+	public function get_wc_customer_id( $order = null ) {
 		if ( is_null( $order ) && self::validate_object( wc()->session, 'get_customer_id' ) && ! empty( wc()->session->get_customer_id() ) ) {
 			return wc()->session->get_customer_id();
 		}

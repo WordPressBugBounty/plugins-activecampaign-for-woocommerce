@@ -2,8 +2,8 @@
 Contributors: acteamintegrations, bartboy011
 Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
 Requires at least: 6.0
-Tested up to: 6.7.0
-Stable tag: 2.7.11
+Tested up to: 6.7.1
+Stable tag: 2.8.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -67,7 +67,7 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 == Installation ==
 
 = WooCommerce Compatibility =
-* Tested up to version: 9.4.1
+* Tested up to version: 9.4.3
 * Minimal version requirement: 7.4.0
 * HPOS Compatible
 
@@ -93,6 +93,14 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.8.0 2024-12-10 =
+* Feature - Product sync now has the option to directly pull products from the database
+* Enhancement - Product sync will show the number of products available to sync for debugging purposes
+* Bugfix - Fatal errors thrown by PHP 8.2 resolved
+* Bugfix - Orders from WooCommerce sometimes synced to the wrong contact
+* Bugfix - Products missing from product sync with some plugin customizations
+* Bugfix - Edge case where some orders would convert to subscriptions and vanish from the store
 
 = 2.7.11 2024-11-13 =
 * Bugfix - URL correction for setup

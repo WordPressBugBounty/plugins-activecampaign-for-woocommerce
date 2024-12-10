@@ -711,15 +711,33 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 		try {
 			if ( $synced_to_ac ) {
 				// Update the record to show we've synced so we don't sync it again
-
-				$wpdb->update(
-					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-					array(
+				if ($order_ac->get_email() !== $customer->email ) {
+					// The emails don't match!
+					$this->logger->warning(
+						'The returned email does not match. This could cause an issue with this contact record. Do not save customer ID in this case.',
+						[
+							'ac_email'       => $order_ac->get_email(),
+							'customer_email' => $customer->email,
+						]
+					);
+					$ab_data_save = array(
+						'synced_to_ac'   => self::STATUS_ABANDONED_CART_AUTO_SYNCED,
+						'abandoned_date' => $this->calculate_abandoned_date( $abc_order ),
+						'ac_order_id'    => self::validate_object( $order_ac, 'get_id' ) ? $order_ac->get_id() : null,
+						'ac_customer_id' => null,
+					);
+				} else {
+					$ab_data_save = array(
 						'synced_to_ac'   => self::STATUS_ABANDONED_CART_AUTO_SYNCED,
 						'abandoned_date' => $this->calculate_abandoned_date( $abc_order ),
 						'ac_order_id'    => self::validate_object( $order_ac, 'get_id' ) ? $order_ac->get_id() : null,
 						'ac_customer_id' => self::validate_object( $order_ac, 'get_customerid' ) ? $order_ac->get_customerid() : null,
-					),
+					);
+				}
+
+				$wpdb->update(
+					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
+					$ab_data_save,
 					array(
 						'id' => $abc_order->id,
 					)
@@ -1010,27 +1028,68 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 		$logger = new Logger();
 
 		if ( isset( $cart->last_access_time ) && ( ! isset( $cart->abandoned_date ) || empty( $cart->abandoned_date ) ) ) {
-			try {
+
 				$now = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 
-				if ( ! isset( $this->expire_time ) || empty( $this->expire_time ) ) {
-					$this->expire_time = 1;
-				}
+				// 1 hour is the default
+			if ( ! isset( $this->expire_time ) || empty( $this->expire_time ) ) {
+				$this->expire_time = 1;
+			}
 
 				$expire_datetime = new DateTime( 'now -' . $this->expire_time . ' hours', new DateTimeZone( 'UTC' ) );
 				$ab_date         = new DateTime( $cart->last_access_time . ' + ' . $this->expire_time . ' hours', new DateTimeZone( 'UTC' ) );
 
-				$diff = $expire_datetime->diff( $ab_date, true );
-				$i    = 0 + ( $diff->days * 24 );
-				$i   += $diff->hours;
+				$i        = 0;
+				$hourdiff = 0;
 
+			try {
+				$diff           = $expire_datetime->diff( $ab_date, true );
+				$hours_in_days  = $diff->format( '%d' ) * 24; // get number of hours in days
+				$hours_in_hours = $diff->format( '%h' ); // add number of hours in hours
+
+				if ( ! empty( $hours_in_days ) ) {
+					$i += intval( $hours_in_days );
+				}
+
+				if ( ! empty( $hours_in_hours ) ) {
+					$i += intval( $hours_in_hours );
+				}
+			} catch ( Throwable $t ) {
+				// cannot use this method on this install
+				$this->logger->debug(
+					'Primary time diff in hours could not be calculated for the abandoned cart.',
+					[
+						'cartid'           => $cart->id,
+						'message'          => $t->getMessage(),
+						'trace'            => $t->getTrace(),
+						'last_access_time' => $cart->last_access_time,
+					]
+				);
+			}
+
+			try {
+				// secondary method to check
+				$hourdiff = round( ( strtotime( $cart->last_access_time + $this->expire_time ) - strtotime( $expire_datetime->format( 'Y-m-d H:i:s' ) ) ) / 3600, 0 );
+			} catch ( Throwable $t ) {
+				// cannot use this method
+				$this->logger->debug(
+					'Secondary time diff in hours could not be calculated for the abandoned cart.',
+					[
+						'cartid'           => $cart->id,
+						'message'          => $t->getMessage(),
+						'trace'            => $t->getTrace(),
+						'last_access_time' => $cart->last_access_time,
+					]
+				);
+			}
+			try {
 				// calc_abandoned_date is calculated by the DB
 				if ( ! empty( $cart->calc_abandoned_date ) && empty( $cart->abandoned_date ) ) {
 					$c_ab_date = new DateTime( $cart->calc_abandoned_date, new DateTimeZone( 'UTC' ) );
 					return $c_ab_date->format( 'Y-m-d H:i:s e' );
 				} elseif ( empty( $cart->calc_abandoned_date ) && empty( $cart->abandoned_date ) ) {
 					// If the DB somehow fails to calculate the date
-					if ( intval( $i ) >= $this->expire_time ) {
+					if ( $i >= $this->expire_time || $hourdiff >= $this->expire_time ) {
 						// If the expiration and abandonment difference is more than the expire time
 						return $ab_date->format( 'Y-m-d H:i:s e' );
 					}

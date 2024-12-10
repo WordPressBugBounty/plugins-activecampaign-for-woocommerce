@@ -95,7 +95,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 	 * @param WC_Order|string|int $wc_order The WC order or ID.
 	 * @param     int                 $source The source.
 	 *
-	 * @return Activecampaign_For_Woocommerce_Cofe_Ecom_Order|null
+	 * @return Activecampaign_For_Woocommerce_Cofe_Ecom_Order|int|null
 	 */
 	public function setup_cofe_order_from_table( $wc_order, $source = 0 ) {
 		if ( ! self::validate_object( $wc_order, 'get_data' ) || ! self::validate_object( $wc_order, 'get_order_number' ) ) {
@@ -115,20 +115,26 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			if (
 				function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $wc_order->get_id() )
 			) {
+				$wc_subscription = wcs_get_subscription( $wc_order->get_id() );
 				$logger->warning(
 					'This record was improperly triggered by WooCommerce as an order but is a subscription. It will be processed as a subscription instead.',
 					[
-						'order_id' => $wc_order->get_id(),
+						'order_id'   => self::validate_object( $wc_order, 'get_id' ) ? $wc_order->get_id() : null,
+						'source'   => $source,
 					]
 				);
 
-				$wc_subscription = wcs_get_subscription( $wc_order->get_id() );
+				$wc_subscription    = wcs_get_subscription( $wc_order->get_id() );
+				$wc_subscription_id = $wc_subscription->get_id();
 
-				if ( ! empty( $wc_subscription->get_id() ) ) {
-					$subscription_id = $wc_subscription->get_id();
-					do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription', [ $subscription_id ] );
+				if ( ! empty( $wc_subscription_id ) ) {
+					if ( 0 === $source ) {
+						do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription_historical', [ $wc_subscription_id ] );
+					} else {
+						do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription', [ $wc_subscription_id ] );
+					}
 
-					return null;
+					return 30; // 30 is the designator for subscription status block
 				}
 			}
 

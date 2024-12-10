@@ -5,10 +5,14 @@ jQuery(document).ready(function($) {
             cancelUpdateCheck();
             $('.sync-run-status').hide();
             $('#activecampaign-run-product-wait').show();
-            // $('#activecampaign-run-product-sync').addClass('disabled');
             $('#activecampaign-product-sync-run-shortly').show();
 
             var batchLimit = 20;
+            var syncDirectMode = 0;
+
+            if($('.activecampaign-product-sync-direct-mode:checked').val() === '1') {
+                syncDirectMode = 1;
+            }
 
             if($('#activecampaign-product-sync-limit').find(":selected").text()) {
                 batchLimit = $('#activecampaign-product-sync-limit').find(":selected").text();
@@ -19,6 +23,7 @@ jQuery(document).ready(function($) {
             runAjax({
                 'action': action,
                 'batchLimit': batchLimit,
+                'syncDirectMode': syncDirectMode,
                 'activecampaign_for_woocommerce_settings_nonce_field': $('#activecampaign_for_woocommerce_nonce_field').val()
             });
             enableStopButtons();

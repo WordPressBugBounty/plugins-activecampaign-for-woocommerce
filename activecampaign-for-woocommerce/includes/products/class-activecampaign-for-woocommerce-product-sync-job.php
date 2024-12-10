@@ -56,6 +56,14 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 * @var int
 	 */
 	private $batch_limit;
+
+	/**
+	 * Direct mode enabled. 1 = enabled = uses direct DB access.
+	 *
+	 * @var int
+	 */
+	private $direct_mode;
+
 	/**
 	 * Activecampaign_For_Woocommerce_Product_Sync_Job constructor.
 	 *
@@ -70,6 +78,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 		$this->cofe_product_repository = $cofe_product_repository;
 		$this->start_record            = 0;
 		$this->batch_limit             = 20;
+		$this->direct_mode             = 0;
 	}
 
 	/**
@@ -99,6 +108,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				'args'         => $args,
 				'batch_limit'  => $this->batch_limit,
 				'start_record' => $this->start_record,
+				'direct_mode'  => $this->direct_mode,
 			)
 		);
 
@@ -244,16 +254,23 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 
 		$offset = 0;
 
-		$wc_product_ids = $this->get_products_by_offset( $this->batch_limit, $offset, true );
-
+		if ($this->direct_mode ) {
+			$wc_product_ids = $this->get_products_direct_by_offset( $this->batch_limit, $offset, true );
+		} else {
+			$wc_product_ids = $this->get_products_by_offset( $this->batch_limit, $offset, true );
+		}
 		while ( $wc_product_ids ) {
 			$this->schedule_background_product_sync( $offset, $this->batch_limit );
 
 			$offset += count( $wc_product_ids );
-
-			$wc_product_ids = $this->get_products_by_offset( $this->batch_limit, $offset, true );
+			if ($this->direct_mode ) {
+				$wc_product_ids = $this->get_products_direct_by_offset( $this->batch_limit, $offset, true );
+			} else {
+				$wc_product_ids = $this->get_products_by_offset( $this->batch_limit, $offset, true );
+			}
 		}
 
+		$status = $this->add_args_to_status( $args );
 	}
 
 	/**
@@ -300,6 +317,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			if ( ! empty( $data->start_record ) || 0 === $data->start_record || '0' === $data->start_record ) {
 				$this->start_record = $args[0]->start_record;
 			}
+			if ( ! empty( $data->direct_mode ) || 1 === $data->direct_mode || '1' === $data->direct_mode ) {
+				$this->direct_mode = $args[0]->direct_mode;
+			}
 		}
 
 		if ( is_array( $data ) ) {
@@ -308,6 +328,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			}
 			if ( ! empty( $data['start_record'] ) || 0 === $data['start_record'] || '0' === $data['start_record'] ) {
 				$this->start_record = $data['start_record'];
+			}
+			if ( ! empty( $data['direct_mode'] ) || 1 === $data['direct_mode'] || '1' === $data['direct_mode'] ) {
+				$this->direct_mode = $data['direct_mode'];
 			}
 		}
 
@@ -323,10 +346,14 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			if ( isset( $_post['startRecord'] ) && ! empty( $_post['startRecord'] ) ) {
 				$this->start_record = $_post['startRecord'];
 			}
+			if ( isset( $_post['syncDirectMode'] ) && ! empty( $_post['syncDirectMode'] ) ) {
+				$this->direct_mode = $_post['syncDirectMode'];
+			}
 		}
 
 		$status->start_record = $this->start_record;
 		$status->batch_limit  = $this->batch_limit;
+		$status->direct_mode  = $this->direct_mode;
 
 		Sync_Status::update_status( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_RUNNING_STATUS_NAME, $status );
 
@@ -346,6 +373,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			[
 				'start_record' => (int) $offset,
 				'batch_limit'  => (int) $batch_limit,
+				'direct_mode'  => (int) $this->direct_mode,
 			],
 		];
 		try {
@@ -434,7 +462,11 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			$offset = $this->start_record;
 			$limit  = $this->batch_limit;
 
-			$wc_products = $this->get_products_by_offset( $limit, $offset, false );
+			if ($this->direct_mode ) {
+				$wc_products = $this->get_products_direct_by_offset( $limit, $offset, false );
+			} else {
+				$wc_products = $this->get_products_by_offset( $limit, $offset, false );
+			}
 		} else {
 			$wc_products = $products_list;
 		}
@@ -578,7 +610,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			} else {
 				$p_data = Ecom_Cofe_Product::product_array_for_cofe( $product, $connection_id, $parent );
 				if ( ! is_null( $p_data ) ) {
-					$product_data[] = $p_data;
+					$product_data[ $p_data['storePrimaryId'] ] = $p_data;
 				}
 			}
 		} catch ( Throwable $t ) {

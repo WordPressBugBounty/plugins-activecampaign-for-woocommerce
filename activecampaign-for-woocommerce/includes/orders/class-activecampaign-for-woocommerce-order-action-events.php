@@ -85,23 +85,17 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		$logger = new Logger();
 
 		if ( isset( $order_id ) && ! empty( $order_id ) ) {
+			$post_type = get_post_type( $order_id );
+
 			$logger->debug_excess(
 				'Order update triggered',
 				[
-					'order' => $order_id,
+					'order'     => $order_id,
+					'post_type' => $post_type,
 				]
 			);
 
-			$post_type = get_post_type( $order_id );
-
-			// If it's a subscription, route through sub update
-			if ( 'shop_subscription' === $post_type ) {
-				$wc_subscription = $this->get_wc_subscription( $order_id );
-
-				if ( $this->check_update_validity( $wc_subscription ) ) {
-					do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
-				}
-
+			if ($this->check_if_subscription_and_reroute( $order_id, $post_type ) ) {
 				return;
 			}
 
@@ -161,22 +155,19 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		$logger = new Logger();
 
 		if ( isset( $order_id ) && ! empty( $order_id ) ) {
+			$post_type = get_post_type( $order_id );
+
 			$logger->debug_excess(
 				'Order status update triggered',
 				[
 					'order'        => $order_id,
 					'order_status' => $from_status,
 					'new_status'   => $to_status,
+					'post_type'    => $post_type,
 				]
 			);
 
-			$post_type = get_post_type( $order_id );
-
-			// If it's a subscription, route through subscription update.
-			if ( 'shop_subscription' === $post_type ) {
-				$wc_subscription = $this->get_wc_subscription( $order_id );
-
-				do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
+			if ($this->check_if_subscription_and_reroute( $order_id, $post_type ) ) {
 				return;
 			}
 
@@ -227,11 +218,24 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		}
 	}
 
-	public function execute_order_edit_status( $order_id, $new_status ) {
+	/**
+	 * Executes the code based on an order status edit action event.
+	 *
+	 * @param string|int $order_id The order id.
+	 * @param string     $new_status The new updated status.
+	 *
+	 * @return void
+	 */
+	public function execute_order_edit_status_event( $order_id, $new_status ) {
 		$wc_order = $this->get_wc_order( $order_id );
 
 		if ( self::validate_object( $wc_order, 'get_data' ) ) {
 			set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
+
+			$post_type = get_post_type( $order_id );
+			if ($this->check_if_subscription_and_reroute( $order_id, $post_type ) ) {
+				return;
+			}
 
 			if ( ! wp_get_scheduled_event(
 				'activecampaign_for_woocommerce_admin_sync_single_order_status',
@@ -405,10 +409,10 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 	 * @return bool
 	 */
 	private function check_update_validity( $wc_order ) {
-		$logger = new Logger();
-		$last_synced      = $wc_order->get_meta( 'ac_order_last_synced_time' );
-		$last_status      = $wc_order->get_meta( 'ac_last_synced_status' );
-		$ac_datahash      = $wc_order->get_meta( 'ac_datahash' );
+		$logger      = new Logger();
+		$last_synced = $wc_order->get_meta( 'ac_order_last_synced_time' );
+		$last_status = $wc_order->get_meta( 'ac_last_synced_status' );
+		$ac_datahash = $wc_order->get_meta( 'ac_datahash' );
 		try {
 			$current_datahash = md5( wp_json_encode( $wc_order->get_data() ) );
 		} catch ( Throwable $t ) {
@@ -458,5 +462,52 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		}
 
 		return true;
+	}
+
+	private function check_if_subscription_and_reroute( $order_id, $post_type ) {
+		$logger = new Logger();
+
+		try {
+				// If it's a subscription, route through sub update
+			if (
+					'shop_subscription' === $post_type ||
+					'shop_order_placehold' === $post_type ||
+					(
+						function_exists( 'wcs_is_subscription' ) &&
+						wcs_is_subscription( $order_id )
+					)
+				) {
+				$wc_subscription = $this->get_wc_subscription( $order_id );
+				$subscription_id = $wc_subscription->get_id();
+
+				if ( wcs_is_subscription( $subscription_id ) ) {
+					$logger->debug(
+						'Order update accidentally triggered from subscription. Routing order to subscription instead.',
+						array(
+							'order_id'                 => $order_id,
+							'subscription_id'          => $subscription_id,
+							'subscription item count'  => $wc_subscription->get_item_count(),
+							'is_subscription on order' => wcs_is_subscription( $order_id ),
+							'is_subscription on subscription' => wcs_is_subscription( $subscription_id ),
+						)
+					);
+
+					if ( $this->check_update_validity( $wc_subscription ) ) {
+						do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
+					}
+
+					return true;
+				}
+			}
+		} catch (Throwable $t ) {
+			$logger->warning(
+				'Something went wrong validating post type as shop_subscription',
+				[
+					'message' => $t->getMessage(),
+				]
+			);
+		}
+
+		return false;
 	}
 }

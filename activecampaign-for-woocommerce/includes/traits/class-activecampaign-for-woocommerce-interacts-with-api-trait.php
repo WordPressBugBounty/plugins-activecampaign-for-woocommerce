@@ -700,4 +700,69 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			);
 		}
 	}
+
+	private function get_result_code_from_api(
+		Activecampaign_For_Woocommerce_Api_Client $client,
+		callable $response_massager = null
+	) {
+		$client->set_filters( [] );
+		$client->with_body( '' );
+		$logger = new Logger();
+		$result = $client
+			->get( self::ENDPOINT_NAME_PLURAL )
+			->execute();
+
+		if ( $result ) {
+			try {
+				$matches = [];
+				if ( preg_match( '/\'setAccount\', \'(\d*)\'\)/', $result, $matches ) !== false && ! empty( $matches[1] ) ) {
+					return $matches[1];
+				}
+
+				if ( ! is_object( $result ) || ! self::validate_object( $result, 'getBody' ) ) {
+					$logger->debug(
+						'Result from API may not have a body. Could be an error.',
+						[
+							'result'        => $result,
+							'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+							'resource_name' => self::RESOURCE_NAME,
+							'endpoint_name' => self::ENDPOINT_NAME,
+						]
+					);
+				} else {
+					$resources_array = json_decode( $result->getBody(), true );
+
+					if ( count( $resources_array[ self::RESOURCE_NAME_PLURAL ] ) < 1 ) {
+						$logger->debug_excess(
+							'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was not found. This may not be an error.',
+							[
+								'resource_name' => self::RESOURCE_NAME,
+								'endpoint_name' => self::ENDPOINT_NAME,
+								'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+								'response'      => $result->getBody() instanceof StreamInterface
+									? $result->getBody()->getContents()
+									: null,
+								'code'          => 404,
+							]
+						);
+					}
+
+					if ( $response_massager ) {
+						$resources_array = $response_massager( $resources_array );
+					}
+
+					return $resources_array[ self::RESOURCE_NAME_PLURAL ];
+				}
+			} catch ( Throwable $t ) {
+				$logger->debug(
+					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource thrown error.',
+					[
+						'result'      => $result,
+						'client_body' => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+						'code'        => $t->getCode(),
+					]
+				);
+			}
+		}
+	}
 }

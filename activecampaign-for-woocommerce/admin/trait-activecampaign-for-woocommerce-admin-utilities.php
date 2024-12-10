@@ -195,6 +195,10 @@ trait Activecampaign_For_Woocommerce_Admin_Utilities {
 				$options_to_be_saved['checkbox_display_option'] = 'visible_checked_by_default';
 			}
 
+			if ( ! isset( $current_options['browse_tracking'] ) ) {
+				$options_to_be_saved['browse_tracking'] = '0';
+			}
+
 			if ( ! isset( $current_options['ac_debug'] ) ) {
 				$options_to_be_saved['ac_debug']        = '0';
 				$options_to_be_saved['ac_debug_calls']  = '0';

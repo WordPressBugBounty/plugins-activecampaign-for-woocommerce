@@ -65,7 +65,8 @@ trait Activecampaign_For_Woocommerce_Admin_Product_Sync {
 				'array'
 			);
 
-			$data['products']     = $this->get_products_by_offset( -1, 15, true );
+			$data['products']     = $this->get_all_product_ids_direct(); // Get the source
+			$data['products_wc']  = $this->get_products_by_offset( -1, 15, true ); // works but does not have all records
 			$data['event_status'] = wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME );
 			$data['page_url']     = esc_url( admin_url( 'admin.php?page=' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '_product_sync&activesync=1' ) );
 			$data['page_nonce']   = wp_create_nonce( 'activecampaign_for_woocommerce_product_sync_form' );
@@ -88,7 +89,6 @@ trait Activecampaign_For_Woocommerce_Admin_Product_Sync {
 	public function run_product_sync( ...$args ) {
 		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_STOP_CHECK_NAME );
 		do_action( 'activecampaign_for_woocommerce_run_sync_connection' );
-
 		do_action( 'activecampaign_for_woocommerce_build_product_sync_schedules' );
 	}
 

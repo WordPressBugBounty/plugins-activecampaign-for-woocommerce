@@ -61,28 +61,28 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Factory {
 	 * @return Ecom_Order
 	 */
 	public function from_woocommerce( $cart, $customer ) {
-		$order  = new Ecom_Order();
-		$logger = new Logger();
+		$ecom_order = new Ecom_Order();
+		$logger     = new Logger();
 
 		try {
 			if ( self::validate_object( $cart, 'get_cart_contents' ) && ! $cart->is_empty() && self::validate_object( $customer, 'get_email' ) ) {
 				$date = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 
-				$order->set_id( $this->get_ac_id() );
+				$ecom_order->set_id( $this->get_ac_id() );
 
 				$external_id = $this->generate_externalcheckoutid(
 					wc()->session->get_customer_id(),
 					$customer->get_email()
 				);
-				$order->set_externalcheckoutid( $external_id );
-				$order->set_source( '1' );
-				$order->set_email( $customer->get_email() );
-				$order->set_total_price( $this->get_cart_total( $cart ) );
-				$order->set_currency( $this->get_woocommerce_currency() );
-				$order->set_connectionid( $this->admin->get_connection_storage()['connection_id'] );
-				$order->set_customerid( $this->get_ac_customer_id() );
-				$order->set_order_date( $date->format( DATE_ATOM ) );
-				$order->set_order_url( wc_get_cart_url() );
+				$ecom_order->set_externalcheckoutid( $external_id );
+				$ecom_order->set_source( '1' );
+				$ecom_order->set_email( $customer->get_email() );
+				$ecom_order->set_total_price( $this->get_cart_total( $cart ) );
+				$ecom_order->set_currency( $this->get_woocommerce_currency() );
+				$ecom_order->set_connectionid( $this->admin->get_connection_storage()['connection_id'] );
+				$ecom_order->set_customerid( $this->get_ac_customer_id() );
+				$ecom_order->set_order_date( $date->format( DATE_ATOM ) );
+				$ecom_order->set_order_url( wc_get_cart_url() );
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
@@ -102,7 +102,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Factory {
 				->create_products_from_cart_contents( $cart->get_cart_contents() );
 
 			if ( count( $products ) > 0 ) {
-				array_walk( $products, [ $order, 'push_order_product' ] );
+				array_walk( $products, [ $ecom_order, 'push_order_product' ] );
 			} else {
 				$logger->warning(
 					'Order Factory: Could not create product from cart contents.',
@@ -126,7 +126,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Factory {
 			return null;
 		}
 
-		return $order;
+		return $ecom_order;
 	}
 
 	/**

@@ -35,7 +35,7 @@ if ( ! isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) ||
 				<div id="sync-start-section">
 					<div>
 						<form method="post"
-							  action="<?php echo esc_html( $activecampaign_for_woocommerce_product_sync_data['page_url'] ); ?>">
+								action="<?php echo esc_html( $activecampaign_for_woocommerce_product_sync_data['page_url'] ); ?>">
 							<?php
 							wp_nonce_field( 'activecampaign_for_woocommerce_product_sync_form', 'activecampaign_for_woocommerce_nonce_field' );
 							?>
@@ -157,7 +157,6 @@ if ( ! isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) ||
 		</div>
 		<?php
 		if ( $activecampaign_for_woocommerce_product_sync_data['options']['ac_debug'] && isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) && ! empty( $activecampaign_for_woocommerce_product_sync_data['products'] ) ) :
-			;
 			?>
 		<div class="card max-w-none">
 			<p>(Debug) Product IDs visible by the plugin to sync</p>

@@ -32,7 +32,7 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 		$logger = new Logger();
 		if ( self::validate_object( $product, 'get_id' ) && ! empty( $product->get_id() ) ) {
 			$terms    = get_the_terms( $product->get_id(), 'product_cat' );
-			$cat_list = [];
+			$cat_list = array();
 			try {
 				// go through the categories and make a named list
 				if ( ! empty( $terms ) && is_array( $terms ) ) {
@@ -44,11 +44,11 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 						} else {
 							$logger->warning(
 								'A product category attached to this product does not have a valid category and/or name.',
-								[
+								array(
 									'product_id' => $product->get_id(),
 									'term_id'    => $term->term_id,
 									'term_name'  => $term->name,
-								]
+								)
 							);
 						}
 					}
@@ -56,12 +56,12 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'There was an error getting all product categories.',
-					[
+					array(
 						'terms'          => $terms,
 						'product_id'     => $product->get_id(),
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
 						'thrown_message' => $t->getMessage(),
-					]
+					)
 				);
 			}
 
@@ -103,11 +103,11 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue retrieving tags',
-				[
+				array(
 					'product_id' => $product_id,
 					'message'    => $t->getMessage(),
 					'trace'      => $t->getTrace(),
-				]
+				)
 			);
 		}
 	}
@@ -158,14 +158,14 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 
 				$logger->warning(
 					'There was an error getting product image url.',
-					[
+					array(
 						'thrown_message' => $t->getMessage(),
 						'post'           => isset( $post ) ? $post : null,
 						'thumbnail_id'   => isset( $thumbnail_id ) ? $thumbnail_id : null,
 						'image_src'      => isset( $image_src ) ? $image_src : null,
 						'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}
@@ -217,11 +217,11 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 				$logger = new Logger();
 				$logger->warning(
 					'There was an error getting product URL.',
-					[
+					array(
 						'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 						'thrown_message' => $t->getMessage(),
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}
@@ -249,11 +249,11 @@ trait Activecampaign_For_Woocommerce_Order_Line_Item_Gathering {
 				$logger = new Logger();
 				$logger->warning(
 					'There was an error getting product sku.',
-					[
+					array(
 						'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 						'thrown_message' => $t->getMessage(),
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}

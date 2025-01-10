@@ -60,10 +60,10 @@ trait Activecampaign_For_Woocommerce_Contact_Data_Handler {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Contact data handler: Could not create contact in AC.',
-				[
+				array(
 					'email'   => $ecom_contact->get_email(),
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}

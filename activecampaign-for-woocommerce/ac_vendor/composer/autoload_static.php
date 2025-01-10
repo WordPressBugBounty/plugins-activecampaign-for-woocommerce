@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
+class ComposerStaticInitb3a86dbca57809eb1f7f59cd09a86bc3
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -370,9 +370,11 @@ class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
         'Activecampaign_For_Woocommerce_AC_Contact_Batch' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-ac-contact-batch.php',
         'Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-contact-batch-repository.php',
         'Activecampaign_For_Woocommerce_AC_Contact_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-contact-repository.php',
+        'Activecampaign_For_Woocommerce_AC_Whitelist' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-ac-whitelist.php',
         'Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities' => __DIR__ . '/../..' . '/includes/abandoned_carts/trait-activecampaign-for-woocommerce-abandoned-cart-utilities.php',
         'Activecampaign_For_Woocommerce_Ac_Features' => __DIR__ . '/../..' . '/includes/features/class-activecampaign-for-woocommerce-ac-features.php',
         'Activecampaign_For_Woocommerce_Ac_Features_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-features-repository.php',
+        'Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-tracking-code-repository.php',
         'Activecampaign_For_Woocommerce_Ac_Tracking_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ac-tracking-repository.php',
         'Activecampaign_For_Woocommerce_Activator' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce-activator.php',
         'Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-add-accepts-marketing-to-customer-meta-command.php',
@@ -397,6 +399,7 @@ class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
         'Activecampaign_For_Woocommerce_Cart_Events' => __DIR__ . '/../..' . '/includes/abandoned_carts/class-activecampaign-for-woocommerce-cart-events.php',
         'Activecampaign_For_Woocommerce_Cart_Updated_Event' => __DIR__ . '/../..' . '/includes/events/class-activecampaign-for-woocommerce-cart-updated-event.php',
         'Activecampaign_For_Woocommerce_Clear_User_Meta_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-clear-user-meta-command.php',
+        'Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-cofe-browse-session-repository.php',
         'Activecampaign_For_Woocommerce_Cofe_Ecom_Order' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-cofe-ecom-order.php',
         'Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-cofe-ecom-order-line-item.php',
         'Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Status' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-cofe-ecom-order-status.php',
@@ -428,6 +431,7 @@ class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
         'Activecampaign_For_Woocommerce_Ecom_Order_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-ecom-order-repository.php',
         'Activecampaign_For_Woocommerce_Ecom_Product' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-ecom-product.php',
         'Activecampaign_For_Woocommerce_Ecom_Product_Factory' => __DIR__ . '/../..' . '/includes/models/factories/class-activecampaign-for-woocommerce-ecom-product-factory.php',
+        'Activecampaign_For_Woocommerce_Enable_Tracking' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-enable-tracking.php',
         'Activecampaign_For_Woocommerce_Executable_Interface' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-executable-interface.php',
         'Activecampaign_For_Woocommerce_Features_Checker' => __DIR__ . '/../..' . '/includes/features/trait-activecampaign-for-woocommerce-features-checker.php',
         'Activecampaign_For_Woocommerce_Global_Utilities' => __DIR__ . '/../..' . '/includes/traits/trait-activecampaign-for-woocommerce-global-utilities.php',
@@ -476,6 +480,7 @@ class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
         'Activecampaign_For_Woocommerce_User_Meta_Service' => __DIR__ . '/../..' . '/includes/services/class-activecampaign-for-woocommerce-user-meta-service.php',
         'Activecampaign_For_Woocommerce_User_Registered_Event' => __DIR__ . '/../..' . '/includes/events/class-activecampaign-for-woocommerce-user-registered-event.php',
         'Activecampaign_For_Woocommerce_Utilities' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce-utilities.php',
+        'Activecampaign_For_Woocommerce_Whitelist_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-whitelist-repository.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'DeactivatorTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce-deactivator.php',
         'FileLoader' => __DIR__ . '/../..' . '/tests/helpers/FileLoader.php',
@@ -487,9 +492,9 @@ class ComposerStaticInitd69e46321af071c131c0b9948fe62b79
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitd69e46321af071c131c0b9948fe62b79::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd69e46321af071c131c0b9948fe62b79::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitd69e46321af071c131c0b9948fe62b79::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitb3a86dbca57809eb1f7f59cd09a86bc3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitb3a86dbca57809eb1f7f59cd09a86bc3::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitb3a86dbca57809eb1f7f59cd09a86bc3::$classMap;
 
         }, null, ClassLoader::class);
     }

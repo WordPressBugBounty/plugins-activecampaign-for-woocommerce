@@ -60,9 +60,9 @@ class Activecampaign_For_Woocommerce_Deactivator {
 			if ( function_exists( 'wp_get_scheduled_event' ) ) {
 				$this->logger->info(
 					'Verify that the scheduled event was removed...',
-					[
+					array(
 						'activecampaign_for_woocommerce_cart_updated_recurring_event' => wp_get_scheduled_event( 'activecampaign_for_woocommerce_cart_updated_recurring_event' ),
-					]
+					)
 				);
 			}
 		} else {
@@ -78,15 +78,13 @@ class Activecampaign_For_Woocommerce_Deactivator {
 			if ( function_exists( 'wp_get_scheduled_event' ) ) {
 				$this->logger->info(
 					'Verify that the scheduled event was removed...',
-					[
+					array(
 						'activecampaign_for_woocommerce_run_order_sync_event' => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME ),
-					]
+					)
 				);
 			}
 		} else {
 			$this->logger->info( 'Order sync event not scheduled. Nothing to deactivate.' );
 		}
-
 	}
-
 }

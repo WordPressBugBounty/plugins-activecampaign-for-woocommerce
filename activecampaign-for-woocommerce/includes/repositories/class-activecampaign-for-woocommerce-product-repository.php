@@ -30,7 +30,6 @@ class Activecampaign_For_Woocommerce_Product_Repository {
 		$this->client = $client;
 		// Prod/Staging:
 		$this->client->configure_client( null, 'ecom/graphql' );
-
 	}
 
 	/**
@@ -70,9 +69,9 @@ class Activecampaign_For_Woocommerce_Product_Repository {
 			} else {
 				$logger->warning(
 					'No valid models were provided to the product bulk sync.',
-					[
+					array(
 						'models' => $models,
-					]
+					)
 				);
 
 				return false;
@@ -80,11 +79,11 @@ class Activecampaign_For_Woocommerce_Product_Repository {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Product repository failed to send graphql data. Process must be ended.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'code'    => $t->getCode(),
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 			return false;
 		}
@@ -103,19 +102,19 @@ class Activecampaign_For_Woocommerce_Product_Repository {
 				'syncLegacyConnection',
 				'woocommerce',
 				$storage['external_id'],
-				[
+				array(
 					'id',
-				]
+				)
 			);
 
 			return $response;
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue trying to sync the COFE connection',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 
 			return false;

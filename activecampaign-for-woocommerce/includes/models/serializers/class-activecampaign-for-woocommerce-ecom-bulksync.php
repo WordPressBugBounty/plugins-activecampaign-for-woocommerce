@@ -33,11 +33,11 @@ class Activecampaign_For_Woocommerce_Ecom_Bulksync implements Ecom_Model, Has_Id
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'service'    => 'service',
 		'externalid' => 'externalid',
 		'customers'  => 'customers',
-	];
+	);
 
 	/**
 	 * The id.
@@ -84,7 +84,6 @@ class Activecampaign_For_Woocommerce_Ecom_Bulksync implements Ecom_Model, Has_Id
 	 */
 	public function set_customers( $customers ) {
 		$this->customers = $customers;
-
 	}
 
 	/**
@@ -158,13 +157,13 @@ class Activecampaign_For_Woocommerce_Ecom_Bulksync implements Ecom_Model, Has_Id
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue setting properties from serialized array on the ecom bulksync',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'passed_array'     => $array,
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
 					'ac_code'          => 'ECBS_159',
-				]
+				)
 			);
 		}
 	}

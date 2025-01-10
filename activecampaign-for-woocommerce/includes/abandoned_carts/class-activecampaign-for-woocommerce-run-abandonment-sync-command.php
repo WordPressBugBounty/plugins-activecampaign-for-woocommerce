@@ -715,10 +715,10 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 					// The emails don't match!
 					$this->logger->warning(
 						'The returned email does not match. This could cause an issue with this contact record. Do not save customer ID in this case.',
-						[
+						array(
 							'ac_email'       => $order_ac->get_email(),
 							'customer_email' => $customer->email,
-						]
+						)
 					);
 					$ab_data_save = array(
 						'synced_to_ac'   => self::STATUS_ABANDONED_CART_AUTO_SYNCED,
@@ -1058,12 +1058,12 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 				// cannot use this method on this install
 				$this->logger->debug(
 					'Primary time diff in hours could not be calculated for the abandoned cart.',
-					[
+					array(
 						'cartid'           => $cart->id,
 						'message'          => $t->getMessage(),
 						'trace'            => $t->getTrace(),
 						'last_access_time' => $cart->last_access_time,
-					]
+					)
 				);
 			}
 
@@ -1074,12 +1074,12 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 				// cannot use this method
 				$this->logger->debug(
 					'Secondary time diff in hours could not be calculated for the abandoned cart.',
-					[
+					array(
 						'cartid'           => $cart->id,
 						'message'          => $t->getMessage(),
 						'trace'            => $t->getTrace(),
 						'last_access_time' => $cart->last_access_time,
-					]
+					)
 				);
 			}
 			try {

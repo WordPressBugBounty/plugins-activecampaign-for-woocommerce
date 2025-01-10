@@ -1,7 +1,8 @@
 <?php
 
 /**
- * The file for the Activecampaign_for_Woocommerce_Ac_User_Repository class
+ * The override file for the Activecampaign_for_Woocommerce_Ac_User_Repository class when retrieving the tracking code
+ * Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository
  *
  * @link       https://www.activecampaign.com/
  * @since      1.0.0
@@ -27,13 +28,11 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @subpackage Activecampaign_For_Woocommerce/includes/repositories
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
-class Activecampaign_For_Woocommerce_Ac_Tracking_Repository implements Repository {
+class Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository extends Activecampaign_For_Woocommerce_Ac_Tracking_Repository {
 	use Interacts_With_Api;
 
-	const RESOURCE_NAME        = 'siteTracking';
-	const RESOURCE_NAME_PLURAL = 'siteTracking';
-	const ENDPOINT_NAME        = 'siteTracking';
-	const ENDPOINT_NAME_PLURAL = 'siteTracking';
+	const ENDPOINT_NAME        = 'siteTracking/code';
+	const ENDPOINT_NAME_PLURAL = 'siteTracking/code';
 
 	/**
 	 * The API client.
@@ -93,29 +92,14 @@ class Activecampaign_For_Woocommerce_Ac_Tracking_Repository implements Repositor
 	}
 
 	/**
-	 * Enables site tracking in AC. Must be a PUT request.
+	 * Finds a connection for current WooCommerce website.
 	 *
-	 * @return void
+	 * @return string
 	 */
-	public function enable_sitetracking() {
-		try {
-			$enable_tracking = new Activecampaign_For_Woocommerce_Enable_Tracking();
-			$enable_tracking->set_enabled( true );
-
-			$this->put_model_properties_in_api(
-				$this->client,
-				$enable_tracking
-			);
-		} catch (Throwable $t ) {
-			$logger = new Logger();
-			$logger->debug(
-				'There was an issue enabling site tracking in AC. It may need to be performed manually.',
-				array(
-					self::ENDPOINT_NAME,
-					$t->getMessage(),
-				)
-			);
-		}
+	public function find_sitetracking_code() {
+		return $this->get_result_code_from_api(
+			$this->client
+		);
 	}
 
 	public function create( $model ) {}

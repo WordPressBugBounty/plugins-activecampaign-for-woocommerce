@@ -30,10 +30,10 @@ use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, Synced_Status {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Order_Data_Gathering,
-		Activecampaign_For_Woocommerce_Contact_Data_Handler,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Contact_Data_Handler;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -147,11 +147,11 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data by wc_order_id.',
-				[
+				array(
 					'args'        => $args,
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
-				]
+				)
 			);
 			if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
 				$this->mark_order_as_incompatible( $wc_order_id );
@@ -176,9 +176,9 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				if ( ! isset( $ac_order ) || ! $ac_order ) {
 					$this->logger->warning(
 						'The order may have failed to sync to cofe',
-						[
+						array(
 							$ac_order,
-						]
+						)
 					);
 
 					$this->mark_order_as_failed( $wc_order_id );
@@ -197,10 +197,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
-				]
+				)
 			);
 		}
 	}
@@ -247,9 +247,9 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				if ( ! isset( $ac_order ) || ! $ac_order ) {
 					$this->logger->warning(
 						'The order may have failed to sync to cofe',
-						[
+						array(
 							$ac_order,
-						]
+						)
 					);
 
 					$this->mark_order_as_failed( $wc_order_id );
@@ -268,11 +268,11 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data by wc_order_id.',
-				[
+				array(
 					'args'        => $args,
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
-				]
+				)
 			);
 			if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
 				$this->mark_order_as_incompatible( $wc_order_id );
@@ -315,11 +315,11 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data.',
-				[
+				array(
 					'args'        => $args,
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
-				]
+				)
 			);
 			if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
 				$this->mark_order_as_incompatible( $wc_order_id );
@@ -341,10 +341,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_New_Order_Sync: There was an error processing the order data.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
-				]
+				)
 			);
 		}
 	}
@@ -366,18 +366,18 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			) {
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-					[ 'synced_to_ac' => self::STATUS_SYNCED ],
-					[
+					array( 'synced_to_ac' => self::STATUS_SYNCED ),
+					array(
 						'id' => $table_data[0]->id,
-					]
+					)
 				);
 			} elseif ( isset( $table_data[0]->id ) ) {
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-					[ 'synced_to_ac' => self::STATUS_SYNCED ],
-					[
+					array( 'synced_to_ac' => self::STATUS_SYNCED ),
+					array(
 						'id' => $table_data[0]->id,
-					]
+					)
 				);
 			}
 		}
@@ -424,11 +424,11 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				} catch ( Throwable $t ) {
 					$this->logger->warning(
 						'New Order Sync: This order failed to process via COFE code. It will not be synced.',
-						[
+						array(
 							'prep_order'  => $prep_order,
 							'message'     => $t->getMessage(),
 							'stack_trace' => $this->logger->clean_trace( $t->getTrace() ),
-						]
+						)
 					);
 				}
 
@@ -461,11 +461,11 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				} catch ( Throwable $t ) {
 					$this->logger->warning(
 						'New Order Sync: This recovered order failed to process via COFE code. It will not be synced.',
-						[
+						array(
 							'prep_order'  => $prep_order,
 							'message'     => $t->getMessage(),
 							'stack_trace' => $this->logger->clean_trace( $t->getTrace() ),
-						]
+						)
 					);
 				}
 
@@ -527,9 +527,9 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			} elseif (30 === $ecom_order ) {
 				$this->logger->debug(
 					'Ecom order builder returned miscat. This order is actually a subscription.',
-					[
+					array(
 						'order_id' => ! empty( $wc_order->get_id() ) ? $wc_order->get_id() : null,
-					]
+					)
 				);
 
 				return false;
@@ -570,10 +570,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			} catch ( Throwable $t ) {
 				$this->logger->info(
 					'Check synced order failed to get ID from ac_order',
-					[
+					array(
 						'unsynced_order' => $unsynced_order,
 						'ac_order'       => $ac_order,
-					]
+					)
 				);
 			}
 
@@ -593,10 +593,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Check synced order encountered an error trying to find record by external ID',
-					[
+					array(
 						'unsynced_order' => $unsynced_order,
 						'ac_order'       => $ac_order,
-					]
+					)
 				);
 			}
 
@@ -607,10 +607,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'customerid not set or threw an error',
-					[
+					array(
 						'unsynced_order' => $unsynced_order,
 						'ac_order'       => $ac_order,
-					]
+					)
 				);
 			}
 
@@ -624,10 +624,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Check synced order failed to get ID from ac_order',
-					[
+					array(
 						'unsynced_order' => $unsynced_order,
 						'ac_order'       => $ac_order,
-					]
+					)
 				);
 			}
 
@@ -641,14 +641,14 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Check synced order failed to get ID from ac_order',
-					[
+					array(
 						'unsynced_order' => $unsynced_order,
 						'ac_order'       => $ac_order,
-					]
+					)
 				);
 			}
 
-			$data = [ 'synced_to_ac' => self::STATUS_FAIL ];
+			$data = array( 'synced_to_ac' => self::STATUS_FAIL );
 
 			if ( isset( $ac_customer_id ) && ! empty( $ac_customer_id ) ) {
 				$data['ac_customer_id'] = $ac_customer_id;
@@ -670,17 +670,17 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			$wpdb->update(
 				$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 				$data,
-				[
+				array(
 					'id' => $unsynced_order->id,
-				]
+				)
 			);
 
 			if ( $wpdb->last_error ) {
 				$this->logger->error(
 					'Abandonement sync: There was an error updating an abandoned cart record as synced.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
-					]
+					)
 				);
 			}
 		}
@@ -782,9 +782,9 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			if ( $wpdb->last_error ) {
 				$this->logger->error(
 					'Abandonment sync: There was an error getting results for abandoned cart records.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
-					]
+					)
 				);
 			}
 
@@ -796,10 +796,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Order Sync: There was an error with preparing or getting order results.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -823,10 +823,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Check synced order failed to get ID from ac_order',
-				[
+				array(
 					'unsynced_order' => $email,
 					'ac_customer_id' => $ac_customer_id,
-				]
+				)
 			);
 		}
 
@@ -854,7 +854,13 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} else {
 			$wc_order->add_meta_data( 'ac_datahash', md5( json_encode( $wc_order->get_data() ) ), true );
 		}
-
-		$wc_order->save_meta_data();
+		$disable_meta_save = false;
+		$settings          = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
+		if (isset( $settings['disable_meta_save'] ) ) {
+			$disable_meta_save = $settings['disable_meta_save'];
+		}
+		if ( false === $disable_meta_save ) {
+			$wc_order->save_meta_data();
+		}
 	}
 }

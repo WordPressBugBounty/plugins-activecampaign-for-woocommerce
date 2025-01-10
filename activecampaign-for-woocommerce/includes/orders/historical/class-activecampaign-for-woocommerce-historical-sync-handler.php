@@ -11,13 +11,13 @@
  * @subpackage Activecampaign_For_Woocommerce/includes
  */
 
- use Activecampaign_For_Woocommerce_Historical_Sync_Prep as Historical_Prep;
- use Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe as Historical_Runner_Cofe;
- use Activecampaign_For_Woocommerce_Historical_Sync_Contacts as Historical_Contacts;
- use Activecampaign_For_Woocommerce_Logger as Logger;
- use Activecampaign_For_Woocommerce_Bulksync_Repository as Bulksync_Repository;
- use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Batch_Repository;
- use Activecampaign_For_Woocommerce_Cofe_Order_Repository as Cofe_Order_Repository;
+use Activecampaign_For_Woocommerce_Historical_Sync_Prep as Historical_Prep;
+use Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe as Historical_Runner_Cofe;
+use Activecampaign_For_Woocommerce_Historical_Sync_Contacts as Historical_Contacts;
+use Activecampaign_For_Woocommerce_Logger as Logger;
+use Activecampaign_For_Woocommerce_Bulksync_Repository as Bulksync_Repository;
+use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Batch_Repository;
+use Activecampaign_For_Woocommerce_Cofe_Order_Repository as Cofe_Order_Repository;
 
 class Activecampaign_For_Woocommerce_Historical_Sync_Handler {
 	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
@@ -100,10 +100,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Handler {
 			$logger = new Logger();
 			$logger->notice(
 				'An error was thrown in historical sync data prep',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 		}
 		$historical_prep->queue_prepared_records();
@@ -150,10 +150,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Handler {
 			$logger = new Logger();
 			$logger->notice(
 				'An error was thrown in historical sync sync process',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 		}
 

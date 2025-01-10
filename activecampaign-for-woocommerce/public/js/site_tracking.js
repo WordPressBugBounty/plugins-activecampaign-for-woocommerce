@@ -9,6 +9,10 @@ if (typeof(php_data.ac_settings.site_tracking) != "undefined" && 1 === php_data.
 
         vgo('setTrackByDefault', php_data.ac_settings.site_tracking_default == "1");
 
+        if (typeof trackcmp_email !== 'undefined') {
+            vgo('setEmail', trackcmp_email);
+        }
+
         if (typeof php_data.user_email !== 'undefined') {
             vgo('setEmail', php_data.user_email);
         }

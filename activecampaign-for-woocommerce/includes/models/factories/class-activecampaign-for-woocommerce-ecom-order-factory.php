@@ -24,8 +24,8 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Ecom_Order_Factory {
-	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * Product Factory
@@ -87,40 +87,38 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Factory {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Order Factory from_woocommerce: There was an error creating the order.',
-				[
+				array(
 					'message'       => $t->getMessage(),
 					'email'         => self::validate_object( $customer, 'get_email' ) ? $customer->get_email() : null,
 					'cart_contents' => self::validate_object( $cart, 'get_cart_contents' ) ? $cart->get_cart_contents() : null,
 					'trace'         => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
 		try {
-			$products = $this
-				->product_factory
-				->create_products_from_cart_contents( $cart->get_cart_contents() );
+			$products = $this->product_factory->create_products_from_cart_contents( $cart->get_cart_contents() );
 
 			if ( count( $products ) > 0 ) {
-				array_walk( $products, [ $ecom_order, 'push_order_product' ] );
+				array_walk( $products, array( $ecom_order, 'push_order_product' ) );
 			} else {
 				$logger->warning(
 					'Order Factory: Could not create product from cart contents.',
-					[
+					array(
 						'email'         => self::validate_object( $customer, 'get_email' ) ? $customer->get_email() : null,
 						'cart_contents' => self::validate_object( $cart, 'get_cart_contents' ) ? $cart->get_cart_contents() : null,
-					]
+					)
 				);
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Order Factory: Could not create product from cart contents.',
-				[
+				array(
 					'message'       => $t->getMessage(),
 					'email'         => self::validate_object( $customer, 'get_email' ) ? $customer->get_email() : null,
 					'cart_contents' => self::validate_object( $cart, 'get_cart_contents' ) ? $cart->get_cart_contents() : null,
 					'trace'         => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;

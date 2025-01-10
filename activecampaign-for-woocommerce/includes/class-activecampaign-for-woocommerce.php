@@ -35,6 +35,7 @@ use Activecampaign_For_Woocommerce_Customer_Utilities as Customer_Utilities;
 use Activecampaign_For_Woocommerce_Bulksync_Repository as Bulksync_Repository;
 use Activecampaign_For_Woocommerce_AC_Contact_Repository as Contact_Repository;
 use Activecampaign_For_Woocommerce_Product_Repository as Product_Repository;
+use Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository as Browse_Session_Repository;
 use Activecampaign_For_Woocommerce_Admin_WC_Order_Page as Admin_Order_Page;
 use Activecampaign_For_Woocommerce_Order_Action_Events as Order_Events;
 use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Batch_Repository;
@@ -57,6 +58,7 @@ use Activecampaign_For_Woocommerce_Admin_Subscription_Page as Admin_Subscription
  */
 class Activecampaign_For_Woocommerce {
 	use Activecampaign_For_Woocommerce_Features_Checker;
+
 	/**
 	 * The Admin class that handles all admin-facing code.
 	 *
@@ -239,6 +241,11 @@ class Activecampaign_For_Woocommerce {
 	private $product_repository;
 
 	/**
+	 * @var Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository
+	 */
+	private $browse_session_repository;
+
+	/**
 	 * @var Activecampaign_For_Woocommerce_Order_Action_Events
 	 */
 	private $order_events;
@@ -319,6 +326,7 @@ class Activecampaign_For_Woocommerce {
 		Bulksync_Repository $bulksync_repository,
 		Contact_Repository $contact_repository,
 		Product_Repository $product_repository,
+		Browse_Session_Repository $browse_session_repository,
 		Product_Sync $product_sync,
 		Admin_Order_Page $admin_order_page,
 		Subscription_Events $subscription_events,
@@ -349,6 +357,7 @@ class Activecampaign_For_Woocommerce {
 		$this->contact_repository                             = $contact_repository;
 		$this->product_sync                                   = $product_sync;
 		$this->product_repository                             = $product_repository;
+		$this->browse_session_repository                      = $browse_session_repository;
 		$this->admin_order_page                               = $admin_order_page;
 		$this->order_events                                   = new Order_Events();
 		$this->subscription_events                            = new Subscription_Events();
@@ -607,6 +616,7 @@ class Activecampaign_For_Woocommerce {
 		);
 
 		// needed for stripe
+		// TODO: Might need option to disable this
 		$this->loader->add_action(
 			'woocommerce_order_edit_status',
 			$this->order_events,
@@ -615,6 +625,7 @@ class Activecampaign_For_Woocommerce {
 			2
 		);
 
+		// TODO: Probably want to disable this if stripe is not installed and as a debug option
 		$this->loader->add_action(
 			'wc_gateway_stripe_process_response',
 			$this->order_events,
@@ -652,6 +663,7 @@ class Activecampaign_For_Woocommerce {
 			2
 		);
 
+		// TODO: Potentially disable this or trace it
 		$this->loader->add_action(
 			'activecampaign_for_woocommerce_admin_sync_single_order_status',
 			$this->new_order_sync,
@@ -1298,7 +1310,6 @@ class Activecampaign_For_Woocommerce {
 		} else {
 			$this->logger->debug( 'Checkbox actions cannot be run. checkbox_display_option and/or optin_checkbox_text are not defined or not available in your theme.' );
 		}
-
 	}
 
 	/**
@@ -1390,8 +1401,8 @@ class Activecampaign_For_Woocommerce {
 	private function is_configured() {
 		$ops = $this->admin->get_local_settings();
 		if ( ! $ops ||
-			 ! $ops['api_key'] ||
-			 ! $ops['api_url']
+			! $ops['api_key'] ||
+			! $ops['api_url']
 		) {
 			return false;
 		}

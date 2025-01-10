@@ -24,9 +24,10 @@ use Activecampaign_For_Woocommerce_Historical_Sync_Prep as Historical_Prep;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
-	use Activecampaign_For_Woocommerce_Admin_Utilities,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Historical_Utilities;
+	use Activecampaign_For_Woocommerce_Admin_Utilities;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Historical_Utilities;
+
 	/**
 	 * Fetches the historical sync page view.
 	 *
@@ -36,8 +37,7 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 		wp_enqueue_script( $this->plugin_name . 'historical-sync' );
 
 		require_once plugin_dir_path( __FILE__ )
-					 . 'views/activecampaign-for-woocommerce-historical-sync.php';
-
+					. 'views/activecampaign-for-woocommerce-historical-sync.php';
 	}
 
 	public function get_has_subscriptions() {
@@ -71,9 +71,9 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 					$data['historical_order_schedule']['error'] = true;
 					$logger->warning(
 						'Historical order sync is not scheduled.',
-						[
+						array(
 							'historical_order_schedule' => $historical_order_schedule,
-						]
+						)
 					);
 				}
 			} elseif ( function_exists( 'wp_next_scheduled' ) ) {
@@ -84,11 +84,11 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue getting the historical sync cron information.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
 					'ac_code' => 'AHS_80',
-				]
+				)
 			);
 		}
 
@@ -116,18 +116,18 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 
 				update_option(
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_SCHEDULED_STATUS_NAME,
-					[
+					array(
 						'orders'   => 'scheduled',
 						'contacts' => 'scheduled',
-					]
+					)
 				);
 			} else {
 				update_option(
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_SCHEDULED_STATUS_NAME,
-					[
+					array(
 						'orders'   => 'scheduled',
 						'contacts' => 'not selected',
-					]
+					)
 				);
 			}
 
@@ -136,18 +136,18 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 			wp_schedule_single_event(
 				time() + 10,
 				'activecampaign_for_woocommerce_prep_historical_data',
-				[]
+				array()
 			);
 
 			wp_send_json_success( 'Historical sync scheduled.' );
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue running the historical sync prep.',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'trace'    => $t->getTrace(),
 					'function' => 'schedule_bulk_historical_sync',
-				]
+				)
 			);
 			wp_send_json_error( 'There was an issue scheduling historical sync.' );
 		}
@@ -176,7 +176,7 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 			$stop_status = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_STOP_CHECK_NAME );
 
 			if ( is_null( $status ) ) {
-				$status = [];
+				$status = array();
 			}
 
 			// status types
@@ -207,10 +207,10 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue getting the historical sync status',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'function' => 'check_historical_sync_status',
-				]
+				)
 			);
 		}
 
@@ -251,9 +251,9 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'There was an issue collecting the historical sync counts from the ActiveCampaign table.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
@@ -300,16 +300,16 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 			);
 
 			// If the sync is scheduled but has not run
-			$data = (object) [
+			$data = (object) array(
 				'status' => $status,
-			];
+			);
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue getting the historical sync status',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'function' => 'check_historical_sync_status',
-				]
+				)
 			);
 		}
 
@@ -332,7 +332,7 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 			$user      = wp_get_current_user();
 
 			if ( ! empty( $stop_type ) ) {
-				if ( in_array( $stop_type, [ 2, '2' ], true ) ) {
+				if ( in_array( $stop_type, array( 2, '2' ), true ) ) {
 					delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_STOP_CHECK_NAME );
 					$status                = json_decode( get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_RUNNING_STATUS_NAME ), 'array' );
 					$status['stuck']       = false;
@@ -344,13 +344,13 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 
 				$logger->alert(
 					'Historical sync stop requested',
-					[
+					array(
 						'stop_type'         => $stop_type,
-						'requested by user' => [
+						'requested by user' => array(
 							'user_id'    => isset( $user->ID ) ? $user->ID : null,
 							'user_email' => isset( $user->data->user_email ) ? $user->data->user_email : null,
-						],
-					]
+						),
+					)
 				);
 
 				update_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_STOP_CHECK_NAME, true, false );
@@ -361,10 +361,10 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue stopping the historical sync.',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'function' => 'stop_historical_sync',
-				]
+				)
 			);
 		}
 	}

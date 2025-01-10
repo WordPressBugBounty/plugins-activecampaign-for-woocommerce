@@ -16,113 +16,113 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	/**
 	 * @var mixed The readable status mapping.
 	 */
-	private $readable_status_mapping = [
-		0  => [
+	private $readable_status_mapping = array(
+		0  => array(
 			'title' => 'Unsynced',
 			'help'  => 'This record has never been synced to ActiveCampaign.',
-		],
-		1  => [
+		),
+		1  => array(
 			'title' => 'Synced',
 			'help'  => 'This record has been synced to ActiveCampaign. This is currently its final state.',
-		],
-		2  => [
+		),
+		2  => array(
 			'title' => 'On Hold',
 			'help'  => 'This is an on hold record or on hold order. Skip it for now until an event marks it available to sync again.',
-		],
-		3  => [
+		),
+		3  => array(
 			'title' => 'Historical Sync Pending',
 			'help'  => 'Historical sync is pending for this record. It is in a scheduled state.',
-		],
-		4  => [
+		),
+		4  => array(
 			'title' => 'Historical Sync Preparation',
 			'help'  => 'This record is ready for historical sync preparation. It has been marked to sync but has not yet been scheduled.',
-		],
-		5  => [
+		),
+		5  => array(
 			'title' => 'Historical Sync Finished',
 			'help'  => 'Historical sync has finished this record but the sync may still be running.',
-		],
-		6  => [
+		),
+		6  => array(
 			'title' => 'Records Incompatible',
 			'help'  => 'Historical sync could not collect required data or could not find the customer/order records.',
-		],
-		7  => [
+		),
+		7  => array(
 			'title' => 'Subscription order',
 			'help'  => 'This is a subscription record. It will not get resynced without a direct change.',
-		],
-		8  => [
+		),
+		8  => array(
 			'title' => 'Refund order, unable to currently sync',
 			'help'  => 'One or more items on this record have been refunded. ActiveCampaign is unable to process them currently.',
-		],
-		9  => [
+		),
+		9  => array(
 			'title' => 'Sync Failed, will not try again',
 			'help'  => 'Sync for this record has permanently failed. Please check logs for explanation. This record will not be synced again until marked otherwise.',
-		],
+		),
 
-		20 => [
+		20 => array(
 			'title' => 'Abandoned cart unsynced',
 			'help'  => '',
-		],
-		21 => [
+		),
+		21 => array(
 			'title' => 'Abandoned cart synced',
 			'help'  => '',
-		],
-		22 => [
+		),
+		22 => array(
 			'title' => 'Abandoned cart manually synced',
 			'help'  => '',
-		],
-		23 => [
+		),
+		23 => array(
 			'title' => 'Abandoned cart recovered',
 			'help'  => '',
-		],
-		24 => [
+		),
+		24 => array(
 			'title' => 'Abandoned cart failed sync',
 			'help'  => '',
-		],
-		24 => [
+		),
+		25 => array(
 			'title' => 'Abandoned cart failed sync twice',
 			'help'  => '',
-		],
-		28 => [
+		),
+		28 => array(
 			'title' => 'Abandoned cart could not reach ActiveCampaign, retry',
 			'help'  => '',
-		],
-		29 => [
+		),
+		29 => array(
 			'title' => 'Abandoned cart could not reach ActiveCampaign permanently',
 			'help'  => '',
-		],
-		30 => [
+		),
+		30 => array(
 			'title' => 'Subscription unsynced',
 			'help'  => 'Record is stored but has not yet been synced.',
-		],
-		31 => [
+		),
+		31 => array(
 			'title' => 'Subscription synced',
 			'help'  => 'Record was last synced as a new recurring order.',
-		],
-		32 => [
+		),
+		32 => array(
 			'title' => 'Subscription pending historical sync',
 			'help'  => 'Record is ready to be synced and waiting in queue.',
-		],
-		33 => [
+		),
+		33 => array(
 			'title' => 'Subscription being prepared for historical sync',
 			'help'  => 'Record is waiting for validation and compatibility. It has been marked to sync but has not yet been scheduled.',
-		],
-		35 => [
+		),
+		35 => array(
 			'title' => 'Subscription historically synced',
 			'help'  => 'Record was last synced historically.',
-		],
-		38 => [
+		),
+		38 => array(
 			'title' => 'Subscription incompatible with ActiveCampaign',
 			'help'  => 'This subscription is incompatible with ActiveCampaign. It may be missing or have unusable required data.',
-		],
-		39 => [
+		),
+		39 => array(
 			'title' => 'Subscription failed sync to ActiveCampaign',
 			'help'  => 'This record failed to sync to ActiveCampaign. Please check logs to verify reason.',
-		],
-		86 => [
+		),
+		86 => array(
 			'title' => 'Record deleted from WooCommerce',
 			'help'  => 'This record may have been deleted from WooCommerce. It will be removed from the table.',
-		],
-	];
+		),
+	);
 
 	public function get_readable_sync_status( $status_ref ) {
 		$mappings = $this->readable_status_mapping;
@@ -151,13 +151,13 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_order_as_failed( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_FAIL ];
+		$data = array( 'synced_to_ac' => self::STATUS_FAIL );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 
@@ -168,13 +168,13 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_order_as_incompatible( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_SYNC_INCOMPATIBLE ];
+		$data = array( 'synced_to_ac' => self::STATUS_SYNC_INCOMPATIBLE );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 
@@ -185,16 +185,16 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_subscription_as_failed( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_SUBSCRIPTION_FAILED_SYNC ];
+		$data = array( 'synced_to_ac' => self::STATUS_SUBSCRIPTION_FAILED_SYNC );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 		$logger = new Logger();
-		$logger->info( 'The following subscription failed to sync', [ $wc_order_id ] );
+		$logger->info( 'The following subscription failed to sync', array( $wc_order_id ) );
 	}
 
 	/**
@@ -204,13 +204,13 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_subscription_as_incompatible( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_SUBSCRIPTION_INCOMPATIBLE ];
+		$data = array( 'synced_to_ac' => self::STATUS_SUBSCRIPTION_INCOMPATIBLE );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 
@@ -221,25 +221,25 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_order_as_historical_incompatible( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_INCOMPATIBLE ];
+		$data = array( 'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_INCOMPATIBLE );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 
 	public function mark_subscription_as_historical_incompatible( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_SUBSCRIPTION_INCOMPATIBLE ];
+		$data = array( 'synced_to_ac' => self::STATUS_SUBSCRIPTION_INCOMPATIBLE );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 	/**
@@ -249,13 +249,13 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_order_as_pending( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_QUEUE ];
+		$data = array( 'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_QUEUE );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 
@@ -267,24 +267,24 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-			[
+			array(
 				'synced_to_ac'   => $fail_step,
 				'abandoned_date' => $abandoned_cart->last_access_time,
-			],
-			[
+			),
+			array(
 				'id' => $abandoned_cart->id,
-			]
+			)
 		);
 
 		if ( $wpdb->last_error ) {
 			$logger->error(
 				'A database error was encountered attempting to update a record in the' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table.',
-				[
+				array(
 					'wpdb_last_error'  => $wpdb->last_error,
 					'suggested_action' => 'Please check the message for explanation and contact ActiveCampaign support if the issue repeats.',
 					'ac_code'          => 'TSSH_239',
 					'order_id'         => $abandoned_cart->id,
-				]
+				)
 			);
 		}
 	}
@@ -313,35 +313,35 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 
 			$wpdb->update(
 				$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-				[
+				array(
 					'synced_to_ac'   => $fail_step,
 					'abandoned_date' => $abandoned_cart->last_access_time,
-				],
-				[
+				),
+				array(
 					'id' => $abandoned_cart->id,
-				]
+				)
 			);
 
 			if ( $wpdb->last_error ) {
 				$logger->error(
 					'A database error was encountered attempting to update a record in the ' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table',
-					[
+					array(
 						'wpdb_last_error'  => $wpdb->last_error,
 						'suggested_action' => 'Please check the message for explanation and contact ActiveCampaign support if the issue repeats.',
 						'order_id'         => $abandoned_cart->id,
 						'ac_code'          => 'TSSH_284',
-					]
+					)
 				);
 			}
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'An exception was thrown while attempting to mark an abandoned cart as failed.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please check the message for explanation and contact ActiveCampaign support if the issue repeats.',
 					'ac_code'          => 'TSSH_295',
 					'trace'            => $t->getTrace(),
-				]
+				)
 			);
 		}
 	}
@@ -358,7 +358,7 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 
 			$synced_to_ac_implode = implode(
 				',',
-				[
+				array(
 					self::STATUS_HISTORICAL_SYNC_FINISH,
 					self::STATUS_HISTORICAL_SYNC_INCOMPATIBLE,
 					self::STATUS_HISTORICAL_SYNC_PREP,
@@ -373,7 +373,7 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 					self::STATUS_SUBSCRIPTION_FAILED_BILLING,
 					self::STATUS_FAIL,
 					self::STATUS_SYNCED,
-				]
+				)
 			);
 
 			// phpcs:disable
@@ -389,21 +389,21 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 				if ( $wpdb->last_error ) {
 					$logger->error(
 						'A database error was encountered while attempting to delete old historical sync records.',
-						[
+						array(
 							'wpdb_last_error' => $wpdb->last_error,
 							'ac_code'         => 'HCU_118',
-						]
+						)
 					);
 				}
 			}
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'An exception was encountered while preparing or getting historical sync results.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'HCU_133',
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}

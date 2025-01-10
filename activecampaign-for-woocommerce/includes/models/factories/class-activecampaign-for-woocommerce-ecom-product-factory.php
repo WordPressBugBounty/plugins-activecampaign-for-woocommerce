@@ -31,18 +31,18 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 	 */
 	public function create_products_from_cart_contents( $cart_contents ) {
 		try {
-			return array_map( [ $this, 'product_from_cart_content' ], $cart_contents );
+			return array_map( array( $this, 'product_from_cart_content' ), $cart_contents );
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
 			$logger->warning(
 				'Product factory could not create products from cart contents.',
-				[
+				array(
 					'suggested_action' => 'Verify this order has products attached. If this order is not syncing and it does contain products please contact ActiveCampaign support.',
 					'message'          => $t->getMessage(),
 					'ac_code'          => 'EPF_168',
 					'function'         => 'create_products_from_cart_contents',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -77,13 +77,13 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 			$logger = new Logger();
 			$logger->warning(
 				'Product factory could not create products from cart contents.',
-				[
+				array(
 					'suggested_action' => 'Verify this order has products attached. If this order is not syncing and it does contain products please contact ActiveCampaign support.',
 					'message'          => $t->getMessage(),
 					'ac_code'          => 'EPF_77',
 					'function'         => 'product_from_cart_content',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -163,12 +163,12 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an exception attempting to convert WC product data to AC product data.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'ac_code'          => 'EPF_162',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -209,12 +209,12 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an exception attempting to convert WC product data to AC product data.',
-				[
+				array(
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'message'          => $t->getMessage(),
 					'ac_code'          => 'EPF_207',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -252,12 +252,12 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 
 			$logger->warning(
 				'There was an exception attempting to convert WC product data to generic AC product data.',
-				[
+				array(
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'message'          => $t->getMessage(),
 					'ac_code'          => 'EPF_249',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -284,11 +284,11 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue cleaning the description field.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'ac_code'     => 'EPF_280',
 					'description' => $description,
-				]
+				)
 			);
 		}
 
@@ -314,7 +314,7 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 		$logger = new Logger();
 		if ( self::validate_object( $product, 'get_id' ) && ! empty( $product->get_id() ) ) {
 			$terms    = get_the_terms( $product->get_id(), 'product_cat' );
-			$cat_list = [];
+			$cat_list = array();
 			try {
 				// go through the categories and make a named list
 				if ( ! empty( $terms ) && is_array( $terms ) ) {
@@ -326,12 +326,12 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 						} else {
 							$logger->warning(
 								'A product category attached to this product does not have a valid category and/or name.',
-								[
+								array(
 									'product_id' => $product->get_id(),
 									'term_id'    => $term->term_id,
 									'term_name'  => $term->name,
 									'ac_code'    => 'EPF_322',
-								]
+								)
 							);
 						}
 					}
@@ -339,13 +339,13 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'There was an error getting all product categories.',
-					[
+					array(
 						'terms'          => $terms,
 						'product_id'     => $product->get_id(),
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
 						'thrown_message' => $t->getMessage(),
 						'ac_code'        => 'EPF_335',
-					]
+					)
 				);
 			}
 
@@ -392,7 +392,7 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 
 				$logger->warning(
 					'There was an error getting product image url.',
-					[
+					array(
 						'thrown_message' => $t->getMessage(),
 						'ac_code'        => 'EPF_386',
 						'post'           => isset( $post ) ? $post : null,
@@ -400,7 +400,7 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 						'image_src'      => isset( $image_src ) ? $image_src : null,
 						'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}
@@ -453,12 +453,12 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 				$logger = new Logger();
 				$logger->warning(
 					'There was an error getting product URL.',
-					[
+					array(
 						'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 						'ac_code'        => 'EPF_438',
 						'thrown_message' => $t->getMessage(),
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}
@@ -486,12 +486,12 @@ class Activecampaign_For_Woocommerce_Ecom_Product_Factory {
 				$logger = new Logger();
 				$logger->warning(
 					'There was an error getting product sku.',
-					[
+					array(
 						'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 						'ac_code'        => 'EPF_471',
 						'thrown_message' => $t->getMessage(),
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}

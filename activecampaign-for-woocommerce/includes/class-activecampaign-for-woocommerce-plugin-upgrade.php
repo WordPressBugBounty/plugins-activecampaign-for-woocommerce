@@ -27,6 +27,7 @@ use Activecampaign_For_Woocommerce_Ecom_Order_Repository as Order_Repository;
  */
 class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+
 	/**
 	 * The custom ActiveCampaign logger
 	 *
@@ -83,10 +84,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 
 		$this->logger->debug(
 			'Plugin Upgrade Check...',
-			[
+			array(
 				'Your AC Table Version'   => $installed_version,
 				'Plugin AC Table Version' => $this->get_plugin_db_version(),
-			]
+			)
 		);
 
 		if ( ! $installed_version ) {
@@ -95,10 +96,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} elseif ( $installed_version !== $this->get_plugin_db_version() ) {
 			$this->logger->notice(
 				'Plugin Upgrade: It looks like your installed version needs a table upgrade.',
-				[
+				array(
 					'Your AC Table Version'   => $installed_version,
 					'Plugin AC Table Version' => $this->get_plugin_db_version(),
-				]
+				)
 			);
 			$this->upgrade_table();
 		} elseif ( $installed_version === $this->get_plugin_db_version() ) {
@@ -135,20 +136,20 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 				} else {
 					$this->logger->error(
 						'Plugin Upgrade: There was an exception in creating or finding the ActiveCampaign table! ActiveCampaign will not properly function without this table.',
-						[
+						array(
 							'suggested_action' => 'Please verify the ' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table was created and that this user has table creation permission.',
 							'ac_code'          => 'PUCM_138',
-						]
+						)
 					);
 				}
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Plugin Upgrade: There was an exception in table verification...',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			$table_exists = false;
@@ -214,10 +215,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Plugin Upgrade install table: There was an exception creating the abandoned cart table. Please verify the plugin can create this table.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -267,10 +268,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an issue upgrading the table for v1.1.0.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 			$this->check_for_error( $wpdb );
 		}
@@ -280,10 +281,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 			if ( $wpdb->last_error ) {
 				$this->logger->notice(
 					'Update db check failed for some reason...',
-					[
+					array(
 						'wpdb_last_error'   => $wpdb->last_error,
 						'update to version' => $this->get_plugin_db_version(),
-					]
+					)
 				);
 			} else {
 				// Add the db version
@@ -293,10 +294,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an error upgrading the table for v1.1.1.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 			$this->check_for_error( $wpdb );
 		}
@@ -311,10 +312,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an error upgrading the table for v1.1.2.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 			$this->check_for_error( $wpdb );
 		}
@@ -335,10 +336,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an error upgrading the table for v1.1.3.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 			$this->check_for_error( $wpdb );
 		}
@@ -352,10 +353,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an error upgrading the table for v1.1.5.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 			$this->check_for_error( $wpdb );
 		}
@@ -373,9 +374,9 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		if ( $wpdb->last_error ) {
 			$this->logger->warning(
 				'Issue encountered on the table upgrade...',
-				[
+				array(
 					'message' => $wpdb->last_error,
-				]
+				)
 			);
 		}
 	}
@@ -465,9 +466,9 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 					$data,
-					[
+					array(
 						'id' => $abc_order->id,
-					]
+					)
 				);
 			}
 		}

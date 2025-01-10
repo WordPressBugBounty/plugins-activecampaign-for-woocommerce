@@ -128,10 +128,10 @@ class Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository implements Repo
 			$logger = new Logger();
 			$logger->debug(
 				'ac_contact_repository: Resource not found.',
-				[
+				array(
 					'endpoint' => $this->client->get_endpoint(),
 					'email'    => $email,
-				]
+				)
 			);
 		}
 
@@ -155,7 +155,6 @@ class Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository implements Repo
 		if ( isset( $result ) ) {
 			return $result;
 		}
-
 	}
 
 	/**

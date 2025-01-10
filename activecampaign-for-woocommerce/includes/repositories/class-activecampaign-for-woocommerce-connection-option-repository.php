@@ -113,6 +113,23 @@ class Activecampaign_For_Woocommerce_Connection_Option_Repository implements Rep
 	}
 
 	/**
+	 * Returns an array of results based on filtered search
+	 *
+	 * @param string $filter_name  The filter name.
+	 * @param string $filter_value The filter value.
+	 *
+	 * @return Ecom_Model
+	 * @throws Resource_Not_Found Thrown when the connection option could not be found.
+	 */
+	public function find_all_by_filter( $filter_name, $filter_value ) {
+		return $this->get_result_set_from_api_by_filter(
+			$this->client,
+			$filter_name,
+			$filter_value
+		);
+	}
+
+	/**
 	 * Creates a remote resource and updates the model with the returned data.
 	 *
 	 * @param Ecom_Model $model The model to be created remotely.

@@ -118,5 +118,5 @@ interface Activecampaign_For_Woocommerce_Synced_Status_Interface {
 	 *
 	 * @return mixed
 	 */
-	public function get_readable_sync_status( int $status);
+	public function get_readable_sync_status( int $status );
 }

@@ -57,11 +57,11 @@ trait Activecampaign_For_Woocommerce_Features_Checker {
 		if ( true !== in_array( $feature, array_keys( $features ), true ) ) {
 			$logger->warning(
 				'The feature being checked for feature may not be correct. Please contact ActiveCampaign as this may be a bug.',
-				[
+				array(
 					'in_feature_list' => in_array( $feature, $features, true ),
 					'feature_name'    => $feature,
 					'features_list'   => $features,
-				]
+				)
 			);
 
 			return false;

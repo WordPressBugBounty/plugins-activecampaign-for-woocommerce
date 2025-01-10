@@ -156,9 +156,9 @@ class Activecampaign_For_Woocommerce_Update_Cart_Command implements Activecampai
 			) {
 				$this->logger->debug_excess(
 					'Update Cart Command: Customer not logged in or email unknown. Do nothing.',
-					[
+					array(
 						'customer email' => self::validate_object( $this->customer, 'get_email' ) ? $this->customer->get_email() : null,
-					]
+					)
 				);
 
 				return false;
@@ -166,10 +166,10 @@ class Activecampaign_For_Woocommerce_Update_Cart_Command implements Activecampai
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Update Cart Command: There was an issue creating a customer or reading order, continuing.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'UCC_168',
-				]
+				)
 			);
 		}
 
@@ -185,11 +185,11 @@ class Activecampaign_For_Woocommerce_Update_Cart_Command implements Activecampai
 
 			$this->logger->notice(
 				'Update Cart: Could not process abandoned cart.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'stack_trace' => $this->logger->clean_trace( $t->getTrace() ),
 					'ac_code'     => 'UCC_207',
-				]
+				)
 			);
 
 			return false;
@@ -225,10 +225,10 @@ class Activecampaign_For_Woocommerce_Update_Cart_Command implements Activecampai
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'There was an issue trying to add additional info to user meta.',
-				[
+				array(
 					'class'   => 'Activecampaign_For_Woocommerce_Create_And_Save_Cart_Id_Command',
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}

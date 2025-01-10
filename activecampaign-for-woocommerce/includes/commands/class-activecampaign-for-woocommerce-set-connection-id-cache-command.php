@@ -67,7 +67,6 @@ class Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command implements 
 		} else {
 			$this->logger = $logger;
 		}
-
 	}
 
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
@@ -89,16 +88,16 @@ class Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command implements 
 		 * @var Connection $connection
 		 * @since 1.0.0
 		 */
-		 $connection = $this->get_connection();
+		$connection = $this->get_connection();
 
 		if ( ! $connection ) {
 			return;
 		}
 
-		 $id = $connection->get_id();
+		$id = $connection->get_id();
 
 		$this->admin->update_connection_storage(
-			[
+			array(
 				'connection_id' => $id,
 				'name'          => $connection->get_name(),
 				'external_id'   => $connection->get_externalid(),
@@ -106,10 +105,10 @@ class Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command implements 
 				'link_url'      => $connection->get_link_url(),
 				'logo_url'      => $connection->get_logo_url(),
 				'is_internal'   => $connection->get_is_internal(),
-			]
+			)
 		);
 
-		 $this->admin->update_storage_from_connection( $connection );
+		$this->admin->update_storage_from_connection( $connection );
 	}
 	// phpcs:enable
 
@@ -147,10 +146,10 @@ class Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command implements 
 			$stack_trace = $this->logger->clean_trace( $e->getTrace() );
 			$this->logger->notice(
 				'Attempting to get connection for ActiveCampaign encountered an issue.',
-				[
+				array(
 					'message'     => $message,
 					'stack trace' => $stack_trace,
-				]
+				)
 			);
 		}
 

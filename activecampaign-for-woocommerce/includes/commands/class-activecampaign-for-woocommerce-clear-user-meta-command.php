@@ -37,7 +37,7 @@ class Activecampaign_For_Woocommerce_Clear_User_Meta_Command implements Executab
 		if ( isset( $args[0] ) ) {
 			$additional_information = $args[0];
 		} else {
-			$additional_information = [];
+			$additional_information = array();
 		}
 
 		if (

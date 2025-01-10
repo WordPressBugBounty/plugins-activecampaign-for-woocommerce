@@ -26,8 +26,8 @@ use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Bat
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executable {
-	use Activecampaign_For_Woocommerce_Historical_Status,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Historical_Status;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * @var Activecampaign_For_Woocommerce_Logger
@@ -70,7 +70,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 		$last_record     = 0;
 		$start           = get_transient( 'activecampaign_for_woocommerce_hs_contacts' );
 
-		$this->logger->debug( 'Contact historical sync started.', [ 'start transient' => $start ] );
+		$this->logger->debug( 'Contact historical sync started.', array( 'start transient' => $start ) );
 
 		if ( null !== $start && false !== $start ) {
 			$last_record     = $start;
@@ -86,7 +86,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 			)
 		) ) {
 			// phpcs:enable
-			$bulk_contacts = [];
+			$bulk_contacts = array();
 			foreach ( $wc_customers as $wc_customer ) {
 				try {
 					$ac_contact = new AC_Contact();
@@ -118,15 +118,15 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 
 					if ( $ac_contact->get_email() ) {
 						$bulk_contacts[] = $ac_contact->serialize_to_array();
-						$synced_contacts ++;
+						++$synced_contacts;
 					}
 				} catch ( Throwable $t ) {
 					$this->logger->warning(
 						'A contact failed validation for historical sync contacts. This record will be skipped.',
-						[
+						array(
 							'message' => $t->getMessage(),
 							'ac_code' => 'hsc_127',
-						]
+						)
 					);
 				}
 
@@ -143,10 +143,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 
 				$this->logger->debug(
 					'Processing the batch customer object...',
-					[
+					array(
 						'batch'    => $batch,
 						'response' => $response,
-					]
+					)
 				);
 
 				if ( is_array( $response ) && isset( $response['type'] ) && 'error' === $response['type'] ) {
@@ -163,10 +163,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 				$synced_contacts -= count( $bulk_contacts );
 				$this->logger->debug(
 					'Historical sync problem encountered',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
-					]
+					)
 				);
 			}
 
@@ -186,9 +186,9 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 
 		$this->logger->debug(
 			'Contacts synced',
-			[
+			array(
 				'count' => $c,
-			]
+			)
 		);
 	}
 
@@ -196,7 +196,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 		wp_schedule_single_event(
 			time() + 50,
 			'activecampaign_for_woocommerce_run_historical_sync_contacts',
-			[ 'start' => $start ]
+			array( 'start' => $start )
 		);
 	}
 
@@ -214,7 +214,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 				$phone = $wpdb->get_var(
 					$wpdb->prepare(
 						'SELECT meta_value FROM ' . $wpdb->prefix . 'usermeta where meta_key = %s AND user_id = %d;',
-						[ 'billing_phone', $wc_customer->user_id ]
+						array( 'billing_phone', $wc_customer->user_id )
 					)
 				);
 
@@ -225,10 +225,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Historical Sync: There was an error trying to find phone number from usermeta.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( ( $t->getTrace() ) ),
-				]
+				)
 			);
 		}
 
@@ -237,7 +237,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 				$order_id = $wpdb->get_var(
 					$wpdb->prepare(
 						'SELECT order_id FROM ' . $wpdb->prefix . 'wc_order_stats where customer_id = %d ORDER BY order_id ASC LIMIT 1;',
-						[ $wc_customer->customer_id ]
+						array( $wc_customer->customer_id )
 					)
 				);
 
@@ -256,10 +256,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Historical Sync: There was an error trying to find phone number from order stats.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( ( $t->getTrace() ) ),
-				]
+				)
 			);
 		}
 

@@ -124,7 +124,7 @@ class Activecampaign_For_Woocommerce_Connection_Repository implements Repository
 			$filter_value
 		);
 
-		$connections = [];
+		$connections = array();
 		if ( isset( $response[0] ) ) {
 			foreach ( $response as $r ) {
 				$connection_model = new Connection();

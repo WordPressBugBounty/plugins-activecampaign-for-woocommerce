@@ -26,9 +26,9 @@ use Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command as Abandoned_Cart
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implements Activecampaign_For_Woocommerce_Executable_Interface {
-	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities,
-		Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Admin_Utilities;
+	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Admin_Utilities;
 
 	/**
 	 * The WC Cart
@@ -136,7 +136,6 @@ class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implement
 		} else {
 			$this->logger = $logger;
 		}
-
 	}
 
 	/**
@@ -160,12 +159,12 @@ class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implement
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Could not initialize the guest cart functions. Session, cart, or customer may be throwing an error.',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'customer' => wc()->customer,
 					'cart'     => wc()->cart,
 					'session'  => wc()->session,
-				]
+				)
 			);
 		}
 	}
@@ -192,21 +191,21 @@ class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implement
 			$abandoned_cart = new Abandoned_Cart();
 
 			if ( ! $abandoned_cart->init_data(
-				[
+				array(
 					'customer_email'      => $this->customer_email,
 					'customer_first_name' => $this->customer_first_name,
 					'customer_last_name'  => $this->customer_last_name,
-				]
+				)
 			) ) {
 				wp_send_json_error( 'Could not initialize abandoned cart data.' );
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Sync Guest Abandoned Cart: Some POST information was missing from the AJAX call.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 			wp_send_json_error( 'Guest abandoned cart was missing data and could not store.' );
 		}
@@ -224,10 +223,10 @@ class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implement
 		if ( is_user_logged_in() ) {
 			$this->logger->debug(
 				'Abandon cart guest sync: User is logged in, cannot perform guest sync',
-				[
+				array(
 					'is_user_logged_in' => is_user_logged_in(),
 					'current_user'      => wp_get_current_user(),
-				]
+				)
 			);
 
 			wp_send_json_error( 'AC Abandoned cart could not validate request.' );
@@ -245,10 +244,10 @@ class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implement
 		if ( empty( $this->customer_email ) ) {
 			$this->logger->debug(
 				'Abandon cart guest sync: Invalid customer email',
-				[
+				array(
 					'email'         => $this->customer_email,
 					'request email' => self::get_request_data( 'email' ),
-				]
+				)
 			);
 
 			wp_send_json_error( 'AC Abandoned cart experienced an issue retrieving the customer email.' );

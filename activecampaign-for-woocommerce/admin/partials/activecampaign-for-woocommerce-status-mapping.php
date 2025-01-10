@@ -25,7 +25,7 @@ try {
 	$activecampaign_for_woocommerce_wc_status_list    = wc_get_order_statuses();
 
 	// We automatically map all of these
-	$activecampaign_for_woocommerce_default_wc = [
+	$activecampaign_for_woocommerce_default_wc = array(
 		'pending',
 		'on-hold',
 		'processing',
@@ -48,7 +48,7 @@ try {
 		'wc-expired',
 		'expired',
 		'paused',
-	];
+	);
 
 	$activecampaign_for_woocommerce_ac_status_list = $activecampaign_for_woocommerce_ecom_order_status->get_all_ac_statuses();
 
@@ -61,10 +61,10 @@ try {
 	$activecampaign_for_woocommerce_logger = new Activecampaign_For_Woocommerce_Logger();
 	$activecampaign_for_woocommerce_logger->warning(
 		'AC Admin could not render status mapping. There may be an issue with order status mapping.',
-		[
+		array(
 			'message' => $t->getMessage(),
 			'trace'   => $t->getTrace(),
-		]
+		)
 	);
 }
 ?>

@@ -53,8 +53,7 @@ trait Activecampaign_For_Woocommerce_Admin_Product_Sync {
 		wp_enqueue_script( $this->plugin_name . 'product-sync' );
 
 		require_once plugin_dir_path( __FILE__ )
-					 . 'views/activecampaign-for-woocommerce-product-sync.php';
-
+					. 'views/activecampaign-for-woocommerce-product-sync.php';
 	}
 
 	public function get_product_sync_page_data() {
@@ -73,10 +72,10 @@ trait Activecampaign_For_Woocommerce_Admin_Product_Sync {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an issue loading the product sync page data.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'data'    => $data,
-				]
+				)
 			);
 		}
 

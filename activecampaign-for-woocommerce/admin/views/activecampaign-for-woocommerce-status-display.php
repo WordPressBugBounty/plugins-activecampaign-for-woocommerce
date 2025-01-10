@@ -664,8 +664,8 @@
 						<select class="wc-enhanced-select" name="log_file">
 							<?php foreach ( $activecampaign_for_woocommerce_status_data['logs'] as $activecampaign_for_woocommerce_log_key => $activecampaign_for_woocommerce_log_file ) : ?>
 								<?php
-								 $activecampaign_for_woocommerce_timestamp = filemtime( $activecampaign_for_woocommerce_status_data['logdir'] . $activecampaign_for_woocommerce_log_file );
-								$activecampaign_for_woocommerce_date       = sprintf(
+								$activecampaign_for_woocommerce_timestamp = filemtime( $activecampaign_for_woocommerce_status_data['logdir'] . $activecampaign_for_woocommerce_log_file );
+								$activecampaign_for_woocommerce_date      = sprintf(
 									/* translators: 1: last access date 2: last access time 3: last access timezone abbreviation */
 									__( '%1$s at %2$s %3$s', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 									wp_date( wc_date_format(), $activecampaign_for_woocommerce_timestamp ),

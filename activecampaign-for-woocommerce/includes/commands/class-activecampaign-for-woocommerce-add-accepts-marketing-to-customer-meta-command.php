@@ -80,10 +80,10 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 		if ( ! $this->nonce_is_valid() ) {
 			$this->logger->debug(
 				'Accepts Marketing: Invalid WooCommerce checkout nonce. The accepts marketing data may not have come from the WC checkout.',
-				[
+				array(
 					'order'        => $order->get_id(),
 					'order_number' => $order->get_order_number(),
-				]
+				)
 			);
 		}
 
@@ -100,18 +100,18 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 
 			$this->logger->debug(
 				'Updated order with accepts marketing meta data: ',
-				[
+				array(
 					'accepts_marketing' => $order->get_meta( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCEPTS_MARKETING_NAME ),
-				]
+				)
 			);
 		} else {
 			$this->logger->debug(
 				"Accepts Marketing: ID found for customer: $id. Setting accepts marketing on the customer record.",
-				[
+				array(
 					'customer_id'       => $id,
 					'order_id'          => $order->get_id(),
 					'accepts_marketing' => $accepts_marketing,
-				]
+				)
 			);
 
 			$this->update_order_accepts_marketing( $order, $accepts_marketing );
@@ -136,10 +136,10 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 		if ( ! $valid ) {
 			$this->logger->debug(
 				'Accepts Marketing: Invalid nonce. There may be an issue storing order values or orders may have been created through the API.',
-				[
+				array(
 					'checkout_nonce' => $checkout_nonce,
 					'nonce_value'    => $nonce_value,
-				]
+				)
 			);
 		}
 

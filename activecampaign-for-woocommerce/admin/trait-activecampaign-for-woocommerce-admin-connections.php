@@ -25,6 +25,7 @@ use Activecampaign_For_Woocommerce_Connection as Connection;
  */
 trait Activecampaign_For_Woocommerce_Admin_Connections {
 	use Activecampaign_For_Woocommerce_Data_Validation;
+
 	/**
 	 * Initialize the class and set its properties.
 	 */
@@ -75,10 +76,10 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 					wp_send_json_success( $connection->serialize_to_array() );
 				} elseif ( isset( $connection['type'] ) && 'error' === $connection['type'] ) {
 					wp_send_json_error(
-						[
+						array(
 							'type'    => 'error',
 							'message' => 'There was an error updating the connection. Please check your logs for details. (' . $connection['message'] . ')',
-						]
+						)
 					);
 				}
 			} else {
@@ -151,16 +152,16 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 				$connection = $this->connection_repository->create( $new_connection );
 				$logger->alert(
 					'create new connection',
-					[
+					array(
 						$connection->serialize_to_array(),
-					]
+					)
 				);
 			} elseif ( isset( $connection ) && $connection->get_externalid() ) {
 				wp_send_json_error(
-					[
+					array(
 						'type'    => 'error',
 						'message' => 'This URL already exists. Only one connection is allowed per unique Site URL. Please refresh the page or update the existing connection from the connection list.',
-					]
+					)
 				);
 
 			}
@@ -234,10 +235,10 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 			// There is an error happening here
 			if ( is_array( $result ) && isset( $result['type'] ) && 'error' === $result['type'] ) {
 				wp_send_json_error(
-					[
+					array(
 						'type'    => 'error',
 						'message' => 'There was an error deleting the connection. Please check your logs for details.',
-					]
+					)
 				);
 			} else {
 				wp_send_json_success( 'Connection deleted' );
@@ -302,13 +303,12 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 			$logger = new Logger();
 			$logger->error(
 				'The connection could not be set from the provided field data.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please address the errors stated in the logs and try again. If this problem repeats please contact ActiveCampaign support.',
 					'ac_code'          => 'ADCO_293',
-				]
+				)
 			);
 		}
 	}
-
 }

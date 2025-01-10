@@ -56,10 +56,10 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: wc_get_order threw an error on the order object. ',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'order class' => get_class( $order ),
-				]
+				)
 			);
 		}
 
@@ -75,9 +75,9 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: There was an issue parsing this order as an array.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
@@ -90,10 +90,10 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: A final WC_Order object failed to retrieve.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'order'   => self::validate_object( $wc_order, 'get_data' ) ? $wc_order->get_data() : null,
-				]
+				)
 			);
 		}
 
@@ -112,17 +112,17 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: Could not create a new WC_Order from any known data type variation.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
 		$this->logger->warning(
 			'Order Data Gathering: A WC_Order object could not be retrieved from WooCommerce. This order may be missing or deleted.',
-			[
+			array(
 				'order' => $order,
-			]
+			)
 		);
 
 		return false;
@@ -151,10 +151,10 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: wc_get_subscription threw an error on the order object. ',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'order class' => get_class( $subscription ),
-				]
+				)
 			);
 		}
 
@@ -170,9 +170,9 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: There was an issue parsing this subscription as an array.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
@@ -191,17 +191,17 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Order Utilities: Could not create a new WC_Order from any known data type variation.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
 		$this->logger->warning(
 			'Order Data Gathering: A WC_Subscription object could not be retrieved from WooCommerce. This order may be missing or deleted.',
-			[
+			array(
 				'subscription' => $subscription,
-			]
+			)
 		);
 
 		return false;
@@ -211,7 +211,7 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		if (
 			self::validate_object( $wc_order, 'get_id' ) &&
 			self::validate_object( $wc_order, 'get_data' ) &&
-			 ! empty( $wc_order->get_id() )
+			! empty( $wc_order->get_id() )
 		) {
 			return true;
 		}
@@ -240,11 +240,11 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 	 * @return array
 	 */
 	public function get_coupons_from_order( $wc_order ) {
-		$ecom_coupons = [];
+		$ecom_coupons = array();
 		$wc_coupons   = $wc_order->get_coupons();
 
 		if ( isset( $wc_coupons ) && count( $wc_coupons ) > 0 ) {
-			$ecom_coupons = [];
+			$ecom_coupons = array();
 
 			foreach ( $wc_coupons as $coupon ) {
 				$ecom_coupons[] = $this->get_coupon_data( $coupon );
@@ -281,11 +281,11 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 			$logger = new Logger();
 			$logger->notice(
 				'There was an issue retrieving coupon data for an order.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'coupon'  => $coupon,
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -299,7 +299,7 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 	 */
 	public function is_failed_order( $status ) {
 		if ( ! empty( $status ) ) {
-			$failed_statuses = [ 'wc-cancelled', 'wc-failed', 'failed', 'cancelled' ];
+			$failed_statuses = array( 'wc-cancelled', 'wc-failed', 'failed', 'cancelled' );
 
 			return in_array( $status, $failed_statuses, true );
 		}
@@ -316,7 +316,7 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 	 */
 	public function verify_order_status( $status ) {
 		if ( ! empty( $status ) ) {
-			$accepted_statuses = [ 'completed', 'processing', 'wc-completed', 'wc-processing' ];
+			$accepted_statuses = array( 'completed', 'processing', 'wc-completed', 'wc-processing' );
 
 			return in_array( $status, $accepted_statuses, true );
 		}
@@ -382,9 +382,9 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 			if ( $wpdb->last_error ) {
 				$logger->error(
 					'Abandonment sync: There was an error getting results for abandoned cart records.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
-					]
+					)
 				);
 			}
 
@@ -395,10 +395,10 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'Abandonment Sync: There was an error with preparing or getting abandoned cart results.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -431,9 +431,9 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 			if ( $wpdb->last_error ) {
 				$logger->error(
 					'Abandonment sync: There was an error getting results for abandoned cart records.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
-					]
+					)
 				);
 			}
 
@@ -444,10 +444,10 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'Abandonment Sync: There was an error with preparing or getting abandoned cart results.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 

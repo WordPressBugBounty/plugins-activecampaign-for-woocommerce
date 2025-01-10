@@ -31,7 +31,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'category'       => 'category',
 		'order_id'       => 'storeOrderId', // is this id?
 		'name'           => 'name', // same
@@ -48,7 +48,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 		'brand'          => 'brand',
 		'tags'           => 'tags',
 
-	];
+	);
 
 	// normalizedOrderStatus
 
@@ -360,7 +360,6 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 		} else {
 			$this->tags = null;
 		}
-
 	}
 
 	/**
@@ -464,9 +463,9 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 			} else {
 				$logger->warning(
 					'Price is missing for this line item',
-					[
+					array(
 						$data,
-					]
+					)
 				);
 			}
 
@@ -475,9 +474,9 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 			} else {
 				$logger->warning(
 					'Quantity is missing for this line item',
-					[
+					array(
 						$data,
-					]
+					)
 				);
 			}
 		}

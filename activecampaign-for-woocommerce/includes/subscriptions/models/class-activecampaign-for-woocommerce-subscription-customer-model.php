@@ -24,21 +24,21 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Subscription_Customer_Model implements Ecom_Model, Has_Id {
-	use Api_Serializable,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Api_Serializable;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * The API mappings for the API_Serializable trait.
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'first_name'        => 'firstName',
 		'last_name'         => 'lastName',
 		'accepts_marketing' => 'acceptsMarketing',
 		'company'           => 'company',
 		'phone'             => 'phone',
-	];
+	);
 
 	/**
 	 * The id.
@@ -223,11 +223,11 @@ class Activecampaign_For_Woocommerce_Subscription_Customer_Model implements Ecom
 				} catch ( Throwable $t ) {
 					$logger->warning(
 						'Could not establish WC_Customer object from the subscription',
-						[
+						array(
 							'message' => $t->getMessage(),
 							'ac_code' => 'SCM_228',
 							'trace'   => $t->getTrace(),
-						]
+						)
 					);
 				}
 			}
@@ -243,11 +243,11 @@ class Activecampaign_For_Woocommerce_Subscription_Customer_Model implements Ecom
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'Could not get user data from subscription.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'ac_code' => 'SCM_248',
 						'trace'   => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 
@@ -266,11 +266,11 @@ class Activecampaign_For_Woocommerce_Subscription_Customer_Model implements Ecom
 				} catch ( Throwable $t ) {
 					$logger->warning(
 						'There was a problem preparing customer data for a record.',
-						[
+						array(
 							'message' => $t->getMessage(),
 							'ac_code' => 'SCM_271',
 							'trace'   => $logger->clean_trace( $t->getTrace() ),
-						]
+						)
 					);
 
 					return false;
@@ -279,11 +279,11 @@ class Activecampaign_For_Woocommerce_Subscription_Customer_Model implements Ecom
 		} else {
 			$logger->warning(
 				'Could not create an ecom customer from this subscription because the subscription may not exist.',
-				[
+				array(
 					'suggested_action' => 'Verify this subscription exists, otherwise you can ignore this issue.',
 					'order'            => $order,
 					'ac_code'          => 'SCM_285',
-				]
+				)
 			);
 		}
 	}

@@ -39,5 +39,4 @@ interface Activecampaign_For_Woocommerce_Ecom_Model_Interface {
 	 * @return mixed The id for the model.
 	 */
 	public function get_id();
-
 }

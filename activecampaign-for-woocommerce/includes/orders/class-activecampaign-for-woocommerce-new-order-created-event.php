@@ -24,8 +24,8 @@ use Activecampaign_For_Woocommerce_Customer_Utilities as Customer_Utilities;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_New_Order_Created_Event {
-	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * The WC Customer
@@ -96,7 +96,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		} else {
 			$this->logger->debug(
 				'New order sync cannot process this request...',
-				[ $args ]
+				array( $args )
 			);
 		}
 	}
@@ -136,21 +136,21 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		if ( isset( $wc_order ) && self::validate_object( $wc_order, 'get_id' ) ) {
 			$this->logger->debug(
 				'New order event triggered',
-				[
+				array(
 					$order_id,
-				]
+				)
 			);
 
 			$this->checkout_completed( $order_id, $wc_order );
 		} else {
 			$this->logger->error(
 				'A new order was created but the record could not be processed or validated. Processing for this new order cannot be performed.',
-				[
+				array(
 					'suggested_action' => 'Check if the order has been created and properly triggered WooCommerce order hooks. If this is an API order or your store uses a third party payment process then this may not process through this method.',
 					'ac_code'          => 'NOCE_130',
 					'wc_order'         => $wc_order,
 					$order_id,
-				]
+				)
 			);
 		}
 	}
@@ -168,11 +168,11 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		} else {
 			$this->logger->error(
 				'A new order was created but the record could not be processed or validated. Processing for this new order cannot be performed.',
-				[
+				array(
 					'suggested_action' => 'Check if the order has been created. If this is an API order or your store uses a third party payment process then this may not process through this method.',
 					'ac_code'          => 'NOCE_140',
 					$order,
-				]
+				)
 			);
 
 			return;
@@ -196,10 +196,10 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 					foreach ( $subscriptions as $subscription ) {
 						$this->logger->debug(
 							'1 each subscription on the order hopefully processed right.',
-							[
+							array(
 								'subscription' => $subscription,
 								'data'         => $subscription->get_data(),
-							]
+							)
 						);
 					}
 				}
@@ -211,10 +211,10 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 					foreach ( $subscriptions as $subscription ) {
 						$this->logger->debug(
 							'2 each subscription on the order hopefully processed right.',
-							[
+							array(
 								'subscription' => $subscription,
 								'data'         => $subscription->get_data(),
-							]
+							)
 						);
 					}
 				}
@@ -353,7 +353,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'An exception was thrown while attempting to retrieve data from the ActiveCampaign table.',
-				[
+				array(
 					'message'            => $t->getMessage(),
 					'suggested_action'   => 'Verify that the ' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' exists and is both writable and readable.',
 					'ac_code'            => 'NOCE_244',
@@ -361,7 +361,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 					'abandoned_cart_id'  => isset( $abandoned_cart_id ) ? $abandoned_cart_id : null,
 					'externalcheckoutid' => isset( $externalcheckoutid ) ? $externalcheckoutid : null,
 					'trace'              => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -373,7 +373,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				return;
 			}
 
-			$store_data = [
+			$store_data = array(
 				'synced_to_ac'                          => 0,
 				'customer_id'                           => $customer_data['id'],
 				'customer_email'                        => $customer_data['email'],
@@ -388,18 +388,18 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				'cart_ref_json'                         => null,
 				'cart_totals_ref_json'                  => null,
 				'removed_cart_contents_ref_json'        => null,
-			];
+			);
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'During checkout completion an exception was thrown while attempting to form the order data.',
-				[
+				array(
 					'message'           => $t->getMessage(),
 					'suggested_action'  => 'Check the message for explanation of the error and contact ActiveCampaign support if necessary.',
 					'ac_code'           => 'NOCE_283',
 					'abandoned_cart_id' => isset( $abandoned_cart_id ) ? $abandoned_cart_id : null,
 					'stored_id'         => isset( $stored_id ) ? $stored_id : null,
 					'trace'             => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			$store_data = null;
@@ -410,9 +410,9 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		if ( ! isset( $store_data ) ) {
 			$this->logger->warning(
 				'New order store data is missing. This should not happen. Something went wrong.',
-				[
+				array(
 					'order_id' => $order_id,
-				]
+				)
 			);
 			return;
 		}
@@ -422,9 +422,9 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 					$store_data,
-					[
+					array(
 						'id' => $stored_id,
-					]
+					)
 				);
 
 				$this->schedule_sync_job( $order_id );
@@ -433,9 +433,9 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 					$store_data,
-					[
+					array(
 						'id' => $abandoned_cart_id,
-					]
+					)
 				);
 			} else {
 				if ( ! isset( $stored_id ) ) {
@@ -452,24 +452,24 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			if ( $wpdb->last_error ) {
 				$this->logger->error(
 					'WordPress encountered an error when creating/updating an abandoned cart record. This order may not properly transition from an abandoned cart to an order. This may be falsely reported as an abandoned cart or result in a duplicate record in ActiveCampaign.',
-					[
+					array(
 						'wpdb_last_error'  => isset( $wpdb->last_error ) ? $wpdb->last_error : null,
 						'stored_id'        => isset( $stored_id ) ? $stored_id : null,
 						'suggested_action' => 'Please verify there is read/write access on the ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME table and contact support if issues persist.',
 						'ac_code'          => 'NOCE_326',
-					]
+					)
 				);
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'An exception was thrown while attempting to save order data from a finished order checkout.',
-				[
+				array(
 					'message'           => $t->getMessage(),
 					'suggested_action'  => 'Check the message for error details and contact ActiveCampaign support if the issue persists.',
 					'ac_code'           => 'NOCE_337',
 					'abandoned_cart_id' => isset( $stored_id ) ? $stored_id : null,
 					'trace'             => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -491,19 +491,19 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			} elseif ( function_exists( 'wp_get_scheduled_event' ) ) {
 				$logger->debug_excess(
 					'Recurring order sync already scheduled',
-					[
+					array(
 						'time_now' => time(),
 						'myevent'  => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME ),
-					]
+					)
 				);
 
 			}
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'There was a thrown issue scheduling the recurring order sync event.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}
@@ -515,36 +515,35 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 	 */
 	private function schedule_sync_job( $row_id ) {
 		try {
-			if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'row_id' => $row_id ] ) ) {
+			if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'row_id' => $row_id ) ) ) {
 				wp_schedule_single_event(
 					time() + 10,
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME,
-					[
+					array(
 						'row_id' => $row_id,
-					]
+					)
 				);
 			}
 
 			$this->logger->debug(
 				'Schedule finished order for immediate sync.',
-				[
+				array(
 					'row_id'       => $row_id,
 					'current_time' => time() + 10,
-					'schedule'     => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'row_id' => $row_id ] ),
-				]
+					'schedule'     => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'row_id' => $row_id ) ),
+				)
 			);
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
 			$logger->warning(
 				'There was a thrown error scheduling the immediate sync event.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'NOCE_418',
-				]
+				)
 			);
 		}
 
 		$this->schedule_recurring_order_sync_task();
 	}
-
 }

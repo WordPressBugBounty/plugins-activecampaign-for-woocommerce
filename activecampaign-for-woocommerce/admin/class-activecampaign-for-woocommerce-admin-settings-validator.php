@@ -76,7 +76,7 @@ class Activecampaign_For_Woocommerce_Admin_Settings_Validator {
 	 * @return array
 	 */
 	public function validate( $new_data, $current_data, $api_only = false ) {
-		$this->errors = [];
+		$this->errors = array();
 		try {
 			if ( ! $api_only ) {
 
@@ -98,13 +98,13 @@ class Activecampaign_For_Woocommerce_Admin_Settings_Validator {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Admin Settings: There was an issue validating the ActiveCampaign developer API.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please verify your API key on the ActiveCampaign developer page.',
 					'new data'         => $new_data,
 					'current_data'     => $current_data,
 					'ac_code'          => 'ASV_99',
-				]
+				)
 			);
 		}
 	}

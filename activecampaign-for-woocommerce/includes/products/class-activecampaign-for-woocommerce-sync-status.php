@@ -240,5 +240,4 @@ class Activecampaign_For_Woocommerce_Sync_Status {
 			);
 		}
 	}
-
 }

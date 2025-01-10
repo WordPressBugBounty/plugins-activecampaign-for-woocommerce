@@ -154,25 +154,25 @@ class Activecampaign_For_Woocommerce_User_Registered_Event implements Triggerabl
 					$new_customer->set_first_name( $this->customer_first_name );
 					$new_customer->set_last_name( $this->customer_last_name );
 				} catch ( Throwable $t ) {
-					$this->logger->debug( 'Registered event: New customer creation exception ', [ 'message' => $t->getMessage() ] );
+					$this->logger->debug( 'Registered event: New customer creation exception ', array( 'message' => $t->getMessage() ) );
 
 					return false;
 				}
 
 				try {
 					// Try to create the new customer in AC
-					$this->logger->debug( 'Registered event: Creating customer in ActiveCampaign. ', [ 'new_customer_data' => wp_json_encode( $new_customer->serialize_to_array() ) ] );
+					$this->logger->debug( 'Registered event: Creating customer in ActiveCampaign. ', array( 'new_customer_data' => wp_json_encode( $new_customer->serialize_to_array() ) ) );
 
 					$this->customer_ac = $this->customer_repository->create( $new_customer );
 
 					return true;
 				} catch ( Throwable $t ) {
-					$this->logger->debug( 'Registered event: guest customer creation exception ', [ 'message' => $t->getMessage() ] );
+					$this->logger->debug( 'Registered event: guest customer creation exception ', array( 'message' => $t->getMessage() ) );
 
 					return false;
 				}
 			} catch ( Throwable $t ) {
-				$this->logger->debug( 'Registered event: Guest find customer exception ', [ 'message' => $t->getMessage() ] );
+				$this->logger->debug( 'Registered event: Guest find customer exception ', array( 'message' => $t->getMessage() ) );
 
 				return false;
 			}
@@ -182,5 +182,4 @@ class Activecampaign_For_Woocommerce_User_Registered_Event implements Triggerabl
 			return false;
 		}
 	}
-
 }

@@ -25,15 +25,15 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, Has_Email {
-	use Api_Serializable,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Api_Serializable;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * The API mappings for the API_Serializable trait.
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'connectionid' => 'connectionid',
 		'externalid'   => 'externalid',
 		'email'        => 'email',
@@ -44,7 +44,7 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 		'last_name_c'  => 'last_name',
 		'phone'        => 'phone',
 		'tags'         => 'tags',
-	];
+	);
 
 	/**
 	 * The connection id.
@@ -303,7 +303,7 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 		if ( isset( $this->tags ) && ! empty( $this->tags ) && ! in_array( $tag, $this->tags, true ) ) {
 			$this->tags[] = $tag;
 		} else {
-			$this->tags = [ $tag ];
+			$this->tags = array( $tag );
 		}
 	}
 
@@ -358,9 +358,9 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 				} catch ( Throwable $t ) {
 					$logger->notice(
 						'AC Contact: Could not establish WC_Customer object',
-						[
+						array(
 							'message' => $t->getMessage(),
-						]
+						)
 					);
 				}
 			}
@@ -379,10 +379,10 @@ class Activecampaign_For_Woocommerce_AC_Contact implements Ecom_Model, Has_Id, H
 				} catch ( Throwable $t ) {
 					$logger->warning(
 						'AC Contact: There was a problem preparing data for a record.',
-						[
+						array(
 							'customer_email' => self::validate_object( $wc_order_or_subscription, 'get_billing_email' ) ? $wc_order_or_subscription->get_billing_email() : null,
 							'message'        => $t->getMessage(),
-						]
+						)
 					);
 
 				}

@@ -25,8 +25,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, Has_Email {
-	use Activecampaign_For_Woocommerce_Data_Validation ,
-		Api_Serializable {
+	use Activecampaign_For_Woocommerce_Data_Validation, Api_Serializable {
 		serialize_to_array as serialize_all_but_products_to_array;
 		set_properties_from_serialized_array as set_all_but_products_as_properties_from_serialized_array;
 	}
@@ -36,7 +35,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'abandoned_date'        => 'abandonedDate',
 		'connectionid'          => 'connectionid',
 		'customerid'            => 'customerid',
@@ -58,25 +57,25 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 		'shipping_amount'       => 'shippingAmount',
 		'shipping_method'       => 'shippingMethod',
 		'tax_amount'            => 'taxAmount',
-	];
+	);
 
 	/**
 	 * The mapping for the discount array.
 	 *
 	 * @var array The discount mapping array.
 	 */
-	private $discount_mappings = [
+	private $discount_mappings = array(
 		'name'            => 'name',
 		'type'            => 'type',
 		'discount_amount' => 'discountAmount',
-	];
+	);
 
 	/**
 	 * The required fields for an ecom order
 	 *
 	 * @var array
 	 */
-	private $required_fields = [
+	private $required_fields = array(
 		'email',
 		'total_price',
 		'source',
@@ -85,7 +84,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 		'customerid',
 		'currency',
 		'external_created_date',
-	];
+	);
 
 	/**
 	 * The abandoned date.
@@ -169,7 +168,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 	 *
 	 * @var Activecampaign_For_Woocommerce_Ecom_Product[]
 	 */
-	private $order_products = [];
+	private $order_products = array();
 
 	/**
 	 * The source (1 or 0).
@@ -689,13 +688,13 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue setting properties from serialized array on the ecom order',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'passed_array'     => $array,
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
 					'ac_code'          => 'EOM_688',
-				]
+				)
 			);
 		}
 	}
@@ -712,7 +711,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 		try {
 			$array = $this->serialize_all_but_products_to_array();
 
-			$order_products = [];
+			$order_products = array();
 
 			foreach ( $this->order_products as $order_product ) {
 				$order_products[] = $order_product->serialize_to_array();
@@ -725,11 +724,11 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 			$logger = new Logger();
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Ecom_Order: The serialize_to_array function encountered an issue. A valid order object may not exist.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 					'ac_code' => 'EOM_723',
-				]
+				)
 			);
 
 			return null;
@@ -748,11 +747,11 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 			if ( empty( $this->email ) ) {
 				$logger->error(
 					'Email is missing from this order. It will not be synced.',
-					[
+					array(
 						'email'            => $this->email,
 						'suggested_action' => 'Please verify this order has an email address related to it.',
 						'ac_code'          => 'EOM_746',
-					]
+					)
 				);
 
 				return false;
@@ -762,11 +761,11 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 			if ( empty( $this->externalcheckoutid ) && empty( $this->externalid ) ) {
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Ecom_Order: No external ID has been set. This is required.',
-					[
+					array(
 						'email'        => $this->email,
 						'order_number' => $this->order_number,
 						'ac_code'      => 'EOM_759',
-					]
+					)
 				);
 
 				return false;
@@ -777,7 +776,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 				) {
 					$logger->error(
 						'Source must be a 0 or 1. This record may have the wrong source set.',
-						[
+						array(
 							'suggested_action'  => 'There may be an issue with processing the data. Please contact support if this continues to be an issue.',
 							'failed_field_name' => $field,
 							'connectionid'      => $this->connectionid,
@@ -787,7 +786,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 							'order_number'      => $this->order_number,
 							'customerid'        => $this->customerid,
 							'ac_code'           => 'EOM_774',
-						]
+						)
 					);
 
 					return false;
@@ -796,7 +795,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 				if ( 'total_price' === $field && ! isset( $this->{$field} ) ) {
 					$logger->warning(
 						'Total price is not valid on this order.',
-						[
+						array(
 							'suggested_action'  => 'Please verify the order has a total of zero or more. If the data for total price is null or negative it may not sync to ActiveCampaign.',
 							'failed_field_name' => $field,
 							'connectionid'      => $this->connectionid,
@@ -806,7 +805,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 							'order_number'      => $this->order_number,
 							'customerid'        => $this->customerid,
 							'ac_code'           => 'EOM_792',
-						]
+						)
 					);
 
 					return false;
@@ -815,7 +814,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 				if ( 'total_price' !== $field && 'source' !== $field && empty( $this->{$field} ) ) {
 					$logger->error(
 						'A field in this order data may not be valid and this order will not sync to ActiveCampaign.',
-						[
+						array(
 							'suggested_action'  => 'Please verify the fields in this log entry and determine if the data is actually missing from your order.',
 							'failed_field_name' => $field,
 							'connectionid'      => $this->connectionid,
@@ -825,7 +824,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 							'order_number'      => $this->order_number,
 							'customerid'        => $this->customerid,
 							'ac_code'           => 'EOM_810',
-						]
+						)
 					);
 
 					return false;
@@ -834,11 +833,11 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Ecom_Order: There was an error validating the ecom order model.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 					'ac_code' => 'EOM_828',
-				]
+				)
 			);
 		}
 

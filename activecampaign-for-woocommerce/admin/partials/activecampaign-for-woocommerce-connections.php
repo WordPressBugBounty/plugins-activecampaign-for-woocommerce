@@ -39,14 +39,14 @@ if ( isset( $activecampaign_for_woocommerce_storage['connection_id'] ) ) {
 				<?php if ( $activecampaign_for_woocommerce_connection_id !== $activecampaign_for_woocommerce_connection->get_id() ) : ?>
 
 					<a href="#"
-					   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-					   class="activecampaign-for-woocommerce-select-connection-button button secondary">
+						data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+						class="activecampaign-for-woocommerce-select-connection-button button secondary">
 						Select
 					</a>
 				<?php endif; ?>
 				<a href="#"
-				   data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-				   class="activecampaign-for-woocommerce-edit-connection-button button secondary">
+					data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+					class="activecampaign-for-woocommerce-edit-connection-button button secondary">
 					Edit
 				</a>
 <!--				<a href="#"-->

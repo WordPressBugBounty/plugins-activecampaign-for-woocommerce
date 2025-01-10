@@ -136,7 +136,6 @@ class Activecampaign_For_Woocommerce_Ac_Features_Repository implements Repositor
 	 */
 	public function create( Ecom_Model $model ) {
 		return null;
-
 	}
 
 	/**

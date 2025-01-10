@@ -15,9 +15,9 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Status {
-	use Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Order_Data_Gathering,
-		Activecampaign_For_Woocommerce_Admin_Utilities;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Admin_Utilities;
 
 	/**
 	 * Populates the order page with our info.
@@ -25,7 +25,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 	 * @param WC_Order $order The WC order.
 	 */
 	public function order_edit_meta_box( $order ) {
-		if ( ! current_user_can( 'administrator' ) ) {
+		if ( ! current_user_can( 'install_plugins' ) ) {
 			// Current user doesn't have permission for this so just return.
 			return;
 		}
@@ -47,9 +47,9 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 			$logger = new Logger();
 			$logger->debug(
 				'There was an issue retrieving subscription details for the subscription page.',
-				[
+				array(
 					'order_id' => method_exists( $order, 'get_id' ) ? $order->get_id() : null,
-				]
+				)
 			);
 		}
 	}
@@ -69,7 +69,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 		$api_key = isset( $settings['api_key'] ) ? $settings['api_key'] : null;
 
 		$contact_repository                  = new Contact_Repository( new Api_Client( $api_uri, $api_key, $logger ) );
-		$activecampaign_for_woocommerce_data = [];
+		$activecampaign_for_woocommerce_data = array();
 
 		try {
 			$order = ( $post_or_order_object instanceof WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
@@ -103,7 +103,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 				if (
 					! isset( $order_ac ) &&
 					isset( $table_data->synced_to_ac ) &&
-					in_array( $table_data->synced_to_ac, [ 0, '0' ] )
+					in_array( $table_data->synced_to_ac, array( 0, '0' ) )
 				) {
 					$order_ac    = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->check_for_synced_order( $wc_order_id );
 					$order_ac_id = $order_ac->get_id();
@@ -134,7 +134,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 					isset( $order_ac_id ) &&
 					! empty( $order_ac_id ) &&
 					isset( $table_data->synced_to_ac ) &&
-					in_array( $table_data->synced_to_ac, [ 0, '0' ] )
+					in_array( $table_data->synced_to_ac, array( 0, '0' ) )
 				) {
 					$table_data->synced_to_ac = 1;
 					self::save_table_data( $order, $table_data );
@@ -146,7 +146,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 				require_once plugin_dir_path( __FILE__ ) . 'partials/activecampaign-for-woocommerce-order-meta.php';
 			}
 		} catch ( Throwable $t ) {
-			$logger->warning( 'There was an issue retrieving or loading the order data for this page.', [ $post_or_order_object ] );
+			$logger->warning( 'There was an issue retrieving or loading the order data for this page.', array( $post_or_order_object ) );
 		}
 	}
 
@@ -238,9 +238,9 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 			$type     = self::get_request_data( 'sync_type' );
 
 			if ( isset( $order_id ) && ! empty( $order_id ) ) {
-				$data = [
+				$data = array(
 					'wc_order_id' => $order_id,
-				];
+				);
 
 				if ( 'new' === $type ) {
 					do_action( 'activecampaign_for_woocommerce_admin_sync_single_order_active', $data );
@@ -248,7 +248,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 					do_action( 'activecampaign_for_woocommerce_admin_sync_single_order_historical', $data );
 				}
 
-				wp_send_json_success( [ $order_id ] );
+				wp_send_json_success( array( $order_id ) );
 			}
 
 			wp_send_json_error( $order_id );
@@ -263,10 +263,10 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Plugin encountered an error trying to save table data.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -283,10 +283,10 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 		} catch ( Throwable $t ) {
 				$logger->warning(
 					'There was an issue retrieving externalcheckoutid',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 		}
 
@@ -294,7 +294,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 			if ( isset( $data['id'] ) ) {
 				$dt = new DateTime( $data['date_created'], new DateTimeZone( 'UTC' ) );
 
-				$store_data = [
+				$store_data = array(
 					'customer_id'                    => $data['customer_id'],
 					'customer_email'                 => $data['billing']['email'],
 					'customer_first_name'            => $data['billing']['first_name'],
@@ -308,7 +308,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 					'cart_ref_json'                  => null,
 					'cart_totals_ref_json'           => null,
 					'removed_cart_contents_ref_json' => null,
-				];
+				);
 
 				if ( isset( $table_data->synced_to_ac ) ) {
 					$store_data['synced_to_ac'] = $table_data->synced_to_ac;
@@ -323,9 +323,9 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 					$wpdb->update(
 						$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 						$store_data,
-						[
+						array(
 							'id' => $table_data->id,
-						]
+						)
 					);
 				} else {
 					$wpdb->insert(
@@ -337,12 +337,12 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'There was an issue saving order data to the ActiveCampaign table.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Verify that the ' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' exists and is both writable and readable.',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
 					'ac_code'          => 'WCOP_243',
-				]
+				)
 			);
 		}
 	}

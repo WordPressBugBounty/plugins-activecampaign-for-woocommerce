@@ -13,10 +13,39 @@
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
 use Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command as Abandoned_Cart;
+use Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository as Browse_Session_Repository;
 
 class Activecampaign_For_Woocommerce_Cart_Events {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+
+
+	/**
+	 * The logger interface.
+	 *
+	 * @var Logger
+	 */
+	private $logger;
+	/**
+	 * Repo.
+	 *
+	 * @var Browse_Session_Repository
+	 */
+	private $browse_session_repository;
+
+	/**
+	 * Activecampaign_For_Woocommerce_Product_Sync_Job constructor.
+	 *
+	 * @param Logger|null               $logger The logger object.
+	 * @param Browse_Session_Repository $browse_session_repository Repo.
+	 */
+	public function __construct(
+		Logger $logger,
+		Browse_Session_Repository $browse_session_repository
+	) {
+		$this->logger                    = $logger;
+		$this->browse_session_repository = $browse_session_repository;
+	}
 
 	public function cart_emptied( ...$args ) {
 		$user_id = get_current_user_id();
@@ -43,20 +72,23 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 			) {
 				$logger->debug_excess(
 					'Update Cart Command: Customer not logged in or email unknown. Do nothing.',
-					[
+					array(
 						'customer email' => self::validate_object( $wc_customer, 'get_email' ) ? $wc_customer->get_email() : null,
-					]
+					)
 				);
 
 				return false;
 			}
+
+			// An update cart event should update the browse session to keep it active.
+			$this->browse_session_repository->browse_session_cart_add( $wc_customer->get_email() );
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Update Cart Command: There was an issue creating a customer or reading order, continuing.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'UCC_168',
-				]
+				)
 			);
 		}
 
@@ -72,11 +104,11 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 
 			$logger->notice(
 				'Update Cart: Could not process abandoned cart.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'stack_trace' => $logger->clean_trace( $t->getTrace() ),
 					'ac_code'     => 'UCC_207',
-				]
+				)
 			);
 
 			return false;
@@ -111,10 +143,10 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 				if ( $order->get_billing_email() === null || empty( $order->get_billing_email() ) ) {
 					$logger->warning(
 						'Cart to order transition was not able to run due to a missing email.',
-						[
+						array(
 							'args'    => $args,
 							'ac_code' => 'CE_118',
-						]
+						)
 					);
 					return $order;
 				}
@@ -188,20 +220,20 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 			} else {
 				$logger->warning(
 					'Cart to order transition is missing order information and cannot transition the cart properly.',
-					[
+					array(
 						'args'    => $args,
 						'ac_code' => 'CE_195',
-					]
+					)
 				);
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue trying to add cart ID to order. External checkout ID may be missing.',
-				[
+				array(
 					'class'   => 'Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command',
 					'message' => $t->getMessage(),
 					'ac_code' => 'CE_202',
-				]
+				)
 			);
 		}
 	}
@@ -232,11 +264,11 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue trying to add additional info to user meta.',
-				[
+				array(
 					'class'   => 'Activecampaign_For_Woocommerce_Create_And_Save_Cart_Id_Command',
 					'message' => $t->getMessage(),
 					'ac_code' => 'CE_238',
-				]
+				)
 			);
 		}
 	}

@@ -29,7 +29,7 @@ class Activecampaign_For_Woocommerce_Admin_Settings_Updated_Event implements Tri
 	 * @since 1.0.0
 	 */
 	public function trigger( ...$args ) {
-		$additional_arguments = isset( $args[0] ) ? $args[0] : [];
+		$additional_arguments = isset( $args[0] ) ? $args[0] : array();
 
 		do_action( 'activecampaign_for_woocommerce_admin_settings_updated', $additional_arguments );
 		do_action( 'activecampaign_for_woocommerce_run_sync_connection' );

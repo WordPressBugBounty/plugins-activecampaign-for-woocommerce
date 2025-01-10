@@ -26,13 +26,13 @@ use Activecampaign_For_Woocommerce_Cofe_Order_Repository as Cofe_Order_Repositor
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Executable, Synced_Status {
-	use Activecampaign_For_Woocommerce_Historical_Status,
-		Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Order_Data_Gathering,
-		Activecampaign_For_Woocommerce_Historical_Utilities,
-		Activecampaign_For_Woocommerce_Subscription_Data_Gathering,
-		Activecampaign_For_Woocommerce_Global_Utilities;
+	use Activecampaign_For_Woocommerce_Historical_Status;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Historical_Utilities;
+	use Activecampaign_For_Woocommerce_Subscription_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -48,12 +48,12 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 	 *
 	 * @var array
 	 */
-	private $process_settings = [
+	private $process_settings = array(
 		'start_order_id' => 0,
 		'end_order_id'   => 0,
 		'batch_limit'    => 30,
 		'batch_runs'     => 10,
-	];
+	);
 
 	/**
 	 * The COFE Order Repo.
@@ -165,20 +165,20 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				// No records in queue to historical sync.
 				return false;
 			} else {
-				$run_count ++;
+				++$run_count;
 			}
 		}
 
 		$this->update_sync_status();
 		$this->logger->debug(
 			'Historical sync finished sync group.',
-			[
+			array(
 				'run_count'   => $run_count,
 				'last_update' => $this->status['last_update'],
 				'batch_runs'  => $this->process_settings['batch_runs'],
 				'batch_limit' => $this->process_settings['batch_limit'],
 				'start_time'  => $this->status['start_time'],
-			]
+			)
 		);
 	}
 
@@ -193,7 +193,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 		}
 
 		if ( isset( $wc_order_id ) ) {
-			$data          = [ $wc_order_id ];
+			$data          = array( $wc_order_id );
 			$sync_response = $this->bulk_sync_data( $data );
 			global $wpdb;
 			// If bulk sync does not return a failure
@@ -205,7 +205,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 					array( '%d' ), // format
 					'%d' // where format
 				);
-			} else if (false === $sync_response ) {
+			} elseif (false === $sync_response ) {
 				$wpdb->update(
 					( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME ), // table
 					array( 'synced_to_ac' => self::STATUS_FAIL ), // data
@@ -229,7 +229,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 
 		// Orders
 		$ac_prep_orders = $this->get_historical_sync_orders();
-		$sync_order_ids = [];
+		$sync_order_ids = array();
 
 		try {
 			if ( isset( $ac_prep_orders ) && ! empty( $ac_prep_orders ) ) {
@@ -250,11 +250,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Historical sync encountered a problem setting up the order array.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'HSRC_228',
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 
 			return false;
@@ -268,11 +268,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Historical sync encountered an issue setting up bulk sync',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
 						'ac_code' => 'HSRC_262',
-					]
+					)
 				);
 			}
 
@@ -290,11 +290,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Historical sync encountered an issue setting up bulk sync',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
 						'ac_code' => 'HSRC_284',
-					]
+					)
 				);
 			}
 
@@ -314,11 +314,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Historical sync encountered an issue updating the table with failed values.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
 						'ac_code' => 'HSRC_308',
-					]
+					)
 				);
 			}
 
@@ -326,16 +326,16 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				if ( isset( $this->status['incompatible_order_id_array'] ) && is_array( $this->status['incompatible_order_id_array'] ) ) {
 					$this->status['incompatible_order_id_array'] = array_unique( $this->status['incompatible_order_id_array'] );
 				} else {
-					$this->status['incompatible_order_id_array'] = [];
+					$this->status['incompatible_order_id_array'] = array();
 				}
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Historical sync could not store incompatible_order_id_array.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'ac_code' => 'HSRC_324',
 						'trace'   => $t->getTrace(),
-					]
+					)
 				);
 			}
 
@@ -354,7 +354,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 	 */
 	private function bulk_sync_data( &$order_ids ) {
 		$cofe_order_group_count = 0;
-		$cofe_order_group_split = [];
+		$cofe_order_group_split = array();
 		$word_count             = 0;
 
 		foreach ( $order_ids as $k => $order_id ) {
@@ -362,10 +362,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				if ( ! isset( $order_id ) ) {
 					$this->logger->warning(
 						'Historical Sync: This order record is not set. A bad var was passed to bulk sync.',
-						[
+						array(
 							'order_id' => isset( $order_id ) ? $order_id : null,
 							'ac_code'  => 'HSRC_354',
-						]
+						)
 					);
 					unset( $order_ids[ $k ] );
 					continue;
@@ -376,11 +376,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				if ( ! $this->order_has_required_data( $wc_order ) ) {
 					$this->logger->warning(
 						'This order does not have any data and will not be synced.',
-						[
+						array(
 							'order_id' => isset( $order_id ) ? $order_id : null,
 							'wc_order' => isset( $wc_order ) ? $wc_order : null,
 							'ac_code'  => 'HSRC_369',
-						]
+						)
 					);
 					$this->add_incompatible_order_to_status( $order_id, $wc_order );
 					$this->mark_order_as_historical_incompatible( $order_id );
@@ -394,9 +394,9 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				if ( is_null( $cofe_ecom_order ) ) {
 					$this->logger->debug(
 						'Ecom order builder returned null. Something may have gone wrong with the sync or the order may have been miscategorized.',
-						[
+						array(
 							'order_id' => isset( $order_id ) ? $order_id : null,
-						]
+						)
 					);
 
 					$this->add_incompatible_order_to_status( $order_id );
@@ -406,9 +406,9 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				} elseif (30 === $cofe_ecom_order ) {
 					$this->logger->debug(
 						'Ecom order builder returned miscat. This order is actually a subscription.',
-						[
+						array(
 							'order_id' => isset( $order_id ) ? $order_id : null,
-						]
+						)
 					);
 
 					unset( $order_ids[ $k ] );
@@ -426,7 +426,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				// This is the limit for tokens in graphql
 				// If the word count passes our limit we must create a new group and reset word count
 				if ( $word_count >= $this->word_count_limit ) {
-					$cofe_order_group_count++;
+					++$cofe_order_group_count;
 					$word_count = str_word_count( wp_json_encode( $serialized_cofe_order ) );
 				}
 
@@ -434,12 +434,12 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Historical sync order failed to serialize and may not sync.',
-					[
+					array(
 						'message'  => $t->getMessage(),
 						'order_id' => $order_id,
 						'ac_code'  => 'HSRC_402',
 						'trace'    => $t->getTrace(),
-					]
+					)
 				);
 			}
 		}
@@ -519,14 +519,14 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			if ( 'error' === $response['type'] ) {
 				$this->logger->error(
 					'COFE returned a bad response and cannot be reached or cannot process the request at this time. Historical sync will be stopped for 5 minutes.',
-					[
+					array(
 						'suggested_action' => 'If this problem repeats please contact support.',
 						'ac_code'          => 'HSRC_450',
 						'response'         => $response,
-					]
+					)
 				);
 
-				if ( in_array( $response['code'], [ 500, 503, 504, 404 ], false ) ) {
+				if ( in_array( $response['code'], array( 500, 503, 504, 404 ), false ) ) {
 					$now = date_create( 'NOW' );
 					update_option( 'activecampaign_for_woocommerce_historical_sync_delay', $now );
 					throw new RuntimeException( 'Error encountered attempting to sync to AC. Historical sync will wait a moment before trying again.' );
@@ -536,11 +536,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			if ( 'timeout' === $response['type'] ) {
 				$this->logger->error(
 					'The ActiveCampaign COFE service could not be reached due to a timeout.',
-					[
+					array(
 						'suggested_action' => 'Please check with your host for issues with your server sending data to ActiveCampaign.',
 						'ac_code'          => 'HSRC_466',
 						'response'         => $response,
-					]
+					)
 				);
 
 				// Call timed out. Records should remain at current status.
@@ -596,7 +596,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 	private function run_historical_sync_subscriptions() {
 
 		$ac_prep_subscriptions = $this->get_historical_sync_subscriptions();
-		$sync_subscription_ids = [];
+		$sync_subscription_ids = array();
 
 		try {
 			if ( isset( $ac_prep_subscriptions ) && ! empty( $ac_prep_subscriptions ) ) {
@@ -617,11 +617,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 		} catch ( Throwable $t ) {
 			$this->logger->debug(
 				'Historical sync encountered a problem setting up the subscription array.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'HSRC_240',
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 
 			return false;
@@ -635,12 +635,12 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Historical sync encountered an issue setting up subscription bulk sync',
-					[
+					array(
 						'sync_subscription_ids' => $sync_subscription_ids,
 						'message'               => $t->getMessage(),
 						'trace'                 => $t->getTrace(),
 						'ac_code'               => 'HSRC_' . __LINE__,
-					]
+					)
 				);
 			}
 
@@ -658,11 +658,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Historical sync encountered an issue setting up subscription bulk sync',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
 						'ac_code' => 'HSRC_284',
-					]
+					)
 				);
 			}
 
@@ -682,11 +682,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Historical sync encountered an issue updating the table with failed values.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
 						'ac_code' => 'HSRC_308',
-					]
+					)
 				);
 			}
 
@@ -694,16 +694,16 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				if ( isset( $this->status['incompatible_subscription_id_array'] ) && is_array( $this->status['incompatible_subscription_id_array'] ) ) {
 					$this->status['incompatible_subscription_id_array'] = array_unique( $this->status['incompatible_subscription_id_array'] );
 				} else {
-					$this->status['incompatible_subscription_id_array'] = [];
+					$this->status['incompatible_subscription_id_array'] = array();
 				}
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Historical sync could not store incompatible_subscription_id_array.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'ac_code' => 'HSRC_324',
 						'trace'   => $t->getTrace(),
-					]
+					)
 				);
 			}
 
@@ -722,17 +722,17 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 	 */
 	private function bulk_sync_subscription_data( &$subscription_ids ) {
 		$success_count           = 0;
-		$cofe_subscription_group = [];
+		$cofe_subscription_group = array();
 
 		foreach ( $subscription_ids as $k => $order_id ) {
 			try {
 				if ( ! isset( $order_id ) ) {
 					$this->logger->warning(
 						'Historical Sync: This order record is not set. A bad var was passed to bulk sync.',
-						[
+						array(
 							'order_id' => isset( $order_id ) ? $order_id : null,
 							'ac_code'  => 'HSRC_354',
-						]
+						)
 					);
 					unset( $subscription_ids[ $k ] );
 					continue;
@@ -743,11 +743,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				if ( ! $this->order_has_required_data( $wc_subscription ) ) {
 					$this->logger->warning(
 						'This order does not have any data and will not be synced.',
-						[
+						array(
 							'order_id' => isset( $order_id ) ? $order_id : null,
 							'wc_order' => isset( $wc_subscription ) ? $wc_subscription : null,
 							'ac_code'  => 'HSRC_689',
-						]
+						)
 					);
 					$this->add_incompatible_subscription_to_status( $order_id, $wc_subscription );
 					$this->mark_subscription_as_historical_incompatible( $order_id );
@@ -770,12 +770,12 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Historical sync order failed to serialize and may not sync.',
-					[
+					array(
 						'message'  => $t->getMessage(),
 						'order_id' => $order_id,
 						'ac_code'  => 'HSRC_402',
 						'trace'    => $t->getTrace(),
-					]
+					)
 				);
 			}
 		}
@@ -819,14 +819,14 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			if ( 'error' === $response['type'] ) {
 				$this->logger->error(
 					'COFE returned a bad response and cannot be reached or cannot process the request at this time. Historical sync will be stopped for 5 minutes.',
-					[
+					array(
 						'suggested_action' => 'If this problem repeats please contact support.',
 						'ac_code'          => 'HSRC_450',
 						'response'         => $response,
-					]
+					)
 				);
 
-				if ( in_array( $response['code'], [ 500, 503, 504, 404 ], false ) ) {
+				if ( in_array( $response['code'], array( 500, 503, 504, 404 ), false ) ) {
 					$now = date_create( 'NOW' );
 					update_option( 'activecampaign_for_woocommerce_historical_sync_delay', $now );
 					throw new RuntimeException( 'Error encountered attempting to sync to AC. Historical sync will wait a moment before trying again.' );
@@ -836,11 +836,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 			if ( 'timeout' === $response['type'] ) {
 				$this->logger->error(
 					'The ActiveCampaign COFE service could not be reached due to a timeout.',
-					[
+					array(
 						'suggested_action' => 'Please check with your host for issues with your server sending data to ActiveCampaign.',
 						'ac_code'          => 'HSRC_466',
 						'response'         => $response,
-					]
+					)
 				);
 
 				// Call timed out. Records should remain at current status.
@@ -903,5 +903,4 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 		// phpcs:enable
 		return $results;
 	}
-
 }

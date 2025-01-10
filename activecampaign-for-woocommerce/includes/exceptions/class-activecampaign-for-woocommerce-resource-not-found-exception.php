@@ -27,7 +27,7 @@ class Activecampaign_For_Woocommerce_Resource_Not_Found_Exception extends Except
 	 * @param int    $code The error code.
 	 * @param null   $previous The previous exception.
 	 */
-	public function __construct( $message = '', $context = [], $code = 0, $previous = null ) {
+	public function __construct( $message = '', $context = array(), $code = 0, $previous = null ) {
 		if ( ! array_key_exists( 'trace', $context ) ) {
 			$context['trace'] = $this->getTrace();
 		}

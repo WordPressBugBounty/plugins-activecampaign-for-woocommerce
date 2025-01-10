@@ -74,10 +74,10 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 			} catch ( Throwable $t ) {
 				$this->logger->error(
 					'Activecampaign_For_Woocommerce_Customer_Utilities: There was an error adding customer to the order.',
-					[
+					array(
 						'message'     => $t->getMessage(),
 						'stack_trace' => $t->getTrace(),
-					]
+					)
 				);
 			}
 		} elseif ( self::validate_object( $order, 'get_customer_id' ) && $order->get_customer_id() ) {
@@ -120,11 +120,11 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Activecampaign_For_Woocommerce_Customer_Utilities: There was an error adding customer to the order.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
 					'ac_code'     => 'CU_122',
-				]
+				)
 			);
 
 			return null;
@@ -161,13 +161,13 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 
 		$this->logger->debug(
 			'Customer Utilities: Could not find a customer ID.',
-			[
+			array(
 				'order'         => $order,
 				'id'            => self::validate_object( $order, 'get_id' ) ? $order->get_id() : null,
 				'order_number'  => self::validate_object( $order, 'get_order_number' ) ? $order->get_order_number() : null,
 				'billing_email' => self::validate_object( $order, 'get_billing_email' ) ? $order->get_billing_email() : null,
 				'ac_code'       => 'CU_162',
-			]
+			)
 		);
 
 		return false;
@@ -187,13 +187,13 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_Order_Finished_Event: Could not create datetime or save sync metadata to the customer',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'date'     => $date->format( 'Y-m-d H:i:s e' ),
 					'order_id' => $customer_id,
 					'trace'    => $this->logger->clean_trace( $t->getTrace() ),
 					'ac_code'  => 'CU_187',
-				]
+				)
 			);
 		}
 	}
@@ -249,10 +249,10 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an exception building a customer from user data.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return false;
@@ -283,18 +283,17 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 				$customer_data['email']      = wc()->customer->get_email();
 				$customer_data['first_name'] = wc()->customer->get_first_name();
 				$customer_data['last_name']  = wc()->customer->get_last_name();
-			} else {
-				if (
+			} elseif (
 					isset( wc()->session ) &&
 					! is_null( wc()->session ) &&
 					self::validate_object( wc()->session, 'get_customer_id' )
 				) {
+
 					// We don't have a real WC customer, get the session customer
 					$customer_data = wc()->session->get( 'customer' );
 
 					// Make sure we've set the id
 					$customer_data['id'] = wc()->session->get_customer_id();
-				}
 			}
 
 			// If we have guest data passed in, replace with that
@@ -340,10 +339,10 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Abandoned sync: Encountered an error on gathering customer and/or session data for the abandonment sync',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}

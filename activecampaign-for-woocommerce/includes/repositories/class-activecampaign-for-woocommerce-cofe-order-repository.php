@@ -44,11 +44,11 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 		try {
 			if ( $model ) {
 				// GraphqlSerializer::graphql_serialize( 'orders', $model );
-				$args = [
+				$args = array(
 					'operation' => 'upsertOrder',
 					'first_key' => 'order',
 					'return'    => array( 'id' ),
-				];
+				);
 
 				$response = $this->perform_mutation( $model, $args );
 
@@ -56,10 +56,10 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 			} else {
 				$logger->warning(
 					'No valid models were provided to the single record sync for upsert order.',
-					[
+					array(
 						'models'  => $model,
 						'ac_code' => 'COR_61',
-					]
+					)
 				);
 
 				return null;
@@ -71,12 +71,12 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 			}
 			$logger->warning(
 				'Order repository failed to send graphql data for upsertOrder. Process must be ended.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'code'    => $t->getCode(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 					'ac_code' => 'COR_78',
-				]
+				)
 			);
 			return null;
 		}
@@ -88,11 +88,11 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 		try {
 			if ( $model ) {
 				// GraphqlSerializer::graphql_serialize( 'orders', $model );
-				$args = [
+				$args = array(
 					'operation' => 'bulkUpsertRecurringPayments',
 					'first_key' => 'recurringPayments',
 					'return'    => array( 'recordId' ),
-				];
+				);
 
 				$response = $this->perform_mutation( $model, $args );
 
@@ -100,10 +100,10 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 			} else {
 				$logger->warning(
 					'No valid models were provided to the single record sync for upsert subscription.',
-					[
+					array(
 						'models'  => $model,
 						'ac_code' => 'COR_105',
-					]
+					)
 				);
 
 				return null;
@@ -116,13 +116,13 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 			}
 			$logger->warning(
 				'Order repository failed to send graphql data for upsert subscription. Process must be ended.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'object'  => $ob,
 					'code'    => $t->getCode(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 					'ac_code' => 'COR_122',
-				]
+				)
 			);
 
 			return null;
@@ -141,13 +141,13 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 		try {
 			// GraphqlSerializer::graphql_serialize( 'orders', $models );
 			if ( $models ) {
-				$args = [
+				$args = array(
 					'operation' => 'bulkUpsertOrdersAsync',
 					'first_key' => 'orders',
 					'return'    => array(
 						'recordId',
 					),
-				];
+				);
 
 				if ( 'subscription' === $operation_type || 'subscriptions' === $operation_type ) {
 					$args['operation'] = 'bulkUpsertRecurringPayments';
@@ -160,10 +160,10 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 			} else {
 				$logger->warning(
 					'No valid models were provided to the record bulk sync.',
-					[
+					array(
 						'models'  => $models,
 						'ac_code' => 'COR_163',
-					]
+					)
 				);
 
 				return null;
@@ -171,12 +171,12 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'The order repository failed processing GraphQL data.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'code'    => $t->getCode(),
 					'ac_code' => 'COR_172',
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return $this->split_errors_from_response(
@@ -199,20 +199,20 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'The mutation has thrown an error.',
-				[
+				array(
 					$t->getMessage(),
 					$args,
-				]
+				)
 			);
 
 			$logger->warning(
 				'The order repository failed processing GraphQL data.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'code'    => $t->getCode(),
 					'ac_code' => 'COR_209',
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return $this->split_errors_from_response( explode( 'Response: ', $t->getMessage() ) );
@@ -235,10 +235,10 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 					isset( $dec->errors[0]->message, $dec->errors[0]->extensions ) &&
 					'Validation errors' === $dec->errors[0]->message
 				) {
-					$data = [
+					$data = array(
 						'type'   => 'validation_error',
 						'errors' => $this->collect_error_records( $dec->errors[0]->extensions ),
-					];
+					);
 
 					return $data;
 				}
@@ -248,10 +248,10 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 					stristr( $dec->errors[0]->message, 'More than 15000 grammar tokens' )
 				) {
 
-					$data = [
+					$data = array(
 						'type'   => 'grammar_tokens',
 						'errors' => $this->collect_error_records( $dec->errors[0]->extensions ),
-					];
+					);
 
 					return $data;
 				}
@@ -267,7 +267,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 	 * @return array|null
 	 */
 	private function collect_error_records( $errors ) {
-		$error_id_array = [];
+		$error_id_array = array();
 
 		foreach ( $errors as $key => $error_text ) {
 			if ( isset( $key ) && ! empty( $key ) && isset( $error_text ) && ! empty( $error_text ) ) {
@@ -300,5 +300,4 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Repository {
 			return $groups[2];
 		}
 	}
-
 }

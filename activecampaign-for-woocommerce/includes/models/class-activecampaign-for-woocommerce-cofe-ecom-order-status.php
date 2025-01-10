@@ -26,7 +26,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Status {
 	 *
 	 * @var array
 	 */
-	public $status_mappings = [
+	public $status_mappings = array(
 		'pending'                 => 'PENDING_PAYMENT',
 		'wc-pending'              => 'PENDING_PAYMENT',
 		'on-hold'                 => 'WAITING',
@@ -53,7 +53,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Status {
 		'requires_confirmation'   => 'PENDING_PAYMENT',
 		'requires_action'         => 'PENDING_PAYMENT',
 		'requires_capture'        => 'PENDING_PAYMENT',
-	];
+	);
 
 	/**
 	 * @var string $status

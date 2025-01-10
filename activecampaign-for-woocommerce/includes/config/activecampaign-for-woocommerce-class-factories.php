@@ -46,6 +46,7 @@ use Activecampaign_For_Woocommerce_Bulksync_Repository as Bulksync_Repository;
 use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Batch_Repository;
 use Activecampaign_For_Woocommerce_Api_Client_Graphql as Graphql_Api_Client;
 use Activecampaign_For_Woocommerce_Product_Repository as Cofe_Product_Repository;
+use Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository as Browse_Session_Repository;
 use Activecampaign_For_Woocommerce_Admin_WC_Order_Page as Admin_Order_Page;
 use Activecampaign_For_Woocommerce_New_Subscription_Sync_Job as New_Subscription_Sync;
 use Activecampaign_For_Woocommerce_Subscription_Events as Subscription_Events;
@@ -74,6 +75,7 @@ return array(
 		Bulksync_Repository $bulksync_repository,
 		Contact_Repository $contact_repository,
 		Cofe_Product_Repository $cofe_product_repository,
+		Browse_Session_Repository $browse_session_repository,
 		Product_Sync $product_sync_job,
 		Admin_Order_Page $admin_order_page,
 		Subscription_Events $subscription_events,
@@ -112,6 +114,7 @@ return array(
 			$bulksync_repository,
 			$contact_repository,
 			$cofe_product_repository,
+			$browse_session_repository,
 			$product_sync_job,
 			$admin_order_page,
 			$subscription_events,
@@ -171,7 +174,7 @@ return array(
 		Connection_Option_Repository $repository,
 		Logger $logger
 	) {
-		return new Create_Or_Update_Connection_Option_Command( $admin, $repository, null, $logger );
+		return new Create_Or_Update_Connection_Option_Command( $admin, $repository, $logger );
 	},
 
 	Set_Connection_Id_Cache_Command::class            => static function (
@@ -222,6 +225,11 @@ return array(
 	) {
 		return new Cofe_Product_Repository( $client );
 	},
+	Browse_Session_Repository::class                  => static function (
+		Graphql_Api_Client $client
+	) {
+		return new Browse_Session_Repository( $client );
+	},
 	New_Order_Sync::class                             => static function (
 		Logger $logger,
 		Customer_Utilities $customer_utilities,
@@ -239,5 +247,11 @@ return array(
 	},
 	Logger::class                                     => static function () {
 		return new Logger();
+	},
+	Cart_Events::class                                => static function (
+		Logger $logger,
+		Browse_Session_Repository $browse_session_repository
+	) {
+		return new Cart_Events( $logger, $browse_session_repository );
 	},
 );

@@ -55,10 +55,10 @@ class Activecampaign_For_Woocommerce_Activator {
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'The plugin activation process encountered an exception.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'ACT_73',
-				]
+				)
 			);
 		}
 

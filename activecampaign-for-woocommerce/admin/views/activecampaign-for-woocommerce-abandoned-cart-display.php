@@ -147,10 +147,10 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 							<?php
 							echo esc_html(
 								add_query_arg(
-									[
+									array(
 										'offset' => $activecampaign_for_woocommerce_c - 1,
 										'activecampaign_for_woocommerce_abandoned_cart_nonce_field' => $activecampaign_for_woocommerce_page_nonce,
-									],
+									),
 									wc_get_current_admin_url()
 								)
 							);
@@ -218,7 +218,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										if (
 												! empty( $activecampaign_for_woocommerce_ab_cart->order_date ) &&
 												! empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) &&
-												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 23, '23', 1, '1' ], true )
+												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 23, '23', 1, '1' ), true )
 										) :
 											?>
 											<?php esc_html_e( 'Recovered:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?> <?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_ab_cart->order_date ) ); ?>
@@ -231,16 +231,16 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										if (
 												(
 												empty( $activecampaign_for_woocommerce_ab_cart->order_date ) &&
-											   ! empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date )
-											 ) ||
+												! empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date )
+											) ||
 											in_array(
 												$activecampaign_for_woocommerce_ab_cart->synced_to_ac,
-												[
+												array(
 													21,
 													'21',
 													22,
 													'22',
-												],
+												),
 												true
 											) ) :
 											?>
@@ -250,35 +250,35 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										<?php
 										if (
 												( empty( $activecampaign_for_woocommerce_ab_cart->order_date ) && empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) ) ||
-												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 0, 20, '0', '20' ], true )
+												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 0, 20, '0', '20' ), true )
 										) :
 											?>
-											<?php if ( isset( $activecampaign_for_woocommerce_ab_cart->ready_state ) && in_array( $activecampaign_for_woocommerce_ab_cart->ready_state, [ '1', 1 ], true ) ) : ?>
+											<?php if ( isset( $activecampaign_for_woocommerce_ab_cart->ready_state ) && in_array( $activecampaign_for_woocommerce_ab_cart->ready_state, array( '1', 1 ), true ) ) : ?>
 												Abandoned Cart Ready to Sync
 											<?php else : ?>
 												Active Cart
 											<?php endif; ?>
 										<?php endif; ?>
 
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 25, '25' ], true ) ) : ?>
+										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 25, '25' ), true ) ) : ?>
 											Timeout/Network failure (try again)
 										<?php endif; ?>
 
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 26, '26' ], true ) ) : ?>
+										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 26, '26' ), true ) ) : ?>
 											Failed to sync 1 time (will try again)
 										<?php endif; ?>
 
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 27, '27' ], true ) ) : ?>
+										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 27, '27' ), true ) ) : ?>
 											Failed to sync 2 times (will try again)
 										<?php endif; ?>
 
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 29, '29' ], true ) ) : ?>
+										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 29, '29' ), true ) ) : ?>
 											Sync failed permanently
 										<?php endif; ?>
 									</td>
 									<td>
 										<?php
-										if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, [ 1, 21, 22, 23, '1', '21', '22', '23' ], true ) ) {
+										if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 1, 21, 22, 23, '1', '21', '22', '23' ), true ) ) {
 											esc_html_e( 'Yes', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 										} else {
 											esc_html_e( 'No', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
@@ -305,7 +305,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 												<?php
 												if ( isset( $activecampaign_for_woocommerce_ab_cart->cart_ref_json ) ) {
 													try {
-														 echo esc_html( maybe_unserialize( $activecampaign_for_woocommerce_ab_cart->cart_ref_json ) );
+														echo esc_html( maybe_unserialize( $activecampaign_for_woocommerce_ab_cart->cart_ref_json ) );
 													} catch ( Throwable $t ) {
 														// do nothing
 													}
@@ -336,7 +336,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 											<?php
 											$activecampaign_for_woocommerce_array_data = json_decode( $activecampaign_for_woocommerce_ab_cart->customer_ref_json, true );
 											if ( is_array( $activecampaign_for_woocommerce_array_data ) ) {
-												 echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocommerce_array_data ) ) );
+												echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocommerce_array_data ) ) );
 											}
 											?>
 											<hr/>
@@ -344,7 +344,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 											<?php
 											$activecampaign_for_woocommerce_array_data = json_decode( $activecampaign_for_woocommerce_ab_cart->cart_ref_json, true );
 											if ( is_array( $activecampaign_for_woocommerce_array_data ) ) {
-												 echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( array_values( $activecampaign_for_woocommerce_array_data )[0] ) ) );
+												echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( array_values( $activecampaign_for_woocommerce_array_data )[0] ) ) );
 											}
 											?>
 										</div>

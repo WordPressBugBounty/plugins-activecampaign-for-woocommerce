@@ -35,25 +35,25 @@ class Activecampaign_For_Woocommerce_Ac_Features implements Ecom_Model {
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'entitlements' => 'entitlements', // the site entitlements
 		'code'         => 'code',
 		'id'           => 'id',
-	];
+	);
 
 	/**
 	 * The valid profile names used in AC.
 	 *
 	 * @var string[]
 	 */
-	private $valid_entitlements = [
+	private $valid_entitlements = array(
 		'ecommerce', // this is legacy
 		'ecom-core',
 		'ecom-historical-sync',
 		'ecom-product-catalog',
 		'ecom-recurring-payments',
 		'ecom-browse-abandonment',
-	];
+	);
 
 	/**
 	 * The id.
@@ -115,7 +115,7 @@ class Activecampaign_For_Woocommerce_Ac_Features implements Ecom_Model {
 	 * @return array|null
 	 */
 	public function get_valid_entitlements() {
-		$entitlement_list = [];
+		$entitlement_list = array();
 
 		if ( isset( $this->entitlements ) ) {
 			foreach ( $this->entitlements as $ent ) {
@@ -148,6 +148,5 @@ class Activecampaign_For_Woocommerce_Ac_Features implements Ecom_Model {
 				$this->$set_method( $array[ $remote_name ] );
 			}
 		}
-
 	}
 }

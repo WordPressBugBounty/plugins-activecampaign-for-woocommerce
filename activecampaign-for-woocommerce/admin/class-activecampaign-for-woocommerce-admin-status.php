@@ -11,7 +11,7 @@
  */
 
 use Activecampaign_For_Woocommerce_Logger as Logger;
-use Automattic\WooCommerce\Utilities\RestApiUtil as RestApiUtil;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -68,7 +68,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		$activecampaign_for_woocommerce_status_data = $this->get_status_page_data();
 		wp_enqueue_script( $this->plugin_name . 'status-page' );
 		require_once plugin_dir_path( __FILE__ )
-				 . 'views/activecampaign-for-woocommerce-status-display.php';
+				. 'views/activecampaign-for-woocommerce-status-display.php';
 	}
 
 	/**
@@ -77,7 +77,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 	 * @return array
 	 */
 	public function get_status_page_data() {
-		$data = [];
+		$data = array();
 		$this->delete_old_log_records();
 
 		$data = $this->get_cron_data( $data );
@@ -104,12 +104,12 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			wp_send_json_success(
 				$count . ' ' .
 				translate_nooped_plural(
-					[
+					array(
 						'singular' => 'record',
 						'plural'   => 'records',
 						'domain'   => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN,
 						'context'  => null,
-					],
+					),
 					$count
 				) . ' removed from the database.'
 			);
@@ -129,9 +129,9 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue trying to remove old log records.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}
@@ -229,9 +229,9 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			$logger = new Logger();
 			$logger->warning(
 				'ActiveCampaign status page threw an error',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 		return $data;
@@ -272,17 +272,17 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		try {
 
 			if ( null !== wc_get_container()->get( RestApiUtil::class ) ) {
-				 $wc_report = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status' );
+				$wc_report = wc_get_container()->get( RestApiUtil::class )->get_endpoint_data( '/wc/v3/system_status' );
 			} else {
 				$wc_report = null;
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'ActiveCampaign status page could not retrieve WooCommerce data from the new method. If you are not on WC 9.0 then this may not be a concern. If there is an issue with WooCommerce then ActiveCampaign may not run as expected.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			try {
@@ -290,10 +290,10 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'ActiveCampaign status page could not retrieve WooCommerce data via the old method either.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}
@@ -320,10 +320,10 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'ActiveCampaign status page could not retrieve WooCommerce legacy API.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -332,10 +332,10 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'ActiveCampaign status page could not retrieve WooCommerce version. WooCommerce setup may not be complete or may have an error.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -344,10 +344,10 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'ActiveCampaign status page could not retrieve WooCommerce latest version. WooCommerce setup may not be complete or may have an error.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -421,11 +421,11 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			$logger = new Logger();
 			$logger->warning(
 				'ActiveCampaign status page could not retrieve WooCommerce data. See the data chunk throwing the issue and the message below. WooCommerce setup may not be complete or may have an error. If there is an issue with WooCommerce then ActiveCampaign may not run as expected.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'chunk'   => $child,
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -454,16 +454,15 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			$logger = new Logger();
 			$logger->warning(
 				'ActiveCampaign status page threw an error',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
 		$data['table_exists'] = $table_exists;
 
 		return $data;
-
 	}
 
 	/**
@@ -496,9 +495,9 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 					$data['abandoned_schedule']['error'] = true;
 					$logger->warning(
 						'Abandoned cart is not scheduled.',
-						[
+						array(
 							'abandoned_cart_schedule' => $abandoned_schedule,
-						]
+						)
 					);
 				}
 
@@ -514,9 +513,9 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 					$data['new_order_schedule']['error'] = true;
 					$logger->warning(
 						'New order sync is not scheduled.',
-						[
+						array(
 							'new_order_schedule' => $new_order_schedule,
-						]
+						)
 					);
 				}
 
@@ -532,9 +531,9 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 					$data['historical_order_schedule']['error'] = true;
 					$logger->warning(
 						'Historical order sync is not scheduled.',
-						[
+						array(
 							'historical_order_schedule' => $historical_order_schedule,
-						]
+						)
 					);
 				}
 			} elseif ( function_exists( 'wp_next_scheduled' ) ) {
@@ -549,11 +548,11 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 				if ( ! $new_order_schedule || ! $abandoned_schedule ) {
 					$logger->warning(
 						'An order sync is not scheduled.',
-						[
+						array(
 							'new_order_schedule'        => $new_order_schedule,
 							'historical_order_schedule' => $historical_order_schedule,
 							'abandoned_cart_schedule'   => $abandoned_schedule,
-						]
+						)
 					);
 				}
 			} else {
@@ -563,9 +562,9 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'ActiveCampaign status page threw an error',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 			$data['new_order_schedule']['error'] = true;
 		}
@@ -623,11 +622,11 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue loading log files.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					$data['viewed_log'],
 					$data['viewed_log_full_path'],
-				]
+				)
 			);
 		}
 
@@ -670,11 +669,11 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Unable to read log file for save.',
-				[
+				array(
 					'message'        => $t->getMessage(),
 					'file'           => $post_data['log_file'],
 					'full_file_path' => $viewed_log_full_path,
-				]
+				)
 			);
 
 			echo 'Unable to read log file.';

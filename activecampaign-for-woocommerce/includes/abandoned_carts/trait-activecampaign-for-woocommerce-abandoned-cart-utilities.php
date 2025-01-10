@@ -58,9 +58,9 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 			if ( $wpdb->last_error ) {
 				$logger->warning(
 					'Abandonment sync: There was an error getting results for abandoned cart records from the database.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
-					]
+					)
 				);
 			}
 
@@ -74,10 +74,10 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Abandonment Sync: There was an error with preparing or getting abandoned cart results. This record may have been fulfilled as an order.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -133,10 +133,10 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		if ( empty( $customer_id ) ) {
 			$logger->warning(
 				'Abandoned Cart: Could not delete the abandoned cart from the database by order. No valid order passed or no customer ID provided.',
-				[
+				array(
 					'passed data' => $order,
 					'customer_id' => $customer_id,
-				]
+				)
 			);
 
 			return false;
@@ -159,9 +159,9 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		if ( empty( $customer_id ) ) {
 			$logger->warning(
 				'Abandoned Cart: Could not delete the abandoned cart from the database by customer. No valid order passed or no customer ID found.',
-				[
+				array(
 					'customer_id' => $customer_id,
-				]
+				)
 			);
 
 			return false;
@@ -190,9 +190,9 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		) {
 			$logger->warning(
 				'Abandoned Cart: Deletion name or value was not set.',
-				[
+				array(
 					$filter_name => $filter_value,
-				]
+				)
 			);
 
 			return false;
@@ -203,18 +203,18 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 
 			$wpdb->delete(
 				$table_name,
-				[
+				array(
 					$filter_name => $filter_value,
-				]
+				)
 			);
 
 			if ( ! empty( $wpdb->last_error ) ) {
 				$logger->warning(
 					'Abandoned cart: There was an error removing the abandoned cart record.',
-					[
+					array(
 						$filter_name      => $filter_value,
 						'wpdb_last_error' => $wpdb->last_error,
-					]
+					)
 				);
 
 				return false;
@@ -225,12 +225,12 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Abandoned cart: could not delete the abandoned cart entry.',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'session'  => isset( wc()->session ) && self::validate_object( wc()->session, 'get_session_data' ) ? wc()->session->get_session_data() : null,
 					'customer' => isset( wc()->customer ) && self::validate_object( wc()->customer, 'get_data' ) ? wc()->customer->get_data() : null,
 					'trace'    => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return false;
@@ -247,23 +247,21 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		try {
 			if ( ! wp_next_scheduled( 'activecampaign_for_woocommerce_cart_updated_recurring_event' ) ) {
 				wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-			} else {
-				if ( function_exists( 'wp_get_scheduled_event' ) ) {
+			} elseif ( function_exists( 'wp_get_scheduled_event' ) ) {
 					$logger->debug_excess(
 						'Recurring cron already scheduled',
-						[
+						array(
 							'time_now' => time(),
 							'myevent'  => wp_get_scheduled_event( 'activecampaign_for_woocommerce_cart_updated_recurring_event' ),
-						]
+						)
 					);
-				}
 			}
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'There was an issue scheduling the abandoned cart event.',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}
@@ -282,9 +280,9 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 					$data,
-					[
+					array(
 						'id' => $stored_id,
-					]
+					)
 				);
 
 			} else {
@@ -303,11 +301,11 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 			if ( $wpdb->last_error ) {
 				$logger->warning(
 					'Abandoned cart: There was an error creating/updating an abandoned cart record.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
 						'data'            => $data,
 						'stored_id'       => $stored_id,
-					]
+					)
 				);
 			}
 
@@ -315,12 +313,12 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Abandoned cart: There was an error attempting to save this abandoned cart to the database.',
-				[
+				array(
 					'message'       => $t->getMessage(),
 					'stored_id (if set this was an update)' => $stored_id,
 					'customer_data' => $data,
 					'trace'         => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -382,10 +380,10 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 
 			$logger->debug(
 				'Reset the activecampaignfwc_order_external_uuid & activecampaign_abandoned_cart_id on cart',
-				[
+				array(
 					'activecampaignfwc_order_external_uuid' => wc()->session->get( 'activecampaignfwc_order_external_uuid' ),
 					'activecampaign_abandoned_cart_id' => wc()->session->get( 'activecampaign_abandoned_cart_id', '' ),
-				]
+				)
 			);
 		}
 	}
@@ -403,7 +401,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 			$expire_datetime      = gmdate( 'Y-m-d H:i:s', strtotime( '-' . $wipe_time . ' minutes' ) );
 			$synced_to_ac_implode = implode(
 				',',
-				[
+				array(
 					self::STATUS_ABANDONED_CART_AUTO_SYNCED,
 					self::STATUS_ABANDONED_CART_AUTO_SYNCED,
 					self::STATUS_ABANDONED_CART_MANUAL_SYNCED,
@@ -412,7 +410,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 					self::STATUS_ABANDONED_CART_FAILED_2,
 					self::STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY,
 					self::STATUS_ABANDONED_CART_NETWORK_FAIL_PERM,
-				]
+				)
 			);
 
 			// phpcs:disable
@@ -428,21 +426,21 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 				if ( $wpdb->last_error ) {
 					$this->logger->error(
 						'A database error was encountered while attempting to delete old abandoned cart records.',
-						[
+						array(
 							'wpdb_last_error' => $wpdb->last_error,
 							'ac_code'         => 'RASC_952',
-						]
+						)
 					);
 				}
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'An exception was encountered while preparing or getting abandoned cart results.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'RASC_962',
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -459,7 +457,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 			// Get the outdated carts from our table
 			$expire_datetime = gmdate( 'Y-m-d H:i:s', strtotime( '-' . $wipe_time . ' minutes' ) );
 
-			$synced_to_ac_implode = implode( ',', [ self::STATUS_ABANDONED_CART_MANUAL_SYNCED, self::STATUS_ABANDONED_CART_AUTO_SYNCED ] );
+			$synced_to_ac_implode = implode( ',', array( self::STATUS_ABANDONED_CART_MANUAL_SYNCED, self::STATUS_ABANDONED_CART_AUTO_SYNCED ) );
 			// phpcs:disable
 			$delete_count = $wpdb->query(
 				'DELETE FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME .
@@ -473,21 +471,21 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 				if ( $wpdb->last_error ) {
 					$this->logger->warning(
 						'Abandonment sync: There was an error deleting old abandoned cart records.',
-						[
+						array(
 							'wpdb_last_error' => $wpdb->last_error,
 							'ac_code'         => 'RASC_997',
-						]
+						)
 					);
 				}
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'An exception was thrown while preparing or getting abandoned cart results.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'RASC_1007',
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -508,14 +506,14 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Could not get the terms/categories for a product.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'product' => $product,
-				]
+				)
 			);
 		}
 
-		$cat_list = [];
+		$cat_list = array();
 		try {
 			// go through the categories and make a named list
 			if ( ! empty( $terms ) && is_array( $terms ) ) {
@@ -527,11 +525,11 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 					} else {
 						$logger->warning(
 							'A product category attached to this product does not have a valid category and/or name.',
-							[
+							array(
 								'product_id' => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 								'term_id'    => $term->term_id,
 								'term_name'  => $term->name,
-							]
+							)
 						);
 					}
 				}
@@ -539,12 +537,12 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an error getting all product categories.',
-				[
+				array(
 					'terms'          => $terms,
 					'product_id'     => self::validate_object( $product, 'get_id' ) ? $product->get_id() : null,
 					'trace'          => $logger->clean_trace( $t->getTrace() ),
 					'thrown_message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 
@@ -555,6 +553,4 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 
 		return null;
 	}
-
-
 }

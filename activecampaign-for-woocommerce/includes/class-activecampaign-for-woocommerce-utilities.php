@@ -33,8 +33,8 @@ class Activecampaign_For_Woocommerce_Utilities {
 		$request_input = null;
 
 		try {
-			$post_input = filter_input( INPUT_POST, $field, FILTER_SANITIZE_STRING );
-			$get_input  = filter_input( INPUT_GET, $field, FILTER_SANITIZE_STRING );
+			$post_input = filter_input( INPUT_POST, $field, FILTER_UNSAFE_RAW );
+			$get_input  = filter_input( INPUT_GET, $field, FILTER_UNSAFE_RAW );
 
 			if ( ! empty( $post_input ) ) {
 				return $post_input;
@@ -47,13 +47,13 @@ class Activecampaign_For_Woocommerce_Utilities {
 			$logger = new Activecampaign_For_Woocommerce_Logger();
 			$logger->warning(
 				'There was an issue getting filter input post data for a field',
-				[
+				array(
 					'field'      => $field,
 					'get_input'  => $get_input,
 					'post_input' => $post_input,
 					'message'    => $t->getMessage(),
 					'ac_code'    => 'UTIL_40',
-				]
+				)
 			);
 		}
 
@@ -70,12 +70,12 @@ class Activecampaign_For_Woocommerce_Utilities {
 			$logger = new Activecampaign_For_Woocommerce_Logger();
 			$logger->warning(
 				'There was an issue getting request data for a field',
-				[
+				array(
 					'field'         => $field,
 					'request_input' => $request_input,
 					'message'       => $t->getMessage(),
 					'ac_code'       => 'UTIL_68',
-				]
+				)
 			);
 		}
 
@@ -94,17 +94,16 @@ class Activecampaign_For_Woocommerce_Utilities {
 			$logger = new Activecampaign_For_Woocommerce_Logger();
 			$logger->warning(
 				'There was an issue getting direct post data for a field',
-				[
+				array(
 					'field'         => $field,
 					'request_input' => $request_input,
 					'message'       => $t->getMessage(),
 					'ac_code'       => 'UTIL_90',
-				]
+				)
 			);
 		}
 
 		return null;
-
 	}
 
 	/**
@@ -157,10 +156,10 @@ class Activecampaign_For_Woocommerce_Utilities {
 			$logger = new Logger();
 			$logger->warning(
 				'AC Check valid email encountered an error',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 		return $email_valid;
@@ -215,10 +214,10 @@ class Activecampaign_For_Woocommerce_Utilities {
 			if ( isset( $wpdb->last_error ) && ! empty( $wpdb->last_error ) ) {
 				$logger->warning(
 					'There was an error inserting records into the table',
-					[
+					array(
 						'error' => $wpdb->last_error,
 						'func'  => 'wpdb_bulk_insert',
-					]
+					)
 				);
 			}
 
@@ -226,10 +225,10 @@ class Activecampaign_For_Woocommerce_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'There was an issue with bulk DB insert',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;
@@ -274,7 +273,7 @@ class Activecampaign_For_Woocommerce_Utilities {
 				$escaped[] = esc_sql( $key ) . ' = ' . $wpdb->prepare( $f, $value );
 				// phpcs:enable
 
-				$i ++;
+				++$i;
 			}
 
 			$q         .= implode( ', ', $escaped );
@@ -298,7 +297,7 @@ class Activecampaign_For_Woocommerce_Utilities {
 			$q .= implode( ', ', $escaped ) . ')';
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
-			$logger->debug( 'wpdb_update_in problem', [ $t->getMessage() ] );
+			$logger->debug( 'wpdb_update_in problem', array( $t->getMessage() ) );
 		}
 
 		try {
@@ -309,7 +308,7 @@ class Activecampaign_For_Woocommerce_Utilities {
 			return $result;
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
-			$logger->debug( 'wpdb_update_in problem', [ $t->getMessage() ] );
+			$logger->debug( 'wpdb_update_in problem', array( $t->getMessage() ) );
 
 			return null;
 		}

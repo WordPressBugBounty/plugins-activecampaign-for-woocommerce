@@ -30,11 +30,11 @@ class Activecampaign_For_Woocommerce_Ecom_Discount {
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'name'            => 'name',
 		'type'            => 'type',
 		'discount_amount' => 'discountAmount',
-	];
+	);
 
 	/**
 	 * The type of discount.

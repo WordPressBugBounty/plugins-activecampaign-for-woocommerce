@@ -28,6 +28,17 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  */
 class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command implements Executable {
 	/**
+	 * Array of browse abandonment connection options with their WC option name and their corresponding AC value
+	 *
+	 * @var array
+	 */
+	private $connection_options_keys = array(
+		'abcart_wait'             => 'abandoned_cart.abandon_after_hours',
+		'ba_min_page_view_time'   => 'browse_abandonment.minimum_page_view_time',
+		'ba_session_timeout'      => 'browse_abandonment.session_timeout',
+		'ba_product_url_patterns' => 'browse_abandonment.product_url_patterns',
+	);
+	/**
 	 * The Admin class.
 	 *
 	 * @var Admin
@@ -60,11 +71,19 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 	private $settings;
 
 	/**
-	 * The connection option.
+	 * The connection option array related to Browse Abandonment Settings.
 	 *
-	 * @var Activecampaign_For_Woocommerce_Connection_Option The connection option model.
+	 * @var Activecampaign_For_Woocommerce_Connection_Option[] The connection option model.
 	 */
-	private $connection_option;
+	private $connection_options;
+
+	/**
+	 * The array connection option ids from AC.
+	 *
+	 * @var array
+	 * @since 1.0.0
+	 */
+	private $ac_connection_option_ids;
 
 	/**
 	 * The logger interface.
@@ -79,15 +98,13 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 	 * @throws Exception When the container is missing definitions.
 	 * @since 1.0.0
 	 *
-	 * @param Admin             $admin The Admin singleton instance.
-	 * @param Repository        $repository The connection option repository singleton.
-	 * @param Connection_Option $connection_option The connection option model to optionally use.
-	 * @param Logger            $logger The logger interface.
+	 * @param Admin      $admin The Admin singleton instance.
+	 * @param Repository $repository The connection option repository singleton.
+	 * @param Logger     $logger The logger interface.
 	 */
-	public function __construct( Admin $admin, Repository $repository, Connection_Option $connection_option = null, Logger $logger = null ) {
-		$this->admin             = $admin;
-		$this->repository        = $repository;
-		$this->connection_option = $connection_option;
+	public function __construct( Admin $admin, Repository $repository, Logger $logger = null ) {
+		$this->admin      = $admin;
+		$this->repository = $repository;
 
 		if ( ! $this->logger ) {
 			$this->logger = new Logger();
@@ -117,35 +134,36 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 		 * If we were to set these values in the constructor, they would be null due to this object
 		 * being constructed prior the values being saved (the first time they're set).
 		 */
-		$this->storage  = $this->admin->get_connection_storage();
-		$this->settings = $this->admin->get_local_settings();
+		$this->storage                  = $this->admin->get_connection_storage();
+		$this->settings                 = $this->admin->get_local_settings();
+		$this->ac_connection_option_ids = $this->store_connection_option_ids_from_ac();
 
 		if ( $this->necessary_values_are_missing() ) {
-			$this->logger->warning( 'Create or update connection option command: connection_id or abcart_wait values are missing.' );
+			$this->logger->warning( 'Create or update connection option command: Some or all the following values are missing: connection_id,abcart_wait,ba_min_page_view_time,ba_session_timeout,ba_product_url_patterns' );
 
 			return;
 		}
 
-		if ( $this->connection_option_id_cache_is_missing() ) {
+		/**
+		 *  Steps of updating connection options to AC
+		 *  check if we have an AC id in Storage.
+		 *  if they are missing in Storage, lets make an API call to see if we can get them.
+		 *  if we find them we need to update storage with each respective AC id.
+		 *  Create new array of options to send to AC. If option has an id, we will update with new values.
+		 *  if option is missing id then we know at this stage we must send a create option request.
+		 */
+		if ( $this->connection_options_id_cache_is_missing() ) {
+			$this->maybe_find_all_connection_options_by_connection_id();
 
-			$this->maybe_find_connection_option_by_connection_id();
-
-			if ( $this->connection_option ) {
-				$this->update_connection_option_id_cache( $this->connection_option->get_id() );
-
-				$this->update_connection_option();
+			if ( $this->connection_options ) {
+				$this->update_all_connection_options();
 
 				return;
 			}
 
-			$this->logger->debug( 'Create or update connection option command: connection option not found.' );
-
-			$this->create_connection_option();
-
-			return;
+			$this->update_all_connection_options();
 		}
-
-		$this->update_connection_option();
+		$this->update_all_connection_options();
 	}
 	// phpcs:enable
 
@@ -158,190 +176,228 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 	 * @deprecated
 	 */
 	private function necessary_values_are_missing() {
-		return ! isset( $this->storage['connection_id'] ) || ! isset( $this->settings['abcart_wait'] );
+		return ! isset( $this->storage['connection_id'] ) || ! isset( $this->settings['abcart_wait'] ) || ! isset( $this->settings['ba_min_page_view_time'] ) || ! isset( $this->settings['ba_session_timeout'] ) || ! isset( $this->settings['ba_product_url_patterns'] );
 	}
 
 	/**
-	 * Instantiates the Connection Option and returns it.
-	 *
-	 * @return Connection_Option
-	 * @since  1.0.0
-	 * @access private
-	 * @deprecated
-	 */
-	private function get_connection_option() {
-		if ( $this->connection_option ) {
-			$connection_option = $this->connection_option;
-		} else {
-			$connection_option = new Connection_Option();
-		}
-
-		$connection_option->set_option( 'abandoned_cart.abandon_after_hours' );
-		$connection_option->set_connectionid( $this->storage['connection_id'] );
-		$connection_option->set_value( $this->settings['abcart_wait'] );
-
-		return $connection_option;
-	}
-
-	/**
-	 * Returns whether or not the connection option id is set
+	 * Returns whether or not the connection option ids are set for ba settings
 	 * in the DB cache or not.
 	 *
 	 * @return bool
 	 * @since  1.0.0
 	 * @access private
-	 * @deprecated
 	 */
-	private function connection_option_id_cache_is_missing() {
-		return ! isset( $this->storage['connection_option_id'] );
+	private function connection_options_id_cache_is_missing() {
+		return ! isset( $this->storage['abcart_wait_id'] ) || ! isset( $this->storage['ba_min_page_view_time_id'] ) || ! isset( $this->storage['ba_session_timeout_id'] ) || ! isset( $this->storage['ba_product_url_patterns_id'] );
 	}
 
 	/**
-	 * Instantiates a connection option, then creates it via API, then caches the id
-	 * of the option in the DB.
-	 *
-	 * @since  1.0.0
-	 * @access private
-	 * @deprecated
+	 * Call AC to store Option Ids used to determine create or update patterns
 	 */
-	private function create_connection_option() {
-		$connection_option = $this->get_connection_option();
-
+	private function store_connection_option_ids_from_ac() {
+		$ac_ids = array();
 		try {
-			$this->repository->create( $connection_option );
-
-			$this->logger->info( 'Create or update connection option command: connection option created.' );
-		} catch ( Throwable $t ) {
-			$this->admin->add_async_processing_notification(
-				'There was a problem updating the Abandoned Cart time, please try saving your settings again.',
-				'error'
-			);
-
-			$message     = $t->getMessage();
-			$stack_trace = $this->logger->clean_trace( $t->getTrace() );
-			$this->logger->warning(
-				'Create connection option encountered an error',
-				array(
-					'message'     => $message,
-					'stack trace' => $stack_trace,
-				)
-			);
-
-			return;
-		}
-
-		$this->connection_option = $connection_option;
-
-		$this->update_connection_option_id_cache( $this->connection_option->get_id() );
-	}
-
-	/**
-	 * Attempts to find the connection option by its connection id before creating.
-	 *
-	 * @deprecated
-	 */
-	private function maybe_find_connection_option_by_connection_id() {
-		try {
-			$this->connection_option = $this->repository->find_by_filter(
+			$connection_options = $this->repository->find_all_by_filter(
 				'connectionid',
 				$this->storage['connection_id']
 			);
+
+			foreach ( $connection_options as $connection_option ) {
+				array_push( $ac_ids, $connection_option['id'] );
+			}
 		} catch ( Activecampaign_For_Woocommerce_Resource_Not_Found_Exception $e ) {
 			$message     = $e->getMessage();
 			$stack_trace = $this->logger->clean_trace( $e->getTrace() );
 			$this->logger->warning(
-				'Could not find the connection option ID by connection ID.',
+				'Could not find any connection options by connection ID.',
 				array(
 					'message'     => $message,
 					'stack trace' => $stack_trace,
 				)
 			);
+			$ac_ids = array();
+		}
+		return $ac_ids;
+	}
+	/**
+	 * Attempts to find all the connection options by its connection id
+	 */
+	private function maybe_find_all_connection_options_by_connection_id() {
+		$connection_options_model_array = array();
+		$temp_connection_options_keys   = array_values( $this->connection_options_keys );
+		try {
+			$connection_options = $this->repository->find_all_by_filter(
+				'connectionid',
+				$this->storage['connection_id']
+			);
 
-			$this->connection_option = null;
+			foreach ( $connection_options as $connection_option ) {
+				$co_model = new Connection_Option();
+				$co_model->set_properties_from_serialized_array( $connection_option );
+
+				array_push( $connection_options_model_array, $co_model );
+				array_splice( $temp_connection_options_keys, array_search( $connection_option['option'], $temp_connection_options_keys ), 1 );
+			}
+			/**
+			 * After retrieval options could be missing. could be due to for some unforeseen reason record was deleted in AC.
+			 * If this array has values that is the case, so we need to create a model for the option we need to create.
+			 */
+			if ( ! empty( $temp_connection_options_keys ) ) {
+				foreach ( $temp_connection_options_keys as $option ) {
+					$missing_connection_option = new Connection_Option();
+					$option_name               = array_search( $option, $this->connection_options_keys );
+
+					$missing_connection_option->set_option( $option );
+					$missing_connection_option->set_connectionid( $this->storage['connection_id'] );
+					$missing_connection_option->set_value( $this->settings[ $option_name ] );
+					array_push( $connection_options_model_array, $missing_connection_option );
+				}
+			}
+
+			$this->connection_options = $connection_options_model_array;
+		} catch ( Activecampaign_For_Woocommerce_Resource_Not_Found_Exception $e ) {
+			$message     = $e->getMessage();
+			$stack_trace = $this->logger->clean_trace( $e->getTrace() );
+			$this->logger->warning(
+				'Could not find any connection options by connection ID.',
+				array(
+					'message'     => $message,
+					'stack trace' => $stack_trace,
+				)
+			);
+			$this->connection_options = null;
 		}
 	}
 
 	/**
-	 * Sends a Connection Option resource to Hosted via the API, then caches the id
-	 * of the option in the DB.
+	 * Prepares all options to update/create process. Sets values from settings
+	 * This is called after an
 	 *
-	 * If the first PUT fails with a Resource Not Found exception, the assumption is that the cache
-	 * has become out of date and we need to attempt to re-find the connection option from the connection
-	 * id. Once we've done that, we'll attempt to update it again. If it _still_ fails, then the assumption is
-	 * that the connection option has somehow been deleted in Hosted. At this point, we create a new one instead.
-	 *
-	 * @param int $attempts How many attempts have we made so far. Prevents an infinite loop.
-	 *
-	 * @throws Exception WHen the container is missing definitions.
-	 * @throws Activecampaign_For_Woocommerce_Resource_Not_Found_Exception When a 404 is returned.
-	 * @throws Activecampaign_For_Woocommerce_Resource_Unprocessable_Exception When the connection option is
-	 *                                                                         unprocessable.
+	 * @return Connection_Option[]
 	 * @since  1.0.0
 	 * @access private
-	 * @deprecated
 	 */
-	private function update_connection_option( $attempts = 0 ) {
-		$connection_option = $this->get_connection_option();
+	private function get_all_connection_options() {
+		$connection_options = array();
 
-		// Don't override an existing ID.
-		if ( $this->storage['connection_id'] === $connection_option->get_connectionid() &&
-			 $this->storage['connection_option_id'] !== $connection_option->get_value()
-		) {
-			$connection_option->set_id( $this->storage['connection_option_id'] );
+		if ( $this->connection_options ) {
+			$connection_options = $this->connection_options;
+		} else {
+			foreach ( $this->connection_options_keys as $wc_option => $ac_option ) {
+				$connection_option = new Connection_Option();
+
+				$connection_option->set_option( $ac_option );
+				$connection_option->set_connectionid( $this->storage['connection_id'] );
+				$connection_option->set_value( $this->settings[ $wc_option ] );
+
+				array_push( $connection_options, $connection_option );
+			}
 		}
 
-		if ( ! $connection_option->get_id() ) {
-			$connection_option->set_id( $this->storage['connection_option_id'] );
-		}
+		return $connection_options;
+	}
 
-		try {
-			$this->repository->update( $connection_option );
-		} catch ( Activecampaign_For_Woocommerce_Resource_Not_Found_Exception $e ) {
-			if ( $attempts > 1 ) {
-				$this->create_connection_option();
+	/**
+	 * Sends all Connection Option resources to Hosted via the API, then caches the ids
+	 * of the option in the DB.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 */
+	private function update_all_connection_options() {
+		$connection_options = $this->get_all_connection_options();
+		foreach ( $connection_options as $connection_option ) {
+			$option_name    = array_search( $connection_option->get_option(), $this->connection_options_keys );
+			$send_to_create = false;
+
+			if ( ! $connection_option->get_id() ) {
+				// The option is missing an id however we have one in storage, so we can use that to make an update call. only if it matches the id we pulled from AC
+				if ( isset( $this->storage[ "{$option_name}_id" ] ) && in_array( $this->storage[ "{$option_name}_id" ], $this->ac_connection_option_ids ) ) {
+					$connection_option->set_id( $this->storage[ "{$option_name}_id" ] );
+				} else {
+					$this->logger->info( 'Connection Option is missing. Creating Connection option - ' . $option_name );
+					$send_to_create = true;
+				}
 			}
 
-			$this->maybe_find_connection_option_by_connection_id();
-
-			$this->update_connection_option( ++ $attempts );
-		} catch ( Throwable $t ) {
-			/**
-			 * We have seen issues for a few users of this plugin where either the create or update call throws
-			 * an exception, which ends up breaking their store. This try/catch is a stop-gap measure for now.
-			 */
-
-			$message     = $t->getMessage();
-			$stack_trace = $this->logger->clean_trace( $t->getTrace() );
-			$this->logger->error(
-				'There was an error attempting to update the connection option with ActiveCampaign.',
-				array(
-					'message'     => $message,
-					'stack trace' => $stack_trace,
-				)
-			);
-
-			return;
+			$this->update_or_create_option( $connection_option, $send_to_create );
 		}
-
-		$this->update_connection_option_id_cache( $connection_option->get_id() );
 	}
 
 	/**
 	 * Updates the cache with the connection option id.
 	 *
-	 * @param string $id The id.
+	 * @param Connection_Option $connection_option The connection option to save in cache.
 	 *
 	 * @since  1.0.0
 	 * @access private
-	 * @deprecated
 	 */
-	private function update_connection_option_id_cache( $id ) {
-		$this->admin->update_connection_storage(
-			array(
-				'connection_option_id' => $id,
-			)
-		);
+	private function update_connection_option_id_cache( $connection_option ) {
+		$option_name = array_search( $connection_option->get_option(), $this->connection_options_keys );
+			$this->admin->update_connection_storage(
+				array(
+					"{$option_name}_id" => $connection_option->get_id(),
+				)
+			);
 
 		$this->storage = $this->admin->get_connection_storage();
+	}
+
+	/**
+	 * Instantiates connection options for each connection option, then creates it via API, then caches their ids
+	 * of the option in the DB.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 */
+	private function update_or_create_option( $connection_option, $to_create ) {
+		if ( $to_create ) {
+			try {
+				$this->repository->create( $connection_option );
+
+				$this->logger->info( 'Create or update connection option command:  single connection option created -' . $connection_option->get_option() );
+			} catch ( Throwable $t ) {
+				$this->admin->add_async_processing_notification(
+					'Issue saving singular connection option setting. Option not saved for option - ' . $connection_option->get_option(),
+					'error'
+				);
+
+				$message     = $t->getMessage();
+				$stack_trace = $this->logger->clean_trace( $t->getTrace() );
+				$this->logger->warning(
+					'Create connection option encountered an error',
+					array(
+						'message'     => $message,
+						'stack trace' => $stack_trace,
+					)
+				);
+
+				return;
+			}
+		} else {
+			try {
+				$this->repository->update( $connection_option );
+
+				$this->logger->info( 'Create or update connection option command:  single connection option updated - ' . $connection_option->get_option() );
+			} catch ( Throwable $t ) {
+				$this->admin->add_async_processing_notification(
+					'Issue updating singular connection option setting. Option not saved for option - ' . $connection_option->get_option(),
+					'error'
+				);
+
+				$message     = $t->getMessage();
+				$stack_trace = $this->logger->clean_trace( $t->getTrace() );
+				$this->logger->warning(
+					'Create connection option encountered an error',
+					array(
+						'message'     => $message,
+						'stack trace' => $stack_trace,
+					)
+				);
+
+				return;
+			}
+		}
+		$this->update_connection_option_id_cache( $connection_option );
 	}
 }

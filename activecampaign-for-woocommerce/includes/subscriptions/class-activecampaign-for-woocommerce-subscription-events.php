@@ -22,8 +22,8 @@ use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Status {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
 
 	/**
 	 * A new subscription is created from checkout.
@@ -36,9 +36,15 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 	public function execute_woocommerce_checkout_subscription_created( WC_Subscription $subscription, WC_Order $wc_order, WC_Cart $recurring_cart ) {
 		global $wpdb;
 
-		$logger = new Logger();
+		$logger          = new Logger();
+		$wc_subscription = $this->get_wc_subscription_object( $subscription );
 
 		$order_id = $subscription->get_id(); // This is actually the ID for a subscription but it's handled as an order.
+
+		if ( false === $wc_subscription || is_null( $wc_subscription ) ) {
+			return;
+		}
+
 		// phpcs:disable
 		$stored_row =$wpdb->get_row(
 			$wpdb->prepare(
@@ -57,9 +63,9 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 			$wpdb->update(
 				$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 				$stored_row,
-				[
+				array(
 					'id' => $stored_id,
-				]
+				)
 			);
 		}
 	}
@@ -101,27 +107,27 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 
 			$logger->debug(
 				'Subscription updated triggered and order set',
-				[
+				array(
 					'subscription_id' => $subscription_id,
-				]
+				)
 			);
 
 			if ( isset( $subscription_id ) && null !== $subscription_id && ! empty( $subscription_id ) ) {
-				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'wc_order_id' => $subscription_id ] ) ) {
+				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $subscription_id ) ) ) {
 					wp_schedule_single_event(
 						time() + 30,
 						'activecampaign_for_woocommerce_update_subscription',
-						[ 'wc_order_id' => $subscription_id ]
+						array( 'wc_order_id' => $subscription_id )
 					);
 				}
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an error thrown while trying to run the subscription update hook.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'SE_146',
-				]
+				)
 			);
 		}
 	}
@@ -142,30 +148,30 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 
 		$logger->debug(
 			'Subscription trial end triggered and order set',
-			[
+			array(
 				'subscription_id' => $subscription_id,
-			]
+			)
 		);
 
 		try {
 			$order_id = $wc_subscription->get_id(); // This is actually the ID for a subscription but it's handled as an order.
 			$this->update_status( $wc_subscription, 0 );
 			if ( isset( $subscription_id ) && null !== $subscription_id && ! empty( $subscription_id ) ) {
-				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, [ 'wc_order_id' => $subscription_id ] ) ) {
+				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $subscription_id ) ) ) {
 					wp_schedule_single_event(
 						time() + 30,
 						'activecampaign_for_woocommerce_update_subscription',
-						[ 'wc_order_id' => $subscription_id ]
+						array( 'wc_order_id' => $subscription_id )
 					);
 				}
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an error thrown while trying to run the subscription trial end hook.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'SE_224',
-				]
+				)
 			);
 		}
 	}
@@ -182,6 +188,10 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 			$wc_subscription = $this->get_wc_subscription_object( $subscription_id );
 		}
 
+		if ( false === $wc_subscription || is_null( $wc_subscription ) ) {
+			return;
+		}
+
 		if (self::validate_object( $wc_subscription, 'get_id' ) && wcs_is_subscription( $wc_subscription ) && ! empty( $wc_subscription->get_id() ) ) {
 			$this->update_status( $wc_subscription, 0 );
 			$this->execute_woocommerce_subscription_status_updated( $wc_subscription );
@@ -189,11 +199,11 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 			$logger = new Logger();
 			$logger->debug(
 				'The trigger_order_to_subscription method failed to establish a subscription object',
-				[
+				array(
 					'subscription_id' => $subscription_id,
 					'wc_subscription' => $wc_subscription,
 					'is subscription' => wcs_is_subscription( $wc_subscription ),
-				]
+				)
 			);
 		}
 	}
@@ -210,7 +220,12 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 		if (is_array( $subscription_id ) ) {
 			$subscription_id = $subscription_id[0];
 		}
+
 		$wc_subscription = $this->get_wc_subscription_object( $subscription_id );
+		if ( false === $wc_subscription || is_null( $wc_subscription ) ) {
+			return;
+		}
+
 		if (self::validate_object( $wc_subscription, 'get_id' ) && ! empty( $wc_subscription->get_id() ) ) {
 			$this->update_status( $wc_subscription, 1 );
 			$this->execute_woocommerce_subscription_status_updated( $wc_subscription );
@@ -218,9 +233,9 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 			$logger = new Logger();
 			$logger->debug(
 				'This historical order to subscription does not appear to be valid.',
-				[
+				array(
 					'subscription_id' => $subscription_id,
-				]
+				)
 			);
 		}
 	}
@@ -236,29 +251,43 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 	public function update_status( $wc_subscription, $historical = 0 ) {
 		$logger = new Logger();
 		global $wpdb;
+		$wc_subscription = $this->get_wc_subscription_object( $wc_subscription );
+
+		if ( false === $wc_subscription || is_null( $wc_subscription ) ) {
+			return;
+		}
+
 		$order_id = $wc_subscription->get_id(); // This is actually the ID for a subscription but it's handled as an order.
-		// phpcs:disable
-		$stored_row = $wpdb->get_row(
-			$wpdb->prepare(
-				'SELECT id, wc_order_id, synced_to_ac FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
+
+		if ( isset( $wc_subscription ) &&
+			self::validate_object( $wc_subscription, 'get_id' ) &&
+			wcs_is_subscription( $wc_subscription )
+		) {
+			// phpcs:disable
+			$stored_row = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT id, wc_order_id, synced_to_ac FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
 					WHERE wc_order_id = %d LIMIT 1',
-				[ $order_id ]
-			),
-			'ARRAY_A'
-		);
-		// phpcs:enable
-
-		if ( isset( $stored_row['id'] ) && ! empty( $stored_row['id'] ) ) {
-			$stored_id                  = $stored_row['id'];
-			$stored_row['synced_to_ac'] = 0 === $historical ? self::STATUS_SUBSCRIPTION_UNSYNCED : self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_PREP;
-
-			$wpdb->update(
-				$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-				$stored_row,
-				[
-					'id' => $stored_id,
-				]
+					[ $order_id ]
+				),
+				'ARRAY_A'
 			);
+			// phpcs:enable
+
+			if ( isset( $stored_row['id'] ) && ! empty( $stored_row['id'] ) ) {
+				$stored_id                  = $stored_row['id'];
+				$stored_row['synced_to_ac'] = 0 === $historical ? self::STATUS_SUBSCRIPTION_UNSYNCED : self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_PREP;
+
+				$wpdb->update(
+					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
+					$stored_row,
+					array(
+						'id' => $stored_id,
+					)
+				);
+			}
+		} else {
+			$logger->debug( 'Non-subscription event sent to update status, ignoring', array( 'subscription_id' => $order_id ) );
 		}
 	}
 
@@ -284,8 +313,8 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 
 			if (
 				! empty( $wc_subscription ) &&
-				 self::validate_object( $wc_subscription, 'get_id' ) &&
-				 ! empty( $wc_subscription->get_id() )
+				self::validate_object( $wc_subscription, 'get_id' ) &&
+				! empty( $wc_subscription->get_id() )
 			) {
 				return $wc_subscription;
 			}

@@ -29,8 +29,8 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 	private function is_configured() {
 		$ops = $this->get_local_settings();
 		if ( ! $ops ||
-			 ! $ops['api_key'] ||
-			 ! $ops['api_url']
+			! $ops['api_key'] ||
+			! $ops['api_url']
 		) {
 			return false;
 		}
@@ -144,10 +144,10 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 			if ( isset( $wpdb->last_error ) && ! empty( $wpdb->last_error ) ) {
 				$logger->warning(
 					'There was an error inserting records into the table',
-					[
+					array(
 						'error' => $wpdb->last_error,
 						'func'  => 'wpdb_bulk_insert',
-					]
+					)
 				);
 			}
 
@@ -155,10 +155,10 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'There was an issue with bulk DB insert',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;
@@ -203,7 +203,7 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 				$escaped[] = esc_sql( $key ) . ' = ' . $wpdb->prepare( $f, $value );
 				// phpcs:enable
 
-				$i ++;
+				++$i;
 			}
 
 			$q         .= implode( ', ', $escaped );
@@ -227,7 +227,7 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 			$q .= implode( ', ', $escaped ) . ')';
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
-			$logger->debug( 'wpdb_update_in problem', [ $t->getMessage() ] );
+			$logger->debug( 'wpdb_update_in problem', array( $t->getMessage() ) );
 		}
 
 		try {
@@ -238,7 +238,7 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 			return $result;
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
-			$logger->debug( 'wpdb_update_in problem', [ $t->getMessage() ] );
+			$logger->debug( 'wpdb_update_in problem', array( $t->getMessage() ) );
 
 			return null;
 		}

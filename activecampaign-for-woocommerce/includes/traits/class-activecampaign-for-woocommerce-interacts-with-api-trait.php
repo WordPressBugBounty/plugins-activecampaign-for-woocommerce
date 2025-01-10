@@ -44,20 +44,18 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		$logger = new Logger();
 
 		try {
-			$result = $client
-				->get( self::ENDPOINT_NAME_PLURAL, (string) $id )
-				->execute();
+			$result = $client->get( self::ENDPOINT_NAME_PLURAL, (string) $id )->execute();
 		} catch ( Throwable $t ) {
 			$logger->debug_excess(
 				'The resource was not found in Hosted. This may not be an error. Check response_message to confirm.',
-				[
+				array(
 					'resource_name'    => self::RESOURCE_NAME,
 					'endpoint_name'    => self::ENDPOINT_NAME,
 					'found_by'         => 'id',
 					'value'            => $id,
 					'response_message' => $t->getMessage(),
 					'status_code'      => $t->getResponse() ? $t->getResponse()->getStatusCode() : '',
-				]
+				)
 			);
 		}
 
@@ -67,11 +65,11 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 				if ( ! is_object( $result ) || ! self::validate_object( $result, 'getBody' ) ) {
 					$logger->debug(
 						'Result of get and set model from get_and_set_model_properties_from_api_by_id',
-						[
+						array(
 							'result'        => $result,
 							'resource_name' => self::RESOURCE_NAME,
 							'endpoint_name' => self::ENDPOINT_NAME,
-						]
+						)
 					);
 				} else {
 					$resource_array = json_decode( $result->getBody(), true );
@@ -86,29 +84,29 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					} else {
 						$logger->error(
 							'Resource returned is invalid or empty. ActiveCampaign may be unreachable.',
-							[
+							array(
 								'result'           => $result,
 								'suggested_action' => 'Please wait and if this message persists contact ActiveCampaign for support.',
 								'ac_code'          => 'IWAPI_88',
 								'resource_name'    => self::RESOURCE_NAME,
 								'result_body'      => self::validate_object( $result, 'getBody' ) ? $result->getBody() : null,
-							]
+							)
 						);
 					}
 				}
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource thrown error.',
-					[
+					array(
 						'result'  => $result,
 						'ac_code' => 'IWAPI_100',
-					]
+					)
 				);
 			}
 		} else {
 			$logger->error(
 				'There was an issue contacting ActiveCampaign, request returned an empty or null result. ActiveCampaign may not be reachable by this Host.',
-				[
+				array(
 					'suggested_action' => 'Please verify with your hosting provider that the ActiveCampaign API is reachable. Please contact ActiveCampaign support if necessary.',
 					'ac_code'          => 'IWAPI_109',
 					'client'           => $client,
@@ -117,7 +115,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					'endpoint_name'    => self::ENDPOINT_NAME,
 					'found_by'         => 'id',
 					'value'            => $id,
-				]
+				)
 			);
 		}
 	}
@@ -193,14 +191,14 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: There was an issue parsing the resource from serialized array.',
-					[
+					array(
 						'message'      => $t->getMessage(),
 						'endpoint'     => $client->get_endpoint(),
 						'client_body'  => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 						'filter_name'  => $filter_name,
 						'filter_value' => $filter_value,
 						'resource'     => $resource,
-					]
+					)
 				);
 			}
 			return;
@@ -209,12 +207,12 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		try {
 			$logger->debug(
 				'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource not found in result.',
-				[
+				array(
 					'endpoint'     => $client->get_endpoint(),
 					'resource'     => $resource,
 					'filter_name'  => $filter_name,
 					'filter_value' => $filter_value,
-				]
+				)
 			);
 
 			if ( isset( $resource ) ) {
@@ -223,14 +221,14 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource threw an error.',
-				[
+				array(
 					'message'      => $t->getMessage(),
 					'endpoint'     => $client->get_endpoint(),
 					'client_body'  => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 					'filter_name'  => $filter_name,
 					'filter_value' => $filter_value,
 					'resource'     => $resource,
-				]
+				)
 			);
 		}
 	}
@@ -251,27 +249,24 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		$filter_value,
 		callable $response_massager = null
 	) {
-		$client->set_filters( [] );
+		$client->set_filters( array() );
 		$client->with_body( '' );
 		$logger = new Logger();
-		$result = $client
-			->get( self::ENDPOINT_NAME_PLURAL )
-			->with_filter( $filter_name, $filter_value )
-			->execute();
+		$result = $client->get( self::ENDPOINT_NAME_PLURAL )->with_filter( $filter_name, $filter_value )->execute();
 
 		if ( $result ) {
 			try {
 				if ( ! is_object( $result ) || ! self::validate_object( $result, 'getBody' ) ) {
 					$logger->debug(
 						'Result from API may not have a body. Could be an error.',
-						[
+						array(
 							'result'        => $result,
 							'filter_name'   => $filter_name,
 							'filter_value'  => $filter_value,
 							'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 							'resource_name' => self::RESOURCE_NAME,
 							'endpoint_name' => self::ENDPOINT_NAME,
-						]
+						)
 					);
 				} else {
 					$resources_array = json_decode( $result->getBody(), true );
@@ -279,7 +274,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 						if ( count( $resources_array[ self::RESOURCE_NAME_PLURAL ] ) < 1 ) {
 							$logger->debug_excess(
 								'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was not found. This may not be an error.',
-								[
+								array(
 									'resource_name' => self::RESOURCE_NAME,
 									'endpoint_name' => self::ENDPOINT_NAME,
 									'filter_name'   => $filter_name,
@@ -289,7 +284,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 										? $result->getBody()->getContents()
 										: null,
 									'code'          => 404,
-								]
+								)
 							);
 						}
 
@@ -303,13 +298,13 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			} catch ( Throwable $t ) {
 				$logger->debug(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource thrown error.',
-					[
+					array(
 						'result'       => $result,
 						'filter_name'  => $filter_name,
 						'filter_value' => $filter_value,
 						'client_body'  => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 						'code'         => $t->getCode(),
-					]
+					)
 				);
 			}
 		}
@@ -327,7 +322,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		Activecampaign_For_Woocommerce_Ecom_Model_Interface $model,
 		callable $response_massager = null
 	) {
-		$client->set_filters( [] );
+		$client->set_filters( array() );
 		$logger = new Logger();
 
 		$resource = $model->serialize_to_array();
@@ -335,22 +330,24 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		if ( 'import' === self::RESOURCE_NAME ) {
 			$body = $resource;
 		} else {
-			$body = [
+			$body = array(
 				self::RESOURCE_NAME => $resource,
-			];
+			);
 		}
 
-		$body_as_string = wp_json_encode( $body );
+		if ('siteTrackingDomain' === self::RESOURCE_NAME ) {
+			// Do not encode these resources
+			$body_as_string = wp_json_encode( $body, JSON_UNESCAPED_SLASHES );
+		} else {
+			$body_as_string = wp_json_encode( $body );
+		}
 
 		try {
-			$result = $client
-				->post( self::ENDPOINT_NAME_PLURAL )
-				->with_body( $body_as_string )
-				->execute();
+			$result = $client->post( self::ENDPOINT_NAME_PLURAL )->with_body( $body_as_string )->execute();
 		} catch ( AcVendor\GuzzleHttp\Exception\ClientException $e ) {
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was unprocessable. [ACGE]',
-				[
+				array(
 					'message'       => $e->getMessage(),
 					'resource_name' => self::RESOURCE_NAME,
 					'endpoint_name' => self::ENDPOINT_NAME,
@@ -362,12 +359,12 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					// Make sure the clean trace ends up in the logs
 					'trace'         => $logger->clean_trace( $e->getTrace() ),
 					'status_code'   => self::validate_object( $e->getResponse(), 'getStatusCode' ) ? $e->getResponse()->getStatusCode() : '',
-				]
+				)
 			);
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was unprocessable. [Throwable]',
-				[
+				array(
 					'message'       => $t->getMessage(),
 					'resource_name' => self::RESOURCE_NAME,
 					'endpoint_name' => self::ENDPOINT_NAME,
@@ -379,7 +376,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					// Make sure the clean trace ends up in the logs
 					'trace'         => $logger->clean_trace( $t->getTrace() ),
 					'status_code'   => self::validate_object( $t->getResponse(), 'getStatusCode' ) ? $t->getResponse()->getStatusCode() : '',
-				]
+				)
 			);
 		}
 
@@ -401,12 +398,13 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 				$logger = new Logger();
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource error thrown.',
-					[
+					array(
 						'message'     => $t->getMessage(),
 						'client_body' => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 						'result'      => $result,
+						'ac_code'     => 'IWAPI_409',
 						'trace'       => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}
@@ -415,13 +413,123 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			$logger = new Logger();
 			$logger->error(
 				'ActiveCampaign returned an error response. Please check the result below for explanation.',
-				[
+				array(
 					'resource_name' => self::RESOURCE_NAME,
 					'endpoint_name' => self::ENDPOINT_NAME,
 					'ac_code'       => 'IWAPI_416',
 					'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 					'result'        => $result,
-				]
+				)
+			);
+
+			return $result;
+		}
+
+		if ( isset( $result ) && is_array( $result ) && isset( $result['type'] ) && ( 'success' === $result['type'] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private function put_model_properties_in_api(
+		Activecampaign_For_Woocommerce_Api_Client $client,
+		Activecampaign_For_Woocommerce_Ecom_Model_Interface $model,
+		callable $response_massager = null
+	) {
+		$client->set_filters( array() );
+		$logger = new Logger();
+
+		$resource = $model->serialize_to_array();
+
+		if ( 'import' === self::RESOURCE_NAME ) {
+			$body = $resource;
+		} else {
+			$body = array(
+				self::RESOURCE_NAME => $resource,
+			);
+		}
+
+		$body_as_string = wp_json_encode( $body );
+
+		try {
+			$result = $client->put( self::ENDPOINT_NAME_PLURAL )->with_body( $body_as_string )->execute();
+		} catch ( AcVendor\GuzzleHttp\Exception\ClientException $e ) {
+			$logger->warning(
+				'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was unprocessable. [ACGE]',
+				array(
+					'message'       => $e->getMessage(),
+					'resource_name' => self::RESOURCE_NAME,
+					'endpoint_name' => self::ENDPOINT_NAME,
+					'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+					'context'       => $body_as_string,
+					'response'      => self::validate_object( $e->getResponse(), 'getBody' )
+						? $e->getResponse()->getBody()->getContents()
+						: '',
+					// Make sure the clean trace ends up in the logs
+					'trace'         => $logger->clean_trace( $e->getTrace() ),
+					'status_code'   => self::validate_object( $e->getResponse(), 'getStatusCode' ) ? $e->getResponse()->getStatusCode() : '',
+				)
+			);
+		} catch ( Throwable $t ) {
+			$logger->warning(
+				'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was unprocessable. [Throwable]',
+				array(
+					'message'       => $t->getMessage(),
+					'resource_name' => self::RESOURCE_NAME,
+					'endpoint_name' => self::ENDPOINT_NAME,
+					'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+					'context'       => $body_as_string,
+					'response'      => self::validate_object( $t->getResponse(), 'getBody' )
+						? $t->getResponse()->getBody()->getContents()
+						: '',
+					// Make sure the clean trace ends up in the logs
+					'trace'         => $logger->clean_trace( $t->getTrace() ),
+					'status_code'   => self::validate_object( $t->getResponse(), 'getStatusCode' ) ? $t->getResponse()->getStatusCode() : '',
+				)
+			);
+		}
+
+		if ( isset( $result ) && self::validate_object( $result, 'getBody' ) ) {
+			try {
+				$resource_array = json_decode( $result->getBody(), true );
+
+				if ( $response_massager ) {
+					$resource_array = $response_massager( $resource_array );
+				}
+
+				if ( isset( $resource_array[ self::RESOURCE_NAME ] ) ) {
+					$resource = $resource_array[ self::RESOURCE_NAME ];
+					$model->set_properties_from_serialized_array( $resource );
+				}
+
+				return $result;
+			} catch ( Throwable $t ) {
+				$logger = new Logger();
+				$logger->warning(
+					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource error thrown.',
+					array(
+						'message'     => $t->getMessage(),
+						'client_body' => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+						'result'      => $result,
+						'ac_code'     => 'IWAPI_409',
+						'trace'       => $logger->clean_trace( $t->getTrace() ),
+					)
+				);
+			}
+		}
+
+		if ( isset( $result['type'] ) && ( 'error' === $result['type'] || 'timeout' === $result['type'] ) ) {
+			$logger = new Logger();
+			$logger->error(
+				'ActiveCampaign returned an error response. Please check the result below for explanation.',
+				array(
+					'resource_name' => self::RESOURCE_NAME,
+					'endpoint_name' => self::ENDPOINT_NAME,
+					'ac_code'       => 'IWAPI_416',
+					'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
+					'result'        => $result,
+				)
 			);
 
 			return $result;
@@ -446,13 +554,13 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		Activecampaign_For_Woocommerce_Ecom_Model_Interface $model,
 		callable $response_massager = null
 	) {
-		$client->set_filters( [] );
+		$client->set_filters( array() );
 
 		$resource = $model->serialize_to_array();
 
-		$body = [
+		$body = array(
 			self::RESOURCE_NAME => $resource,
-		];
+		);
 
 		$body_as_string = wp_json_encode( $body );
 		$logger         = new Logger();
@@ -466,17 +574,14 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 				)
 			);
 
-			$result = $client
-				->put( self::RESOURCE_NAME_PLURAL, $model->get_id() )
-				->with_body( $body_as_string )
-				->execute();
+			$result = $client->put( self::RESOURCE_NAME_PLURAL, $model->get_id() )->with_body( $body_as_string )->execute();
 
 			return $result;
 		} catch ( AcVendor\GuzzleHttp\Exception\ClientException $e ) {
 			if ( $e->getCode() === 404 ) {
 				$logger->debug_excess(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was not found. This is likely not an error.',
-					[
+					array(
 						'message'       => $e->getMessage(),
 						'resource_name' => self::RESOURCE_NAME,
 						'endpoint_name' => self::ENDPOINT_NAME,
@@ -488,14 +593,14 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 						// Make sure the trace ends up in the logs
 						'trace'         => $logger->clean_trace( $e->getTrace() ),
 						'status_code'   => $e->getResponse() ? $e->getResponse()->getStatusCode() : '',
-					]
+					)
 				);
 			}
 
 			if ( $e->getCode() === 403 ) {
 				$logger->error(
 					'ActiveCampaign returned a 403 error. This action may be forbidden.',
-					[
+					array(
 						'suggested_action' => 'Please verify your API credentials are correct. If they are please try repairing your connection or re-saving your settings in the plugin.',
 						'ac_code'          => 'IWAPI_496',
 						'message'          => $e->getMessage(),
@@ -509,13 +614,13 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 						// Make sure the trace ends up in the logs
 						'trace'            => $logger->clean_trace( $e->getTrace() ),
 						'status_code'      => $e->getResponse() ? $e->getResponse()->getStatusCode() : '',
-					]
+					)
 				);
 			}
 
 			$logger->warning(
 				'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was unprocessable.',
-				[
+				array(
 					'message'       => $e->getMessage(),
 					'resource_name' => self::RESOURCE_NAME,
 					'endpoint_name' => self::ENDPOINT_NAME,
@@ -524,7 +629,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 						? $e->getResponse()->getBody()->getContents()
 						: '',
 					'status_code'   => $e->getResponse() ? $e->getResponse()->getStatusCode() : '',
-				]
+				)
 			);
 		}
 
@@ -542,13 +647,12 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 				$logger = new Logger();
 				$logger->debug(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: Failed to set properties from serialized array.',
-					[
+					array(
 						'result' => $result,
-					]
+					)
 				);
 			}
 		}
-
 	}
 
 	/**
@@ -568,19 +672,17 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		$logger = new Logger();
 
 		try {
-			$result = $client
-				->delete( self::ENDPOINT_NAME_PLURAL, (string) $id )
-				->execute();
+			$result = $client->delete( self::ENDPOINT_NAME_PLURAL, (string) $id )->execute();
 		} catch ( Throwable $t ) {
 			$logger->debug_calls(
 				'The delete method threw a critical error.',
-				[
+				array(
 					'resource_name'    => self::RESOURCE_NAME,
 					'endpoint_name'    => self::ENDPOINT_NAME,
 					'value'            => $id,
 					'response_message' => $t->getMessage(),
 					'status_code'      => $t->getTrace(),
-				]
+				)
 			);
 		}
 
@@ -590,15 +692,15 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource thrown error.',
-					[
+					array(
 						'result' => $result,
-					]
+					)
 				);
 			}
 		} else {
 			$logger->error(
 				'There was an issue contacting hosted with delete method, request returned an empty or null result.',
-				[
+				array(
 					'suggested_action' => 'You may not have access rights to delete via the ActiveCampaign API.',
 					'ac_code'          => 'IWAPI_599',
 					'client'           => $client,
@@ -606,7 +708,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					'resource_name'    => self::RESOURCE_NAME,
 					'endpoint_name'    => self::ENDPOINT_NAME,
 					'value'            => $id,
-				]
+				)
 			);
 		}
 	}
@@ -620,20 +722,18 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		$result = 'zero';
 
 		try {
-			$result = $client
-				->get( self::ENDPOINT_NAME_PLURAL )
-				->execute();
+			$result = $client->get( self::ENDPOINT_NAME_PLURAL )->execute();
 		} catch ( Throwable $t ) {
 			$logger->debug_excess(
 				'The resource was not found in Hosted. This may not be an error. Check response_message to confirm.',
-				[
+				array(
 					'resource_name'    => self::RESOURCE_NAME,
 					'endpoint_name'    => self::ENDPOINT_NAME,
 					'found_by'         => 'gets all',
 					'response_message' => $t->getMessage(),
 					'ac_code'          => 'IWAPI_630',
 					// 'status_code'      => $t->getResponse() ? $t->getResponse()->getStatusCode() : '',
-				]
+				)
 			);
 		}
 
@@ -641,12 +741,12 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			if ( ! is_object( $result ) || ! self::validate_object( $result, 'getBody' ) ) {
 				$logger->debug(
 					'Result of get and set model from get_and_set_model_properties_from_api_by_id',
-					[
+					array(
 						'result'        => $result,
 						'resource_name' => self::RESOURCE_NAME,
 						'endpoint_name' => self::ENDPOINT_NAME,
 						'ac_code'       => 'IWAPI_643',
-					]
+					)
 				);
 			} else {
 				try {
@@ -665,30 +765,30 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					} else {
 						$logger->error(
 							'Resource returned is invalid or empty. ActiveCampaign may be unreachable.',
-							[
+							array(
 								'result'           => $result,
 								'suggested_action' => 'Please wait and if this message persists contact ActiveCampaign for support.',
 								'ac_code'          => 'IWAPI_665',
 								'resource_name'    => self::RESOURCE_NAME,
 								'result_body'      => self::validate_object( $result, 'getBody' ) ? $result->getBody() : null,
-							]
+							)
 						);
 					}
 				} catch ( Throwable $t ) {
 					$logger->warning(
 						'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource thrown error.',
-						[
+						array(
 							'result'  => $result,
 							'message' => $t->getMessage(),
 							'ac_code' => 'IWAPI_677',
-						]
+						)
 					);
 				}
 			}
 		} else {
 			$logger->error(
 				'There was an issue contacting ActiveCampaign, request returned an empty or null result. ActiveCampaign may not be reachable by this Host.',
-				[
+				array(
 					'suggested_action' => 'Please verify with your hosting provider that the ActiveCampaign API is reachable. Please contact ActiveCampaign support if necessary.',
 					'ac_code'          => 'IWAPI_686',
 					'client'           => $client,
@@ -696,7 +796,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					'resource_name'    => self::RESOURCE_NAME,
 					'endpoint_name'    => self::ENDPOINT_NAME,
 					'found_by'         => 'all',
-				]
+				)
 			);
 		}
 	}
@@ -705,16 +805,14 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 		Activecampaign_For_Woocommerce_Api_Client $client,
 		callable $response_massager = null
 	) {
-		$client->set_filters( [] );
+		$client->set_filters( array() );
 		$client->with_body( '' );
 		$logger = new Logger();
-		$result = $client
-			->get( self::ENDPOINT_NAME_PLURAL )
-			->execute();
+		$result = $client->get( self::ENDPOINT_NAME_PLURAL )->execute();
 
 		if ( $result ) {
 			try {
-				$matches = [];
+				$matches = array();
 				if ( preg_match( '/\'setAccount\', \'(\d*)\'\)/', $result, $matches ) !== false && ! empty( $matches[1] ) ) {
 					return $matches[1];
 				}
@@ -722,12 +820,12 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 				if ( ! is_object( $result ) || ! self::validate_object( $result, 'getBody' ) ) {
 					$logger->debug(
 						'Result from API may not have a body. Could be an error.',
-						[
+						array(
 							'result'        => $result,
 							'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 							'resource_name' => self::RESOURCE_NAME,
 							'endpoint_name' => self::ENDPOINT_NAME,
-						]
+						)
 					);
 				} else {
 					$resources_array = json_decode( $result->getBody(), true );
@@ -735,7 +833,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 					if ( count( $resources_array[ self::RESOURCE_NAME_PLURAL ] ) < 1 ) {
 						$logger->debug_excess(
 							'Activecampaign_For_Woocommerce_Interacts_With_Api: The resource was not found. This may not be an error.',
-							[
+							array(
 								'resource_name' => self::RESOURCE_NAME,
 								'endpoint_name' => self::ENDPOINT_NAME,
 								'client_body'   => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
@@ -743,7 +841,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 									? $result->getBody()->getContents()
 									: null,
 								'code'          => 404,
-							]
+							)
 						);
 					}
 
@@ -756,11 +854,11 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			} catch ( Throwable $t ) {
 				$logger->debug(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: Resource thrown error.',
-					[
+					array(
 						'result'      => $result,
 						'client_body' => self::validate_object( $client, 'getBody' ) ? $client->get_body() : null,
 						'code'        => $t->getCode(),
-					]
+					)
 				);
 			}
 		}

@@ -24,11 +24,11 @@ use Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions as Subscription
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable, Synced_Status {
-	use Activecampaign_For_Woocommerce_Historical_Status,
-		Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Historical_Utilities,
-		Activecampaign_For_Woocommerce_Global_Utilities;
+	use Activecampaign_For_Woocommerce_Historical_Status;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Historical_Utilities;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -71,10 +71,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 
 		if ( isset( $first_set_pagination->total, $first_set_pagination->max_num_pages ) ) {
 			if ( ! isset( $first_set_pagination->orders ) ||
-				 $first_set_pagination->total < 1 ||
-				 count( $first_set_pagination->orders ) < 1
+				$first_set_pagination->total < 1 ||
+				count( $first_set_pagination->orders ) < 1
 			) {
-				$this->logger->debug( 'WooCommerce returned no orders for historical sync to prepare.', [ $first_set_pagination->orders ] );
+				$this->logger->debug( 'WooCommerce returned no orders for historical sync to prepare.', array( $first_set_pagination->orders ) );
 				return false;
 			}
 
@@ -83,10 +83,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 			$orders_id_array = $first_set_pagination->orders;
 			$this->logger->debug(
 				'WooCommerce returned these totals for pagination:',
-				[
+				array(
 					'total_records' => $total_records,
 					'total_pages'   => $max_pages,
-				]
+				)
 			);
 			unset( $first_set_pagination );
 		} else {
@@ -96,7 +96,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		if ( isset( $orders_id_array[0] ) ) {
 			$this->prep_loop( $wpdb, $orders_id_array );
 		}
-		$current_page ++;
+		++$current_page;
 		unset( $orders_id_array );
 
 		while ( $current_page <= $max_pages ) {
@@ -109,25 +109,24 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 					break;
 				}
 				$this->prep_loop( $wpdb, $orders_id_array );
-				$current_page ++;
+				++$current_page;
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Historical sync prep encountered an error and will skip this page.',
-					[
+					array(
 						'page'        => $current_page,
 						'batch_limit' => $batch_limit,
 						'exclude'     => $exclude,
 						'message'     => $t->getMessage(),
 						'trace'       => $t->getTrace(),
-					]
+					)
 				);
-				$current_page ++;
+				++$current_page;
 			}
 		}
 
-		$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, [ 'synced_to_ac' => self::STATUS_DELETE ] );
+		$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, array( 'synced_to_ac' => self::STATUS_DELETE ) );
 		$this->logger->debug( 'Historical Sync finished preparing records' );
-
 	}
 
 	/**
@@ -166,7 +165,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		unset( $registered_order_ids ); // save memory
 		$unique_order_ids = array_diff( $orders_id_array, $result_int );
 		unset( $result_int );
-		$data = [];
+		$data = array();
 
 		if ( count( $unique_order_ids ) >= 1 ) {
 			foreach ( $unique_order_ids as $order_id ) {
@@ -194,11 +193,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		$this->clean_bad_data_from_table();
 		$in_str = implode(
 			',',
-			[
+			array(
 				self::STATUS_UNSYNCED,
 				self::STATUS_ON_HOLD,
 				self::STATUS_REFUND,
-			]
+			)
 		);
 
 		// phpcs:disable
@@ -224,10 +223,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		try {
 			// $externalcheckout_id = get_metadata_raw( 'post', $order_id, 'activecampaign_for_woocommerce_external_checkout_id', true );
 
-			$store_data = [
+			$store_data = array(
 				'synced_to_ac' => self::STATUS_HISTORICAL_SYNC_PREP,
 				'wc_order_id'  => $order_id,
-			];
+			);
 
 			return $store_data;
 
@@ -235,10 +234,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue forming the order data for historical sync.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;

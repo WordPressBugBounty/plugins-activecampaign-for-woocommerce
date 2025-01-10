@@ -2,6 +2,10 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.8.1 2025-01-09 =
+* Feature - Browse Abandonment Settings Page Management
+* Bugfix - Issue with synced order in ActiveCampaign not being visible in WooCommerce
+
 = 2.8.0 2024-12-10 =
 * Feature - Product sync now has the option to directly pull products from the database
 * Enhancement - Product sync will show the number of products available to sync for debugging purposes

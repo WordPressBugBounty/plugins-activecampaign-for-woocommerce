@@ -21,15 +21,15 @@ use Activecampaign_For_Woocommerce_Api_Serializable as Api_Serializable;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Ecom_Address {
-	use Api_Serializable,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Api_Serializable;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * The API mappings for the API_Serializable trait.
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'first_name' => 'firstName',
 		'last_name'  => 'lastName',
 		'address_1'  => 'address1',
@@ -40,14 +40,14 @@ class Activecampaign_For_Woocommerce_Ecom_Address {
 		'postcode'   => 'postal',
 		'phone'      => 'phone',
 		'company'    => 'company',
-	];
+	);
 
 	/**
 	 * The order data mapping.
 	 *
 	 * @var array
 	 */
-	public $order_data_mappings = [
+	public $order_data_mappings = array(
 		'first_name' => 'first_name',
 		'last_name'  => 'last_name',
 		'company'    => 'company',
@@ -59,19 +59,19 @@ class Activecampaign_For_Woocommerce_Ecom_Address {
 		'country'    => 'country',
 		'email'      => 'email',
 		'phone'      => 'phone',
-	];
+	);
 
 	/**
 	 * The contact override mappings to convert address to override.
 	 *
 	 * @var array
 	 */
-	public $customer_override_mappings = [
+	public $customer_override_mappings = array(
 		'first_name' => 'firstName',
 		'last_name'  => 'lastName',
 		'company'    => 'company',
 		'phone'      => 'phone',
-	];
+	);
 
 	/**
 	 * The email address.

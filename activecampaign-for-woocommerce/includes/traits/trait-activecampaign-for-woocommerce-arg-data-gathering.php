@@ -34,8 +34,8 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 		$request_input = null;
 
 		try {
-			$post_input = filter_input( INPUT_POST, $field, FILTER_SANITIZE_STRING );
-			$get_input  = filter_input( INPUT_GET, $field, FILTER_SANITIZE_STRING );
+			$post_input = filter_input( INPUT_POST, $field, FILTER_UNSAFE_RAW );
+			$get_input  = filter_input( INPUT_GET, $field, FILTER_UNSAFE_RAW );
 
 			if ( ! empty( $post_input ) ) {
 				return $post_input;
@@ -48,13 +48,13 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 			$logger = new Activecampaign_For_Woocommerce_Logger();
 			$logger->warning(
 				'There was an issue getting get or post data for a field',
-				[
+				array(
 					'field_name' => $field,
 					'get_input'  => $get_input,
 					'post_input' => $post_input,
 					'message'    => $t->getMessage(),
 					'ac_code'    => 'ADG_48',
-				]
+				)
 			);
 		}
 
@@ -71,12 +71,12 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 			$logger = new Activecampaign_For_Woocommerce_Logger();
 			$logger->warning(
 				'There was an issue getting request data for a field',
-				[
+				array(
 					'field_name'    => $field,
 					'request_input' => $request_input,
 					'message'       => $t->getMessage(),
 					'ac_code'       => 'ADG_70',
-				]
+				)
 			);
 		}
 
@@ -96,17 +96,16 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 			$logger = new Activecampaign_For_Woocommerce_Logger();
 			$logger->warning(
 				'There was an issue getting direct post data for a field',
-				[
+				array(
 					'field_name'    => $field,
 					'request_input' => $request_input,
 					'message'       => $t->getMessage(),
 					'ac_code'       => 'ADG_90',
-				]
+				)
 			);
 		}
 
 		return null;
-
 	}
 
 	/**
@@ -126,13 +125,13 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 		try {
 			$safe_product_types = self::get_cofe_safe_product_types(); // This may be causing an issue with some 3rd party plugins due to custom product types.
 
-			$data = [
+			$data = array(
 				'limit'   => (int) $limit,
 				'offset'  => (int) $offset,
 				'orderby' => 'ID',
 				'status'  => 'publish',
 				'order'   => 'ASC',
-			];
+			);
 
 			if ( isset( $safe_product_types ) && ! empty( $safe_product_types ) ) {
 				$data['type'] = $safe_product_types;
@@ -144,11 +143,11 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 
 			$logger->debug(
 				'Getting products by offset',
-				[
+				array(
 					'producttypes'   => $safe_product_types,
 					'data'           => $data,
 					'return_id_only' => $return_id_only,
-				]
+				)
 			);
 
 			$products = wc_get_products( $data );
@@ -158,10 +157,10 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue getting products for the product sync',
-				[
+				array(
 					'message'        => $t->getMessage(),
 					'return_id_only' => $return_id_only,
-				]
+				)
 			);
 		}
 
@@ -191,10 +190,10 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue getting products for the product sync',
-				[
+				array(
 					'message'        => $t->getMessage(),
 					'return_id_only' => $return_id_only,
-				]
+				)
 			);
 		}
 		try {
@@ -213,10 +212,10 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue getting products for the product sync',
-				[
+				array(
 					'message'        => $t->getMessage(),
 					'return_id_only' => $return_id_only,
-				]
+				)
 			);
 		}
 
@@ -271,5 +270,4 @@ trait Activecampaign_For_Woocommerce_Arg_Data_Gathering {
 		// WC returns array as type_name: type readable so return only the keys
 		return array_keys( $product_types );
 	}
-
 }

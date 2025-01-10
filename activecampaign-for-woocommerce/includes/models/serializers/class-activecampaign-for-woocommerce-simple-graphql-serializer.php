@@ -74,14 +74,14 @@ class Activecampaign_For_Woocommerce_Simple_Graphql_Serializer {
 				} catch ( Throwable $t ) {
 					$logger->error(
 						'GraphQL Serializer encountered an exception while processing a data single.',
-						[
+						array(
 							'message'          => $t->getMessage(),
 							'suggested_action' => 'If this problem repeats please contact ActiveCampaign support.',
 							'ac_code'          => 'SGQLS_75',
 							'key'              => $key,
 							'value'            => $value,
 							'trace'            => $t->getTrace(),
-						]
+						)
 					);
 				}
 			}

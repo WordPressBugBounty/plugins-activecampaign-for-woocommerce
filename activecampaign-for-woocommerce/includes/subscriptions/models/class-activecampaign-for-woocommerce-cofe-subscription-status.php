@@ -26,7 +26,7 @@ class Activecampaign_For_Woocommerce_Cofe_Subscription_Status {
 	 *
 	 * @var array
 	 */
-	public $status_mappings = [
+	public $status_mappings = array(
 		'active'            => 'ACTIVE',
 		'wc-active'         => 'ACTIVE',
 		'processing'        => 'ACTIVE',
@@ -49,7 +49,7 @@ class Activecampaign_For_Woocommerce_Cofe_Subscription_Status {
 		'wc-failed'         => 'PAYMENT_FAILED',
 		'pending-cancel'    => 'PAYMENT_FAILED',
 		'wc-pending-cancel' => 'PAYMENT_FAILED',
-	];
+	);
 
 	/**
 	 * @var string $status

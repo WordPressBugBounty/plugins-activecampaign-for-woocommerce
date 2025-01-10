@@ -25,15 +25,15 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id, Has_Email {
-	use Api_Serializable,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Api_Serializable;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * The API mappings for the API_Serializable trait.
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'connectionid'      => 'connectionid',
 		'externalid'        => 'externalid',
 		'email'             => 'email',
@@ -41,7 +41,7 @@ class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id
 		'first_name'        => 'first_name',
 		'last_name'         => 'last_name',
 		'accepts_marketing' => 'acceptsMarketing',
-	];
+	);
 
 	/**
 	 * The connection id.
@@ -262,11 +262,11 @@ class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id
 				} catch ( Throwable $t ) {
 					$logger->warning(
 						'Could not establish WC_Customer object from the order',
-						[
+						array(
 							'message' => $t->getMessage(),
 							'ac_code' => 'ECM_263',
 							'trace'   => $t->getTrace(),
-						]
+						)
 					);
 				}
 			}
@@ -286,12 +286,12 @@ class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'Could not get user data from order.',
-					[
+					array(
 						'customer_email' => self::validate_object( $order, 'get_billing_email' ) ? $order->get_billing_email() : null,
 						'message'        => $t->getMessage(),
 						'ac_code'        => 'ECM_290',
 						'trace'          => $logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 
@@ -313,12 +313,12 @@ class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id
 				} catch ( Throwable $t ) {
 					$logger->warning(
 						'There was a problem preparing customer data for a record.',
-						[
+						array(
 							'customer_email' => self::validate_object( $order, 'get_billing_email' ) ? $order->get_billing_email() : null,
 							'message'        => $t->getMessage(),
 							'ac_code'        => 'ECM_317',
 							'trace'          => $logger->clean_trace( $t->getTrace() ),
-						]
+						)
 					);
 
 					return false;
@@ -327,11 +327,11 @@ class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id
 		} else {
 			$logger->warning(
 				'Could not create an ecom customer from this order because the order may not exist.',
-				[
+				array(
 					'suggested_action' => 'Verify this order exists, otherwise you can ignore this issue.',
 					'order'            => $order,
 					'ac_code'          => 'ECM_331',
-				]
+				)
 			);
 		}
 	}

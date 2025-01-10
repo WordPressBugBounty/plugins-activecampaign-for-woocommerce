@@ -108,7 +108,7 @@ class Activecampaign_For_Woocommerce_Public {
 			wp_enqueue_style(
 				$this->plugin_name,
 				plugin_dir_url( __FILE__ ) . 'css/activecampaign-for-woocommerce-public.css',
-				[],
+				array(),
 				$this->version,
 				'all'
 			);
@@ -129,25 +129,25 @@ class Activecampaign_For_Woocommerce_Public {
 				} else {
 					$this->logger->error(
 						'The value for custom_email_field not found in database. This should not happen and may mean the setting has not been saved to the database.',
-						[
+						array(
 							'suggested_action' => 'Go to the plugin settings page and save the opt-in setting again. If the issue persists please contact support.',
 							'ac_code'          => 'PUB_129',
-						]
+						)
 					);
 				}
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'Activecampaign_For_Woocommerce_Public: There was an issue reading the custom email field.',
-					[
+					array(
 						'message' => $t->getMessage(),
-					]
+					)
 				);
 			}
 
 			wp_register_script(
 				$this->plugin_name,
 				plugin_dir_url( __FILE__ ) . 'js/activecampaign-for-woocommerce-public.js?custom_email_field=' . $custom_email_field,
-				[ 'jquery' ],
+				array( 'jquery' ),
 				$this->version,
 				true
 			);
@@ -157,9 +157,9 @@ class Activecampaign_For_Woocommerce_Public {
 			wp_localize_script(
 				$this->plugin_name,
 				'public_vars',
-				[
+				array(
 					'ajaxurl' => admin_url( "admin-ajax.php?nonce=$sync_guest_abandoned_cart_nonce" ),
-				]
+				)
 			);
 
 			wp_enqueue_script( $this->plugin_name );
@@ -170,7 +170,7 @@ class Activecampaign_For_Woocommerce_Public {
 
 			if (
 				isset( $options['browse_tracking'] ) &&
-				in_array( $options['browse_tracking'], [ 1, '1' ], true ) &&
+				in_array( $options['browse_tracking'], array( 1, '1' ), true ) &&
 				isset( $options['tracking_id'] )
 			) {
 				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'] );
@@ -178,10 +178,10 @@ class Activecampaign_For_Woocommerce_Public {
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_Public: There was an issue with enabling site tracking.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'PUB_180',
-				]
+				)
 			);
 		}
 	}
@@ -214,10 +214,10 @@ class Activecampaign_For_Woocommerce_Public {
 			} else {
 				$this->logger->error(
 					'The value for checkbox_display_option not found in database. This should not happen and may mean the setting has not been saved to the database.',
-					[
+					array(
 						'suggested_action' => 'Go to the plugin settings page and save the opt-in setting again. If the issue persists please contact support.',
 						'ac_code'          => 'PUB_193',
-					]
+					)
 				);
 			}
 
@@ -229,12 +229,12 @@ class Activecampaign_For_Woocommerce_Public {
 
 			woocommerce_form_field(
 				'activecampaign_for_woocommerce_accepts_marketing',
-				[
+				array(
 					'type'     => 'checkbox',
-					'class'    => [ 'woocommerce-form__input', 'woocommerce-form__input-checkbox', 'input-checkbox' ],
+					'class'    => array( 'woocommerce-form__input', 'woocommerce-form__input-checkbox', 'input-checkbox' ),
 					'label'    => $label,
 					'required' => false,
-				],
+				),
 				$activecampaign_for_woocommerce_is_checked
 			);
 
@@ -267,10 +267,10 @@ class Activecampaign_For_Woocommerce_Public {
 		} else {
 			$this->logger->error(
 				'The value for checkbox_display_option not found in database. This should not happen and may mean the setting has not been saved to the database.',
-				[
+				array(
 					'suggested_action' => 'Go to the plugin settings page and save the opt-in setting again. If the issue persists please contact support.',
 					'ac_code'          => 'PUB_246',
-				]
+				)
 			);
 		}
 
@@ -333,12 +333,12 @@ class Activecampaign_For_Woocommerce_Public {
 			$current_url_path = wp_parse_url( "http://$host_name", PHP_URL_PATH );
 
 			if (
-			   (
-				   null !== $checkout_path &&
-				   null !== $current_url_path &&
-				   trailingslashit( $checkout_path ) === trailingslashit( $current_url_path )
-			   ) ||
-			   is_page( 'checkout' )
+				(
+					null !== $checkout_path &&
+					null !== $current_url_path &&
+					trailingslashit( $checkout_path ) === trailingslashit( $current_url_path )
+				) ||
+				is_page( 'checkout' )
 			) {
 
 				return true;
@@ -347,10 +347,10 @@ class Activecampaign_For_Woocommerce_Public {
 
 			$logger->warning(
 				'There may be an issue checking for the checkout page',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'PUB_350',
-				]
+				)
 			);
 		}
 
@@ -369,7 +369,7 @@ class Activecampaign_For_Woocommerce_Public {
 
 			if (
 				isset( $options['browse_tracking'] ) &&
-				in_array( $options['browse_tracking'], [ 1, '1', 2, '2' ], true ) &&
+				in_array( $options['browse_tracking'], array( 1, '1', 2, '2' ), true ) &&
 				isset( $options['tracking_id'] )
 			) {
 				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'] );
@@ -377,10 +377,10 @@ class Activecampaign_For_Woocommerce_Public {
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_Public: There was an issue with loading site tracking.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'PUB_380',
-				]
+				)
 			);
 		}
 	}
@@ -395,7 +395,7 @@ class Activecampaign_For_Woocommerce_Public {
 
 		if (
 			isset( $ac_forms_settings['activecampaign_site_tracking_default'], $ac_forms_settings['site_tracking'] ) &&
-			in_array( $ac_forms_settings['site_tracking'], [ '1', 1 ] )
+			in_array( $ac_forms_settings['site_tracking'], array( '1', 1 ) )
 		) {
 			// Don't perform this stuff, the other plugin will do it
 			return;
@@ -437,7 +437,5 @@ class Activecampaign_For_Woocommerce_Public {
 
 		wp_localize_script( 'activecampaign-for-woocommerce-site-tracking', 'php_data', $data );
 		wp_enqueue_script( 'activecampaign-for-woocommerce-site-tracking' );
-
 	}
-
 }

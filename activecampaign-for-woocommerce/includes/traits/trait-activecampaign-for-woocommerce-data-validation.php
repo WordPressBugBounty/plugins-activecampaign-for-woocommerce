@@ -70,12 +70,12 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue validating this email for syncing.',
-				[
+				array(
 					'email'   => $email,
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 					'ac_code' => 'DVAL_70',
-				]
+				)
 			);
 		}
 		return $email_valid;
@@ -99,9 +99,9 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 				if ( 'trash' === $wc_order->get_status() ) {
 					$this->logger->warning(
 						'This order is trashed and cannot be synced.',
-						[
+						array(
 							'order_status' => self::validate_object( $wc_order, 'get_status' ) ? $wc_order->get_status() : null,
-						]
+						)
 					);
 
 					return false;
@@ -112,31 +112,31 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 				} else {
 					$this->logger->warning(
 						'This order does not have a compatible email.',
-						[
+						array(
 							'billing_email' => self::validate_object( $wc_order, 'get_billing_email' ) ? $wc_order->get_billing_email() : null,
-						]
+						)
 					);
 				}
 			} else {
 				$this->logger->warning(
 					'This order is missing one of the following required data for this order. (id, order number, or billing email)',
-					[
+					array(
 						'id'            => self::validate_object( $wc_order, 'get_id' ) ? $wc_order->get_id() : null,
 						'order_number'  => self::validate_object( $wc_order, 'get_order_number' ) ? $wc_order->get_order_number() : null,
 						'billing_email' => self::validate_object( $wc_order, 'get_billing_email' ) ? $wc_order->get_billing_email() : null,
 						'ac_code'       => 'DVAL_110',
-					]
+					)
 				);
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'There was an issue validating the WC order data.',
-				[
+				array(
 					'order'       => wp_json_encode( $wc_order ),
 					'message'     => $t->getMessage(),
 					'stack_trace' => $this->logger->clean_trace( $t->getTrace() ),
 					'ac_code'     => 'DVAL_120',
-				]
+				)
 			);
 		}
 
@@ -156,10 +156,10 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 				// refunds don't work yet
 				$this->logger->debug(
 					'Historical sync cannot currently sync refund data. This order will be ignored.',
-					[
+					array(
 						'order_id'            => self::validate_object( $order, 'get_id' ) ? $order->get_id() : null,
 						'item_count_refunded' => self::validate_object( $order, 'get_item_count_refunded' ) ? $order->get_item_count_refunded() : null,
-					]
+					)
 				);
 
 				return true;
@@ -167,11 +167,11 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 		} catch ( Throwable $t ) {
 			$this->logger->notice(
 				'There was an issue verifying an order as refund.',
-				[
+				array(
 					'order'       => wp_json_encode( $order ),
 					'message'     => $t->getMessage(),
 					'stack_trace' => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return true;
@@ -214,10 +214,10 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue cleaning the description field.',
-				[
+				array(
 					'message'     => $t->getMessage(),
 					'description' => $description,
-				]
+				)
 			);
 		}
 
@@ -227,5 +227,4 @@ trait Activecampaign_For_Woocommerce_Data_Validation {
 
 		return $description;
 	}
-
 }

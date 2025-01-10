@@ -30,8 +30,8 @@ use AcVendor\Brick\Math\RoundingMode;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
-	use Activecampaign_For_Woocommerce_Order_Data_Gathering,
-		Activecampaign_For_Woocommerce_Order_Line_Item_Gathering;
+	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Order_Line_Item_Gathering;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -118,10 +118,10 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 				$wc_subscription = wcs_get_subscription( $wc_order->get_id() );
 				$logger->warning(
 					'This record was improperly triggered by WooCommerce as an order but is a subscription. It will be processed as a subscription instead.',
-					[
-						'order_id'   => self::validate_object( $wc_order, 'get_id' ) ? $wc_order->get_id() : null,
+					array(
+						'order_id' => self::validate_object( $wc_order, 'get_id' ) ? $wc_order->get_id() : null,
 						'source'   => $source,
-					]
+					)
 				);
 
 				$wc_subscription    = wcs_get_subscription( $wc_order->get_id() );
@@ -129,9 +129,9 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 
 				if ( ! empty( $wc_subscription_id ) ) {
 					if ( 0 === $source ) {
-						do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription_historical', [ $wc_subscription_id ] );
+						do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription_historical', array( $wc_subscription_id ) );
 					} else {
-						do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription', [ $wc_subscription_id ] );
+						do_action( 'activecampaign_for_woocommerce_miscat_order_to_subscription', array( $wc_subscription_id ) );
 					}
 
 					return 30; // 30 is the designator for subscription status block
@@ -168,7 +168,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			$ecom_order->set_shipping_method( $wc_order->get_shipping_method() );
 			$ecom_order->set_order_discounts( $this->get_coupons_from_order( $wc_order ) );
 
-			if ( in_array( $ecom_order->get_wc_customer_id(), [ 0, '0', null ], true ) ) {
+			if ( in_array( $ecom_order->get_wc_customer_id(), array( 0, '0', null ), true ) ) {
 				$customer_id = $this->get_customer_id_from_order( $wc_order );
 				$ecom_order->set_wc_customer_id( $customer_id );
 			}
@@ -185,7 +185,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			$order_refunds = $wc_order->get_refunds();
 
 			$refund_total        = 0;
-			$partial_refund_list = [];
+			$partial_refund_list = array();
 			foreach ( $order_refunds as $refund ) {
 				$refund_total += $refund->get_total();
 
@@ -221,13 +221,13 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			$logger = new Logger();
 			$logger->error(
 				'There was an exception creating the order object for AC.',
-				[
+				array(
 					'wc_order'         => $wc_order->get_id(),
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please check the message for explanation or error and if the issue continues contact ActiveCampaign support.',
 					'ac_code'          => 'COB_219',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;
@@ -360,11 +360,11 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'Customer ID fetch threw an error on the order object.',
-				[
+				array(
 					$order,
 					$t->getMessage(),
 					'ac_code' => 'COB_312',
-				]
+				)
 			);
 		}
 
@@ -373,7 +373,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			$customer_row = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT order_id, customer_id FROM ' . $wpdb->prefix . 'wc_order_stats where order_id = %s LIMIT 1;',
-					[ $order->get_id() ]
+					array( $order->get_id() )
 				)
 			);
 
@@ -383,23 +383,23 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Customer fetch threw an error for order from the table.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'order'   => $order,
 					'ac_code' => 'COB_335',
-				]
+				)
 			);
 		}
 
 		$logger->warning(
 			'Could not find a customer ID matching the order for COFE builder.',
-			[
+			array(
 				'order'         => $order,
 				'id'            => self::validate_object( $order, 'get_id' ) ? $order->get_id() : null,
 				'order_number'  => self::validate_object( $order, 'get_order_number' ) ? $order->get_order_number() : null,
 				'billing_email' => self::validate_object( $order, 'get_billing_email' ) ? $order->get_billing_email() : null,
 				'ac_code'       => 'COB_346',
-			]
+			)
 		);
 
 		return null;

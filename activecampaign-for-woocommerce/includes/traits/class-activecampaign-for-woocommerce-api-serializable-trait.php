@@ -37,7 +37,7 @@ trait Activecampaign_For_Woocommerce_Api_Serializable {
 
 	public function serialize_to_array_from_mapping( $mappings ) {
 
-		$array = [];
+		$array = array();
 
 		// e.g., "order_number" => "orderNumber"
 		foreach ( $mappings as $local_name => $remote_name ) {

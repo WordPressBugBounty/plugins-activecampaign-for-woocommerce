@@ -24,8 +24,9 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 trait Activecampaign_For_Woocommerce_Admin_Utilities {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Arg_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Arg_Data_Gathering;
+
 	/**
 	 * Initialize the class and set its properties.
 	 */
@@ -159,7 +160,7 @@ trait Activecampaign_For_Woocommerce_Admin_Utilities {
 		if ( is_array( $current_options ) ) {
 			$options_to_be_saved = $current_options;
 		} else {
-			$options_to_be_saved = [];
+			$options_to_be_saved = array();
 		}
 
 		try {
@@ -207,13 +208,12 @@ trait Activecampaign_For_Woocommerce_Admin_Utilities {
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'The plugin activation process encountered an exception.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'ac_code' => 'ACT_73',
-				]
+				)
 			);
 		}
 		return $options_to_be_saved;
 	}
-
 }

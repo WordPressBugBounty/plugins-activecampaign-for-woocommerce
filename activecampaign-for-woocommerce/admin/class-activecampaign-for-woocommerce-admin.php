@@ -18,7 +18,9 @@ use Activecampaign_For_Woocommerce_Connection_Repository as Connection_Repositor
 use Activecampaign_For_Woocommerce_AC_Contact_Repository as Contact_Repository;
 use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
 use Activecampaign_For_Woocommerce_Api_Client as Api_Client;
+use Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository as AC_Tracking_Code_Repository;
 use Activecampaign_For_Woocommerce_Ac_Tracking_Repository as AC_Tracking;
+use Activecampaign_For_Woocommerce_AC_Whitelist as AC_Whitelist;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -31,15 +33,15 @@ use Activecampaign_For_Woocommerce_Ac_Tracking_Repository as AC_Tracking;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
-	use Activecampaign_For_Woocommerce_Admin_Abandoned_Cart,
-		Activecampaign_For_Woocommerce_Admin_Historical_Sync,
-		Activecampaign_For_Woocommerce_Admin_Status,
-		Activecampaign_For_Woocommerce_Admin_Product_Sync,
-		Activecampaign_For_Woocommerce_Admin_Connections,
-		Activecampaign_For_Woocommerce_Admin_Utilities,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Features_Checker,
-		Activecampaign_For_Woocommerce_Global_Utilities;
+	use Activecampaign_For_Woocommerce_Admin_Abandoned_Cart;
+	use Activecampaign_For_Woocommerce_Admin_Historical_Sync;
+	use Activecampaign_For_Woocommerce_Admin_Status;
+	use Activecampaign_For_Woocommerce_Admin_Product_Sync;
+	use Activecampaign_For_Woocommerce_Admin_Connections;
+	use Activecampaign_For_Woocommerce_Admin_Utilities;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Features_Checker;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
 
 	/**
 	 * The ID of this plugin.
@@ -276,20 +278,19 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				);
 			}
 		}
-
 	}
 
 	public function load_connection_block() {
 		if ( $this->get_connection_storage() && $this->is_configured() ) {
 			require_once plugin_dir_path( __FILE__ )
-						 . 'partials/activecampaign-for-woocommerce-connections.php';
+						. 'partials/activecampaign-for-woocommerce-connections.php';
 		}
 	}
 
 	public function load_status_mapping_block() {
 		if ( $this->get_connection_storage() && $this->is_configured() ) {
 			require_once plugin_dir_path( __FILE__ )
-						 . 'partials/activecampaign-for-woocommerce-status-mapping.php';
+						. 'partials/activecampaign-for-woocommerce-status-mapping.php';
 		}
 	}
 
@@ -333,7 +334,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		// Verify we're on an admin section
 		if (
 		'activecampaign_for_woocommerce' !== $plugin_page &&
-		current_user_can( 'administrator' ) &&
+		current_user_can( 'install_plugins' ) &&
 		(
 			'admin.php' === $pagenow
 			|| 'plugins.php' === $pagenow
@@ -389,10 +390,10 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 						),
 						$err_count
 					) .
-					 '.'
+					'.'
 				) .
-					 '<br/><a href="' . esc_url( $admin_log_url ) . '">' . esc_html( 'Please check the ActiveCampaign logs for issues.' ) .
-					 '</a></p></div>
+					'<br/><a href="' . esc_url( $admin_log_url ) . '">' . esc_html( 'Please check the ActiveCampaign logs for issues.' ) .
+					'</a></p></div>
 						<script type="text/javascript">
 						jQuery(document).ready(function($) {
 						    $("#activecampaign-for-woocommerce-notice-error").click(function(){
@@ -489,7 +490,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		wp_enqueue_script( $this->plugin_name . 'settings-page-status-mapping' );
 
 		require_once plugin_dir_path( __FILE__ )
-				 . 'views/activecampaign-for-woocommerce-admin-display.php';
+				. 'views/activecampaign-for-woocommerce-admin-display.php';
 	}
 
 
@@ -589,7 +590,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		if ( ! isset( $connection ) || ! $connection->get_id() ) {
 			$connection = $this->connection_repository->find_current(); // If we don't have an active connection ID, check if we have one for the URL
-			$logger->debug( 'Find my current connection', [ self::validate_object( $connection, 'serialize_to_array' ) ? $connection->serialize_to_array() : null ] );
+			$logger->debug( 'Find my current connection', array( self::validate_object( $connection, 'serialize_to_array' ) ? $connection->serialize_to_array() : null ) );
 		}
 
 		// No valid connection, find current if it exists
@@ -600,27 +601,27 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 			$logger->debug(
 				'This is the full connection check output',
-				[
+				array(
 					'$storage'         => $storage,
 					'site_url'         => get_site_url(),
 					'serializetoarray' => self::validate_object( $connection, 'serialize_to_array' ) ? $connection->serialize_to_array() : null,
-				]
+				)
 			);
 		}
 
 		// If this is accurate store it
-		$valid_site_urls = [
+		$valid_site_urls = array(
 			get_site_url(),
 			get_site_url() . '/',
 			get_home_url(),
 			get_home_url() . '/',
 			get_option( 'home' ),
 			get_option( 'home' ) . '/',
-		];
+		);
 
 		if ( isset( $connection ) &&
-			 ( in_array( $connection->get_externalid(), $valid_site_urls, false ) ||
-			 $storage['external_id'] === $connection->get_externalid() )
+			( in_array( $connection->get_externalid(), $valid_site_urls, false ) ||
+			$storage['external_id'] === $connection->get_externalid() )
 		) {
 			set_transient( 'activecampaign_for_woocommerce_connection', $connection, 3600 );
 			return $connection;
@@ -638,8 +639,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function connection_health_check() {
 		if ( $this->get_connection_storage() ) {
 			$issues   = array(
-				'warnings' => [],
-				'errors'   => [],
+				'warnings' => array(),
+				'errors'   => array(),
 			);
 			$now      = date_create( 'NOW' );
 			$last_run = get_option( 'activecampaign_for_woocommerce_connection_health_check_last_run' );
@@ -692,14 +693,14 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 					}
 
 					try {
-						$valid_site_urls = [
+						$valid_site_urls = array(
 							get_site_url(),
 							get_site_url() . '/',
 							get_home_url(),
 							get_home_url() . '/',
 							get_option( 'home' ),
 							get_option( 'home' ) . '/',
-						];
+						);
 
 						if (
 							isset( $connection ) &&
@@ -758,11 +759,11 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				delete_option( 'activecampaign_for_woocommerce_connection_health_check_last_run' );
 				$logger->error(
 					'Connection Health Check: Issues Discovered',
-					[
+					array(
 						'issues'           => $issues,
 						'suggested_action' => 'Please see the issues above and verify your connection is properly selected and set up.',
 						'ac_code'          => 'ADMIN_663',
-					]
+					)
 				);
 				$storage = $this->get_connection_storage();
 
@@ -811,6 +812,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				'There was an issue saving settings.',
 				array(
 					'message'  => $t->getMessage(),
+					'trace'    => $logger->clean_trace( $t->getTrace() ),
 					'function' => 'handle_settings_post',
 				)
 			);
@@ -839,7 +841,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 * @throws Exception When the container is missing definitions.
 	 */
 	public function update_settings( $data ) {
-		$logger           = new Logger();
+		$logger = new Logger();
+
 		$current_settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
 
 		$this->validate_options_update( $data, $current_settings );
@@ -852,14 +855,17 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		if (
 			isset( $current_settings['browse_tracking'] ) &&
-			in_array( $current_settings['browse_tracking'], [ 1, '1' ] ) &&
-			(
+			in_array( $current_settings['browse_tracking'], array( 1, '1' ) )
+		) {
+			$this->add_standard_urls_to_ac_whitelist( site_url() );
+
+			if (
 				! isset( $current_settings['tracking_id'] ) ||
 				empty( $current_settings['tracking_id'] )
-			)
-		) {
-			$tracking_id         = $this->activecampaign_fetch_accountid();
-			$data['tracking_id'] = $tracking_id;
+			) {
+				$tracking_id         = $this->activecampaign_fetch_accountid();
+				$data['tracking_id'] = $tracking_id;
+			}
 		}
 
 		if ( $current_settings ) {
@@ -934,7 +940,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function update_storage_from_connection( Connection $connection ) {
 		if ( isset( $connection ) && self::validate_object( $connection, 'get_id' ) ) {
 			$this->update_connection_storage(
-				[
+				array(
 					'connection_id' => $connection->get_id(),
 					'name'          => $connection->get_name(),
 					'external_id'   => $connection->get_externalid(),
@@ -942,7 +948,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 					'link_url'      => $connection->get_link_url(),
 					'logo_url'      => $connection->get_logo_url(),
 					'is_internal'   => $connection->get_is_internal(),
-				]
+				)
 			);
 
 			delete_transient( 'activecampaign_for_woocommerce_all_connections' );
@@ -992,7 +998,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		$notifications[] = $this->format_response_message( $message, $level );
 
-		$this->update_settings( [ 'notifications' => $notifications ] );
+		$this->update_settings( array( 'notifications' => $notifications ) );
 	}
 
 	/**
@@ -1075,7 +1081,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 */
 	private function api_url_is_changing( $new_data, $current_data ) {
 		return ( isset( $new_data['api_url'] ) && isset( $current_data['api_url'] ) ) && // both are set
-			   $new_data['api_url'] !== $current_data['api_url'];                        // and changing
+				$new_data['api_url'] !== $current_data['api_url'];                        // and changing
 	}
 
 	/**
@@ -1133,10 +1139,10 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		} else {
 			$logger->error(
 				'ActiveCampaign was unable to store data via the WooCommerce API.',
-				[
+				array(
 					'suggested_action' => 'Please setup your integration URL and key manually by visiting the developer page in your ActiveCampaign Hosted settings and saving it to your settings in the WordPress plugin.',
 					'ac_code'          => 'ADMIN_1018',
-				]
+				)
 			);
 
 			return new WP_REST_Response( 'Error: Missing required parameters.', 400 );
@@ -1189,7 +1195,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function validate_rest_user() {
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error( 'Unauthorized', __( 'Unauthorized', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ), array( 'status' => 401 ) );
-		} elseif ( ! current_user_can( 'administrator' ) ) {
+		} elseif ( ! current_user_can( 'install_plugins' ) ) {
 			return new WP_Error( 'Forbidden', __( 'Forbidden', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ), array( 'status' => 403 ) );
 		} else {
 			return true;
@@ -1341,7 +1347,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				return;
 			}
 
-			$logger->debug( 'Restore trashed product', [ 'product' => $args ] );
+			$logger->debug( 'Restore trashed product', array( 'product' => $args ) );
 			// Sync the product when restored
 			do_action( 'activecampaign_for_woocommerce_run_single_product_sync', $product_id );
 		}
@@ -1397,7 +1403,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Could not save mapping',
-				[ $t->getMessage() ]
+				array( $t->getMessage() )
 			);
 			wp_send_json_error( 'An error was encountered.' );
 		}
@@ -1420,7 +1426,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		$logger = new Logger();
 
 		try {
-			$ac_user     = new AC_Tracking( $this->api_client );
+			$ac_user     = new AC_Tracking_Code_Repository( $this->api_client );
 			$tracking_id = $ac_user->find_sitetracking_code();
 
 			// $result = $this->api_client->get( 'user/me' )->execute();
@@ -1429,11 +1435,44 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Could not fetch tracking ID from ActiveCampaign.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'code'    => 'ADMIN_1435',
-				]
+				)
 			);
 		}
+	}
+
+	/**
+	 * Adds the built-in URLs.
+	 *
+	 * @param string $url The URL.
+	 */
+	private function add_standard_urls_to_ac_whitelist( $url ) {
+		$logger         = new Logger();
+		$whitelist_repo = new Activecampaign_For_Woocommerce_Whitelist_Repository( $this->api_client );
+
+		$site_list = array(
+			site_url(),
+			content_url(),
+			home_url(),
+			get_option( 'home' ),
+		);
+
+		$unique_list = $whitelist_repo->parse_url_array_return_unique_hosts( $site_list );
+
+		if ( ! empty( $unique_list ) ) {
+			foreach ( $unique_list as $host ) {
+				$whitelist_repo->create( $whitelist_repo->build_whitelist_model_for_name( $host ) );
+			}
+		}
+
+		// gets all the whitelist results for debug logs.
+		$whitelist = $whitelist_repo->list_all();
+		$logger->debug( 'Site tracking whitelist:', array( $whitelist ) );
+
+		// Enable site tracking.
+		$ac_tracking = new AC_Tracking( $this->api_client );
+		$ac_tracking->enable_sitetracking();
 	}
 }

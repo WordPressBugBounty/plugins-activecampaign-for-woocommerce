@@ -141,19 +141,19 @@ class Activecampaign_For_Woocommerce_AC_Contact_Repository implements Repository
 			} catch ( Throwable $t ) {
 				$logger->warning(
 					'Activecampaign_For_Woocommerce_Interacts_With_Api: There was an issue parsing the resource from serialized array for a contact.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'result'  => $result,
-					]
+					)
 				);
 			}
 
 			$logger->debug(
 				'ac_contact_repository: Resource not found.',
-				[
+				array(
 					'endpoint' => $this->client->get_endpoint(),
 					'email'    => $email,
-				]
+				)
 			);
 
 			return null;

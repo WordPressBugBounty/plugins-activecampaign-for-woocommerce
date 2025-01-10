@@ -124,13 +124,13 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 			} catch ( Throwable $t ) {
 				$logger->error(
 					'Failed to build the COFE product array for the product sync.',
-					[
+					array(
 						'message'          => $t->getMessage(),
 						'suggested_action' => 'Check the message for the error and verify the order data. If the issue persists please contact ActiveCampaign.',
 						'ac_code'          => 'ECPS_127',
 						'cofe_product'     => $cofe_product,
 						'trace'            => $t->getTrace(),
-					]
+					)
 				);
 			}
 		}
@@ -166,7 +166,7 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 	 * @return bool
 	 */
 	private static function convert_to_bool( $field ) {
-		if ( in_array( $field, [ 'yes', 'YES', 'visible', 'search', 'catalog', true, 1, '1' ] ) ) {
+		if ( in_array( $field, array( 'yes', 'YES', 'visible', 'search', 'catalog', true, 1, '1' ) ) ) {
 			return true;
 		}
 
@@ -260,10 +260,10 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue gathering product images for sync.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'product' => self::validate_object( $product, 'get_data' ) ? $product->get_data() : null,
-				]
+				)
 			);
 		}
 
@@ -302,13 +302,13 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'Failed to build the base COFE product fields for the product sync.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Check the message for the error and verify the order data. If the issue persists please contact ActiveCampaign.',
 					'ac_code'          => 'ECPS_290',
 					'cofe_product'     => $cofe_product,
 					'found_in'         => 'base_product_fields',
-				]
+				)
 			);
 
 			return array();
@@ -322,9 +322,9 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 			$logger  = new Logger();
 			$logger->debug_excess(
 				'Int was too big for cofe product serializer and must be capped',
-				[
+				array(
 					'num_passed' => $stringy,
-				]
+				)
 			);
 		} else {
 			$int_val = intval( $stringy );
@@ -345,7 +345,7 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 	 * @param ?array $field
 	 * @return array
 	 */
-	private static function map_field( ?array $field ) : ?array {
+	private static function map_field( ?array $field ): ?array {
 		$result = array();
 		foreach ( $field as $k => $v ) {
 			// GraphQL cannot process any other characters as keys, so replace them

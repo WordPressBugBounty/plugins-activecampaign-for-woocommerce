@@ -30,12 +30,12 @@ class Activecampaign_For_Woocommerce_Connection_Option implements Ecom_Model, Ha
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'connectionid' => 'connectionid',
 		'id'           => 'id',
 		'option'       => 'option',
 		'value'        => 'value',
-	];
+	);
 
 	/**
 	 * The connectionid.

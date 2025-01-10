@@ -33,9 +33,9 @@ class Activecampaign_For_Woocommerce_AC_Contact_Batch implements Ecom_Model, Has
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'contacts' => 'contacts',
-	];
+	);
 
 	/**
 	 * The id.
@@ -68,7 +68,6 @@ class Activecampaign_For_Woocommerce_AC_Contact_Batch implements Ecom_Model, Has
 	 */
 	public function set_contacts( $contacts ) {
 		$this->contacts = $contacts;
-
 	}
 
 	/**
@@ -106,13 +105,13 @@ class Activecampaign_For_Woocommerce_AC_Contact_Batch implements Ecom_Model, Has
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue setting properties from serialized array on the contact batch',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'passed_array'     => $array,
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
 					'ac_code'          => 'ACCB_107',
-				]
+				)
 			);
 		}
 	}

@@ -60,7 +60,7 @@
 		</div>
 		<div class="flex items-center">
 			<span class="mr-400">
-			 <a href="https://help.activecampaign.com/hc/en-us/articles/115000652490-WooCommerce-Deep-Data-integration-overview" target="_blank" rel="noopener noreferrer"><span><?php esc_html_e( 'Learn more about ActiveCampaign for WooCommerce', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span><svg class="is-styled css-ws9hmn" height="16px" width="16px" role="img" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5 0H0V16H16V11H14V14H2V2H5V0ZM8.99995 2H12.5857L6.29285 8.29289L7.70706 9.70711L14 3.41421V7H16V0H8.99995V2Z" fill-rule="evenodd"></path></svg></a>
+			<a href="https://help.activecampaign.com/hc/en-us/articles/115000652490-WooCommerce-Deep-Data-integration-overview" target="_blank" rel="noopener noreferrer"><span><?php esc_html_e( 'Learn more about ActiveCampaign for WooCommerce', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span><svg class="is-styled css-ws9hmn" height="16px" width="16px" role="img" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5 0H0V16H16V11H14V14H2V2H5V0ZM8.99995 2H12.5857L6.29285 8.29289L7.70706 9.70711L14 3.41421V7H16V0H8.99995V2Z" fill-rule="evenodd"></path></svg></a>
 			</span>
 				<hr/>
 			<?php if ( isset( $activecampaign_for_woocommerce_page_url ) && preg_match( "/.page=activecampaign_for_woocommerce(?:&manual_setup=1)?\b/", $activecampaign_for_woocommerce_page_url ) ) { ?>

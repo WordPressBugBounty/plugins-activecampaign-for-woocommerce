@@ -35,8 +35,8 @@ use Activecampaign_For_Woocommerce_Request_Id_Service as RequestIdService;
  * @method self delete( string $endpoint, string | int $id = null )
  */
 class Activecampaign_For_Woocommerce_Api_Client {
-	use Activecampaign_For_Woocommerce_Global_Utilities,
-		Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
+	use Activecampaign_For_Woocommerce_Data_Validation;
 
 	/**
 	 * The API Uri to make requests against.
@@ -483,6 +483,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 					array(
 						'endpoint'             => $this->endpoint,
 						'method'               => $this->method,
+						'options'              => $options,
 						'response_status_code' => self::validate_object( $response, 'getStatusCode' ) ? $response->getStatusCode() : null,
 						'response_headers'     => self::validate_object( $response, 'getHeaders' ) ? $response->getHeaders() : null,
 						'response_body'        => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
@@ -531,12 +532,12 @@ class Activecampaign_For_Woocommerce_Api_Client {
 						)
 					);
 
-					return [
+					return array(
 						'type'             => 'error',
 						'code'             => $e->getCode(),
 						'response_message' => $e->getMessage(),
 						'message'          => 'The API returned an error. This may be a duplicate record or data that could not be processed. Please check logs.',
-					];
+					);
 				}
 			} else {
 
@@ -554,7 +555,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 							)
 						);
 
-						$this->retry_count ++;
+						++$this->retry_count;
 						sleep( 10 );
 						return $this->execute();
 					} else {
@@ -575,8 +576,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 							'message' => 'The connection to ActiveCampaign timed out ' . $this->retry_count . ' times. Aborting the call and continuing on.',
 						);
 					}
-				} else {
-					if (
+				} elseif (
 						(
 							'ecomData/bulkSync' === $this->endpoint ||
 							'ecomData\/bulkSync' === $this->endpoint
@@ -586,6 +586,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 							'400' === $e->getCode()
 						)
 					) {
+
 						$this->logger->warning(
 							'The API returned an error but it may be false [api_eb]',
 							array(
@@ -598,62 +599,61 @@ class Activecampaign_For_Woocommerce_Api_Client {
 							)
 						);
 
-						return [
-							'type'    => 'error',
-							'message' => $message,
-							'code'    => $e->getCode(),
-						];
-					} elseif ( in_array( $e->getCode(), array( 500, 503, 520, 521, 525, 526, 590 ), true ) ) {
-						$full_response = '';
-						if (
-							self::validate_object( $e, 'getResponse' ) &&
-							self::validate_object( $e->getResponse(), 'getBody' ) &&
-							self::validate_object( $e->getResponse()->getBody(), 'getContents' )
-						) {
-							$full_response = $e->getResponse()->getBody()->getContents();
-						}
-
-						$this->logger->error(
-							'The ActiveCampaign API returned a server level error [api_e5]',
-							array(
-								'endpoint'          => $this->endpoint,
-								'origin_endpoint'   => $this->origin_endpoint,
-								'method'            => $this->method,
-								'response_code'     => $e->getCode(),
-								'message'           => $message,
-								'get_response_body' => $full_response,
-								'response_body'     => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
-								'stack_trace'       => $stack_trace,
-							)
-						);
-
 						return array(
 							'type'    => 'error',
-							'message' => $full_response,
-							'code'    => $e->getCode(),
-						);
-					} else {
-						$this->logger->error(
-							'The ActiveCampaign API returned an error indicating there may be an issue with the data sent.',
-							array(
-								'suggested_action' => 'Please address the errors stated in the logs and if this problem repeats please contact ActiveCampaign support.',
-								'endpoint'         => $this->endpoint,
-								'origin_endpoint'  => $this->origin_endpoint,
-								'method'           => $this->method,
-								'response_code'    => $e->getCode(),
-								'message'          => $message,
-								'ac_code'          => 'API_621',
-								'response_body'    => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
-								'stack_trace'      => $stack_trace,
-							)
-						);
-
-						return [
-							'type'    => 'error',
 							'message' => $message,
 							'code'    => $e->getCode(),
-						];
+						);
+				} elseif ( in_array( $e->getCode(), array( 500, 503, 520, 521, 525, 526, 590 ), true ) ) {
+					$full_response = '';
+					if (
+						self::validate_object( $e, 'getResponse' ) &&
+						self::validate_object( $e->getResponse(), 'getBody' ) &&
+						self::validate_object( $e->getResponse()->getBody(), 'getContents' )
+					) {
+						$full_response = $e->getResponse()->getBody()->getContents();
 					}
+
+					$this->logger->error(
+						'The ActiveCampaign API returned a server level error [api_e5]',
+						array(
+							'endpoint'          => $this->endpoint,
+							'origin_endpoint'   => $this->origin_endpoint,
+							'method'            => $this->method,
+							'response_code'     => $e->getCode(),
+							'message'           => $message,
+							'get_response_body' => $full_response,
+							'response_body'     => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
+							'stack_trace'       => $stack_trace,
+						)
+					);
+
+					return array(
+						'type'    => 'error',
+						'message' => $full_response,
+						'code'    => $e->getCode(),
+					);
+				} else {
+					$this->logger->error(
+						'The ActiveCampaign API returned an error indicating there may be an issue with the data sent.',
+						array(
+							'suggested_action' => 'Please address the errors stated in the logs and if this problem repeats please contact ActiveCampaign support.',
+							'endpoint'         => $this->endpoint,
+							'origin_endpoint'  => $this->origin_endpoint,
+							'method'           => $this->method,
+							'response_code'    => $e->getCode(),
+							'message'          => $message,
+							'ac_code'          => 'API_621',
+							'response_body'    => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
+							'stack_trace'      => $stack_trace,
+						)
+					);
+
+					return array(
+						'type'    => 'error',
+						'message' => $message,
+						'code'    => $e->getCode(),
+					);
 				}
 
 				return false;

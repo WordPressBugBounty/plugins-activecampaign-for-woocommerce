@@ -1,5 +1,24 @@
 document.addEventListener("DOMContentLoaded", function () {
     const $ = window.jQuery;
+    let cobraListOfValidProductIds = [2,3,4,5,6,7,8,9,10];
+    let finalUrlList = [];
+    // Lading Product Urls from settings. They get Put into first input array
+    // must format that correctly
+    let compiledProductInputField = document.getElementById('ba_product_url_patterns');
+    let primaryProductInputField = document.getElementById('ba_product_url_patterns-1');
+    if (primaryProductInputField) {
+        finalUrlList = (primaryProductInputField.value != '') ? JSON.parse(primaryProductInputField.value) : [];
+    }
+    
+    for(let i = 0; i < finalUrlList.length;i++) {
+        if(i == 0) {
+            compiledProductInputField.value = primaryProductInputField.value
+            primaryProductInputField.value = finalUrlList[i];
+        } else {
+            let item_id = cobraListOfValidProductIds.shift();
+            createProductUrlInputFields(item_id, true, finalUrlList[i]);
+        }
+    }
     if($('#ac_emailoption0').attr('checked')){
         $("#custom-email-option-set").hide();
     }
@@ -105,9 +124,168 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const form = $('#activecampaign-for-woocommerce-options-form');
+    
+    // https://my-woocommerce-store.shop/**/products/{{sku}}
+    function validProductUrlPattern(pattern) {
+        let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc'];
+        const regexp = /\{\{(.*?)}}/g;
+
+        if(pattern == '') {
+            return true;
+        }
+        // Wildcard validation
+        //https://my-woocommerce-store.shop/**/products/**/slug/collection/**/corner
+        if(pattern.split('**').length > 3) {
+            return false;
+        }
+        // Variable validations
+        // https://my-woocommerce-store.shop/**/products/{{sku}}/{{id}}
+        // https://my-woocommerce-store.shop/**/products/{{id}}
+        const matches = [...pattern.matchAll(regexp)]
+        if (matches.length !== 1) {
+            return false;
+        } else {
+            let variable = matches[0][1]
+            if (!validUrlPatternVariables.includes(variable)) {
+                return false;
+            }
+        }
+        // Wildcard next To Variable Validation
+        // https://example.com/**{{sku}}
+        if(pattern.includes('**{{') || pattern.includes('}}**')) {
+            return false;
+        }
+        
+        return true;
+    }
 
     $("#ac-update-settings").click(function(e){
         form.submit();
+    });
+
+    function removeAdditionalProductInput(ev) {
+        let button = ev.target;
+        let div = button.parentElement;
+        let oldValue = div.firstChild.value;
+        let usable_id = div.firstChild.getAttribute('id').split('-')[1];
+        let baProductField = document.getElementById('ba_product_url_patterns');
+        let indexofRemoval = finalUrlList.indexOf(oldValue);
+
+        // Remove pattern from final result and add that id to usable list
+        finalUrlList.splice(indexofRemoval,1);
+        if(finalUrlList.length == 0) {
+            baProductField.value = '';
+        } else {
+            baProductField.value = JSON.stringify(finalUrlList);
+        }
+        cobraListOfValidProductIds.push(usable_id);
+
+        div.remove();
+    }
+    function updateMainProductUrlFormField(ev) {
+        let patternUrlInputFieldId = ev.currentTarget.getAttribute('id').split('-')[1];
+        let patternUrlInputField = document.getElementById('ba_product_url_patterns-'+patternUrlInputFieldId);
+        let removalButtonField = document.getElementById('ba_product_url_patterns_rmv-'+patternUrlInputFieldId);
+        let pattern = patternUrlInputField.value;
+        let baProductField = document.getElementById('ba_product_url_patterns');
+        let showSaveToolTip = document.getElementById('ba_product_url_save_tooltip');
+        
+        if(!finalUrlList.includes(pattern)) {
+            if (validProductUrlPattern(pattern) && pattern != '') {
+                finalUrlList.push(pattern);
+                baProductField.value = JSON.stringify(finalUrlList);
+                removalButtonField.style.display = 'block'
+                showSaveToolTip.style.display = 'none'
+                patternUrlInputField.style.border="";
+            } else {
+                patternUrlInputField.style.border="2px solid red";
+            }
+        }
+    }
+
+    $('#validate_ba_product_url-1').click(function(e){
+        updateMainProductUrlFormField(e);
+    });
+    $('#ba_product_url_patterns-1').on('change', function(e) {
+        showSaveToolTip(e);
+    });
+    $('#ba_product_url_patterns_rmv-1').click(function(e){
+        let baProductField = document.getElementById('ba_product_url_patterns');
+        let productPatternInputs = [];
+        let allInputs = document.getElementsByTagName("input");
+
+        for(let i = 0; i < allInputs.length; i++) {
+            if(allInputs[i].id.indexOf('ba_product_url_patterns-') == 0) {
+                productPatternInputs.push(allInputs[i]);
+            }
+        }
+
+        productPatternInputs.forEach((productPatternInput) => {
+            let freeId = productPatternInput.getAttribute('id').split('-')[1]
+
+            if (freeId == 1) {
+                productPatternInput.value = ''
+            } else {
+                productPatternInput.parentElement.remove();   
+            }
+            cobraListOfValidProductIds.push(freeId);
+        });
+        finalUrlList = [];
+        baProductField.value = '';
+    });
+    function showSaveToolTip(ev) {
+        let showSaveToolTip = document.getElementById('ba_product_url_save_tooltip');
+        let possiblePattern = ev.target.value
+        if (!finalUrlList.includes(possiblePattern)) {
+            showSaveToolTip.style.display = 'block'
+        }
+    }
+    function createProductUrlInputFields(id, showRemove, inputValue = '') {
+        let removeDisplayValue = showRemove ? 'block' : 'none';
+        // Product Url Input
+        let input = document.createElement('input');
+        input.type = "text";
+        input.setAttribute('id', 'ba_product_url_patterns-' + id);
+        input.setAttribute('class', 'ba_product_url_inputs');
+        input.setAttribute('size', 23);
+        input.onchange = function(e) {
+            showSaveToolTip(e);
+        };
+        if(inputValue) {
+            input.value = inputValue;
+        }
+        // Product Url Validate Button
+        let validator = document.createElement('button');
+        validator.setAttribute('id', 'validate_ba_product_url-' + id);
+        validator.setAttribute('class', 'activecampaign-for-woocommerce button validation');
+        validator.setAttribute("type", "button");
+        validator.innerHTML = "Validate Url";
+        validator.onclick = function(e) {
+            updateMainProductUrlFormField(e);
+        };
+        // Product Url Input Removal Button
+        let remove = document.createElement('button');
+        remove.setAttribute('id', 'ba_product_url_patterns_rmv-' + id);
+        remove.setAttribute('class', 'activecampaign-for-woocommerce button removal');
+        remove.setAttribute("type", "button");
+        remove.style.display = removeDisplayValue;
+        remove.innerHTML = "Remove Product Url";
+        remove.onclick = function(e) {
+            removeAdditionalProductInput(e);
+        };
+        // Product Url List
+        var reqs = document.getElementById("additional_ba_product_url_patterns_list");
+        var listItem = document.createElement('li');
+        listItem.appendChild(input);
+        listItem.appendChild(validator);
+        listItem.appendChild(remove);
+        reqs.appendChild(listItem);
+    }
+    $("#ac-add-ba_product_url").click(function(e){ 
+        if (cobraListOfValidProductIds.length > 0) {
+            let item_id = cobraListOfValidProductIds.shift();
+            createProductUrlInputFields(item_id, false);
+        }
     });
 
     form.submit(function(e) {

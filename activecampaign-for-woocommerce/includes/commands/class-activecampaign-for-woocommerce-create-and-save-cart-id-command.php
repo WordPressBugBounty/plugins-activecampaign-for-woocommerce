@@ -80,10 +80,10 @@ class Activecampaign_For_Woocommerce_Create_And_Save_Cart_Id_Command implements 
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'There was an issue trying to add additional info to user meta.',
-				[
+				array(
 					'class'   => 'Activecampaign_For_Woocommerce_Create_And_Save_Cart_Id_Command',
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}

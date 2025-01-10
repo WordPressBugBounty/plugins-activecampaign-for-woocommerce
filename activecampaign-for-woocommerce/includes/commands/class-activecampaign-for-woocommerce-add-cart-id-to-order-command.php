@@ -28,6 +28,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  */
 class Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command implements Executable {
 	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+
 	/**
 	 * Executes the command.
 	 *
@@ -119,10 +120,10 @@ class Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command implements Exe
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue trying to add cart ID to order.',
-				[
+				array(
 					'class'   => 'Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command',
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}

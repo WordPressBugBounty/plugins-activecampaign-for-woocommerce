@@ -84,7 +84,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		$ac_debug = null
 	) {
 		$this->path_to_log_directory = wp_upload_dir()['basedir'] . '/wc-logs';
-		$this->context               = [ 'source' => $plugin_name ];
+		$this->context               = array( 'source' => $plugin_name );
 		$this->error_context         = array( 'source' => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_ERR_KEBAB );
 		if ( ! $this->logDirectoryExists() ) {
 			$this->createLogDirectory();
@@ -340,7 +340,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	 * @return array The replacement stack trace.
 	 */
 	public function clean_trace( $trace ) {
-		$result = [];
+		$result = array();
 		$c      = count( $trace );
 		// Only retrieve class, function, and line for the first 5 trace results
 		for ( $i = 0; $i <= $c; $i++ ) {
@@ -370,7 +370,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		$error = false;
 		$c     = 0;
 		try {
-			if ( ! current_user_can( 'administrator' ) ) {
+			if ( ! current_user_can( 'install_plugins' ) ) {
 				throw new Error( 'Current user does not have permission to clear the ActiveCampaign log entries.', 403 );
 			}
 			$c += $this->clear( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_ERR_KEBAB );
@@ -378,17 +378,17 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		} catch ( Throwable $t ) {
 			$this->error(
 				'There was an error clearing the AC entries from the WC error log.',
-				[
+				array(
 					'message'         => $t->getMessage(),
 					'current_user_id' => get_current_user_id(),
-				]
+				)
 			);
 			$error = true;
 		}
-		return [
+		return array(
 			'error' => $error,
 			'count' => $c,
-		];
+		);
 	}
 
 	/**
@@ -408,13 +408,12 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		} catch ( Throwable $t ) {
 			$this->info(
 				'There was an issue adding an entry to the WooCommerce log',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
-
 	}
 
 	/**
@@ -434,13 +433,11 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		} catch ( Throwable $t ) {
 			$this->info(
 				'There was an issue adding an entry to the WooCommerce log',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
-
 	}
-
 }

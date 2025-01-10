@@ -145,11 +145,11 @@ class Activecampaign_For_Woocommerce_Ecom_Customer_Repository implements Reposit
 			if ( ! isset( $result ) && empty( $result ) ) {
 				$logger->debug(
 					'Customer Lookup: Resource not found.',
-					[
+					array(
 						'connectionid' => $connection_id,
 						'email'        => $email,
 						'result'       => $result ?? null,
-					]
+					)
 				);
 
 				return null;
@@ -162,10 +162,10 @@ class Activecampaign_For_Woocommerce_Ecom_Customer_Repository implements Reposit
 
 			$logger->warning(
 				'find_by_email_and_connection_id: There was an issue creating the customer model or finding the contact in ActiveCampaign.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}

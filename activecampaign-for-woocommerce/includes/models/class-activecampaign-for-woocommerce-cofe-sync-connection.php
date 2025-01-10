@@ -30,10 +30,10 @@ class Activecampaign_For_Woocommerce_Cofe_Sync_Connection implements Ecom_Model,
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'integration_name'             => 'integrationName',
 		'connection_unique_identifier' => 'connectionUniqueIdentifier',
-	];
+	);
 
 	/**
 	 * The integrationName.

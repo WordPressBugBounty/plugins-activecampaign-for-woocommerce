@@ -28,7 +28,7 @@ class Activecampaign_For_Woocommerce_Ecom_Product {
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'category'    => 'category',
 		'externalid'  => 'externalid',
 		'name'        => 'name',
@@ -40,7 +40,7 @@ class Activecampaign_For_Woocommerce_Ecom_Product {
 		'image_url'   => 'imageUrl',
 		'description' => 'description',
 		'id'          => 'id',
-	];
+	);
 
 	/**
 	 * The category.

@@ -33,7 +33,7 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 	public function fetch_abandoned_cart_page() {
 		wp_enqueue_script( $this->plugin_name . 'abandoned-cart' );
 		require_once plugin_dir_path( __FILE__ )
-					 . 'views/activecampaign-for-woocommerce-abandoned-cart-display.php';
+					. 'views/activecampaign-for-woocommerce-abandoned-cart-display.php';
 	}
 
 	/**
@@ -100,20 +100,20 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 			if ( $wpdb->last_error ) {
 				$logger->warning(
 					'Save abandoned cart command: There was an error selecting the id for a customer abandoned cart record.',
-					[
+					array(
 						'wpdb_last_error' => $wpdb->last_error,
 						'result'          => $result,
-					]
+					)
 				);
 			}
 			return $result;
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue getting abandoned carts',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'function' => 'get_abandoned_carts',
-				]
+				)
 			);
 		}
 	}
@@ -189,10 +189,10 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue deleting an abandoned cart',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'function' => 'handle_abandon_cart_delete',
-				]
+				)
 			);
 		}
 	}
@@ -226,14 +226,13 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue forcing a row sync on an abandoned cart',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'function' => 'handle_abandon_cart_force_row_sync',
 					'trace'    => $t->getTrace(),
-				]
+				)
 			);
 			wp_send_json_error( 'There was an issue processing this request. Check logs for details.' );
 		}
 	}
-
 }

@@ -11,21 +11,21 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 	 *
 	 * @var array
 	 */
-	private $status = [
+	private $status = array(
 		'success_count'                      => 0,
 		'batch_limit'                        => 100, // How many records per batch (200 is the API limit)
 		'start_time'                         => null, // WP date time
 		'last_update'                        => null, // WP date time
 		'end_time'                           => null, // WP date time
-		'failed_order_id_array'              => [], // Array of failed IDs
-		'incompatible_order_id_array'        => [], // Array of incompatible IDs
-		'failed_subscription_id_array'       => [], // Array of failed IDs
-		'incompatible_subscription_id_array' => [], // Array of incompatible IDs
+		'failed_order_id_array'              => array(), // Array of failed IDs
+		'incompatible_order_id_array'        => array(), // Array of incompatible IDs
+		'failed_subscription_id_array'       => array(), // Array of failed IDs
+		'incompatible_subscription_id_array' => array(), // Array of incompatible IDs
 		'is_running'                         => true,
 		'contact_count'                      => 0,
 		'contact_failed_count'               => 0,
 		'contact_total'                      => 0,
-	];
+	);
 
 	/**
 	 * Initialize the status.
@@ -59,9 +59,9 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 					update_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_RUNNING_STATUS_NAME, wp_json_encode( $this->status ) );
 					$logger->debug(
 						'Historical Sync Ended',
-						[
+						array(
 							'status' => $this->status,
-						]
+						)
 					);
 					break;
 				case 'halted':
@@ -72,9 +72,9 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 					update_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_RUNNING_STATUS_NAME, wp_json_encode( $this->status ) );
 					$logger->info(
 						'Historical Sync was halted due to an error',
-						[
+						array(
 							'status' => $this->status,
-						]
+						)
 					);
 					die( 'There was a fatal error encountered and Historical Sync was halted. Please go back to the historical sync page and check your ActiveCampaign logs.' );
 				default:
@@ -84,10 +84,10 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue attempting to save historical sync status.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'status'  => $this->status,
-				]
+				)
 			);
 		}
 	}
@@ -112,12 +112,12 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 			$logger = new Logger();
 			$logger->error(
 				'An exception was thrown by historical sync while attempting to mark an order as failed.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'If this problem repeats please contact ActiveCampaign support.',
 					'ac_code'          => 'THS_107',
 					'order'            => $order,
-				]
+				)
 			);
 		}
 	}
@@ -135,12 +135,12 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 			$logger = new Logger();
 			$logger->error(
 				'An exception was thrown by historical sync while attempting to mark an subscription as failed.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'If this problem repeats please contact ActiveCampaign support.',
 					'ac_code'          => 'THS_107',
 					'subscription'     => $subscription,
-				]
+				)
 			);
 		}
 	}
@@ -164,12 +164,12 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 			$logger = new Logger();
 			$logger->error(
 				'An exception was thrown by historical sync while attempting to mark an order as incompatible.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'If this problem repeats please contact ActiveCampaign support.',
 					'ac_code'          => 'THS_136',
 					'order'            => $order,
-				]
+				)
 			);
 		}
 	}
@@ -187,12 +187,12 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 			$logger = new Logger();
 			$logger->error(
 				'An exception was thrown by historical sync while attempting to mark an subscription as incompatible.',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'If this problem repeats please contact ActiveCampaign support.',
 					'ac_code'          => 'THS_136',
 					'subscription'     => $subscription,
-				]
+				)
 			);
 		}
 	}
@@ -204,13 +204,13 @@ trait Activecampaign_For_Woocommerce_Historical_Status {
 	 */
 	public function mark_order_as_refund( $wc_order_id ) {
 		global $wpdb;
-		$data = [ 'synced_to_ac' => self::STATUS_REFUND ];
+		$data = array( 'synced_to_ac' => self::STATUS_REFUND );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 			$data,
-			[
+			array(
 				'wc_order_id' => $wc_order_id,
-			]
+			)
 		);
 	}
 

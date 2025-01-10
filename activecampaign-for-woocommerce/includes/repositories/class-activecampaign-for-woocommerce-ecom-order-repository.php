@@ -76,7 +76,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Repository implements Repository
 			$this->client,
 			$ecom_order_model,
 			(string) $id,
-			[ $this, 'find_and_insert_ecom_order_products_from_response' ]
+			array( $this, 'find_and_insert_ecom_order_products_from_response' )
 		);
 
 		return $ecom_order_model;
@@ -103,7 +103,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Repository implements Repository
 			$ecom_order_model,
 			$filter_name,
 			$filter_value,
-			[ $this, 'find_and_insert_ecom_order_products_from_response' ]
+			array( $this, 'find_and_insert_ecom_order_products_from_response' )
 		);
 
 		return $ecom_order_model;
@@ -153,7 +153,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Repository implements Repository
 		$result = $this->create_and_set_model_properties_from_api(
 			$this->client,
 			$model,
-			[ $this, 'find_and_insert_ecom_order_products_from_response' ]
+			array( $this, 'find_and_insert_ecom_order_products_from_response' )
 		);
 
 		if ( is_array( $result ) && isset( $result['type'] ) && ( 'error' === $result['type'] || 'timeout' === $result['type'] ) ) {
@@ -174,7 +174,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Repository implements Repository
 		$this->update_and_set_model_properties_from_api(
 			$this->client,
 			$model,
-			[ $this, 'find_and_insert_ecom_order_products_from_response' ]
+			array( $this, 'find_and_insert_ecom_order_products_from_response' )
 		);
 
 		return $model;
@@ -191,7 +191,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Repository implements Repository
 		$this->delete_model_from_api_by_id(
 			$this->client,
 			$id,
-			[ $this, 'return_result_from_response' ]
+			array( $this, 'return_result_from_response' )
 		);
 
 		return $id;
@@ -223,11 +223,11 @@ class Activecampaign_For_Woocommerce_Ecom_Order_Repository implements Repository
 		$is_order_list = isset( $response['ecomOrders'] );
 
 		// create our array of orders
-		$orders = $is_order_list ? $response['ecomOrders'] : [ $response['ecomOrder'] ];
+		$orders = $is_order_list ? $response['ecomOrders'] : array( $response['ecomOrder'] );
 
 		// create our array of products
-		$products = isset( $response['ecomOrderProducts'] ) ? $response['ecomOrderProducts'] : [];
-		uasort( $products, [ $this, 'product_array_sort' ] );
+		$products = isset( $response['ecomOrderProducts'] ) ? $response['ecomOrderProducts'] : array();
+		uasort( $products, array( $this, 'product_array_sort' ) );
 
 		// map through all orders, setting them in-place
 		$orders = array_map(

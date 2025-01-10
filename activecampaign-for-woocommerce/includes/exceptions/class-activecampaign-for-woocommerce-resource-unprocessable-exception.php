@@ -27,7 +27,7 @@ class Activecampaign_For_Woocommerce_Resource_Unprocessable_Exception extends Ex
 	 * @param int    $code The error code.
 	 * @param null   $previous The previous exception.
 	 */
-	public function __construct( $message = '', $context = [], $code = 0, $previous = null ) {
+	public function __construct( $message = '', $context = array(), $code = 0, $previous = null ) {
 		$message .= ' ' . wp_json_encode( $context );
 		parent::__construct( $message, $code, $previous );
 	}

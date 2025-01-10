@@ -45,28 +45,28 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			set_transient( 'acforwc_order_created_hook', wp_date( DATE_ATOM ), 604800 );
 
 			if ( isset( $order_id ) && null !== $order_id && ! empty( $order_id ) ) {
-				if ( ! wp_get_scheduled_event( 'activecampaign_for_woocommerce_ready_new_order', [ 'order_id' => $order_id ] ) ) {
+				if ( ! wp_get_scheduled_event( 'activecampaign_for_woocommerce_ready_new_order', array( 'order_id' => $order_id ) ) ) {
 					wp_schedule_single_event(
 						time() + 30,
 						'activecampaign_for_woocommerce_ready_new_order',
-						[ 'order_id' => $order_id ]
+						array( 'order_id' => $order_id )
 					);
 				}
 
 				$logger->debug(
 					'Order created triggered and order set',
-					[
+					array(
 						'post_type' => $post_type,
 						'order_id'  => $order_id,
-					]
+					)
 				);
 			}
 		} else {
 			$logger->warning(
 				'The new order does not appear to be valid for sync to AC.',
-				[
+				array(
 					'order_id' => $order_id,
-				]
+				)
 			);
 		}
 
@@ -89,10 +89,10 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 			$logger->debug_excess(
 				'Order update triggered',
-				[
+				array(
 					'order'     => $order_id,
 					'post_type' => $post_type,
-				]
+				)
 			);
 
 			if ($this->check_if_subscription_and_reroute( $order_id, $post_type ) ) {
@@ -112,33 +112,33 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 				if ( ! wp_get_scheduled_event(
 					'activecampaign_for_woocommerce_admin_sync_single_order_active',
-					[
+					array(
 						'wc_order_id' => $order_id,
 						'status'      => $wc_order->get_status(),
-					]
+					)
 				) &&
 					! wp_get_scheduled_event(
 						'activecampaign_for_woocommerce_admin_sync_single_order_status',
-						[
+						array(
 							'wc_order_id' => $order_id,
 							'status'      => $wc_order->get_status(),
-						]
+						)
 					) ) {
 					wp_schedule_single_event(
 						time() + 10,
 						'activecampaign_for_woocommerce_admin_sync_single_order_active',
-						[
+						array(
 							'wc_order_id' => $order_id,
 							'status'      => $wc_order->get_status(),
-						]
+						)
 					);
 				}
 			} else {
 				$logger->warning(
 					'The updated order does not appear to be valid for sync to AC.',
-					[
+					array(
 						'order_id' => $order_id,
-					]
+					)
 				);
 			}
 		}
@@ -159,12 +159,12 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 			$logger->debug_excess(
 				'Order status update triggered',
-				[
+				array(
 					'order'        => $order_id,
 					'order_status' => $from_status,
 					'new_status'   => $to_status,
 					'post_type'    => $post_type,
-				]
+				)
 			);
 
 			if ($this->check_if_subscription_and_reroute( $order_id, $post_type ) ) {
@@ -175,11 +175,11 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			if ( 'shop_order' !== $post_type ) {
 				$logger->debug_excess(
 					'Order status update was triggered but the post is not a shop order type.',
-					[
+					array(
 						'order_id'   => $order_id,
 						'post_type'  => $post_type,
 						'new_status' => $to_status,
-					]
+					)
 				);
 
 				return;
@@ -193,27 +193,27 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 				if ( ! wp_get_scheduled_event(
 					'activecampaign_for_woocommerce_admin_sync_single_order_status',
-					[
+					array(
 						'wc_order_id' => $order_id,
 						'status'      => $to_status,
-					]
+					)
 				) ) {
 					wp_schedule_single_event(
 						time() + 10,
 						'activecampaign_for_woocommerce_admin_sync_single_order_status',
-						[
+						array(
 							'wc_order_id' => $order_id,
 							'status'      => $to_status,
-						]
+						)
 					);
 				}
 			}
 		} else {
 			$logger->warning(
 				'The updated order does not appear to be valid for sync to AC.',
-				[
+				array(
 					'order_id' => $order_id,
-				]
+				)
 			);
 		}
 	}
@@ -239,18 +239,18 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 			if ( ! wp_get_scheduled_event(
 				'activecampaign_for_woocommerce_admin_sync_single_order_status',
-				[
+				array(
 					'wc_order_id' => $order_id,
 					'event_type'  => 'status_' . $new_status,
-				]
+				)
 			) ) {
 				wp_schedule_single_event(
 					time() + 10,
 					'activecampaign_for_woocommerce_admin_sync_single_order_status',
-					[
+					array(
 						'wc_order_id' => $order_id,
 						'status'      => $new_status,
-					]
+					)
 				);
 			}
 		}
@@ -269,19 +269,19 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		try {
 			$logger->debug_excess(
 				'Refund order update triggered',
-				[
+				array(
 					'order_id' => $order_id,
-				]
+				)
 			);
 
 			$this->execute_order_updated( $order_id );
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue updating the order from a refund trigger.',
-				[
+				array(
 					'order_id' => $order_id,
 					'message'  => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}
@@ -303,9 +303,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 				if ( isset( $order_id ) && ! empty( $order_id ) ) {
 					$logger->debug_excess(
 						'Stripe verified order update triggered',
-						[
+						array(
 							'order_id' => $order_id,
-						]
+						)
 					);
 
 					$this->execute_order_updated( $order_id );
@@ -314,10 +314,10 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue updating the order from stripe.',
-				[
+				array(
 					'order'   => $order,
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}
@@ -342,9 +342,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 				$logger->debug(
 					'Order delete triggered',
-					[
+					array(
 						'order' => $order_id,
-					]
+					)
 				);
 				// Delete an order for deepdata
 				$settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
@@ -369,10 +369,10 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue deleting the order from AC.',
-				[
+				array(
 					'order_id' => $order_id,
 					'message'  => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}
@@ -396,7 +396,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			}
 
 			global $wpdb;
-			$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, [ 'wc_order_id' => $order_id ] );
+			$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, array( 'wc_order_id' => $order_id ) );
 		}
 	}
 
@@ -418,9 +418,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue attempting to create a datahash for the update validity on the order update.',
-				[
+				array(
 					'order_id' => $wc_order->get_id(),
-				]
+				)
 			);
 			// If this fails return true. Better to double sync than miss it entirely.
 		}
@@ -434,9 +434,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue attempting to validate the order update.',
-				[
+				array(
 					'order_id' => $wc_order->get_id(),
-				]
+				)
 			);
 			// If this fails return true. Better to double sync than miss it entirely.
 		}
@@ -454,9 +454,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 			$logger->warning(
 				'There was an issue attempting to validate the order update.',
-				[
+				array(
 					'order_id' => $wc_order->get_id(),
-				]
+				)
 			);
 			// If this fails return true. Better to double sync than miss it entirely.
 		}
@@ -464,36 +464,45 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		return true;
 	}
 
+	/**
+	 * Check if the order is a subscription and re route it through another procedure.
+	 *
+	 * @param string|int|object $order_id The order ID.
+	 * @param string            $post_type The post type.
+	 *
+	 * @return bool
+	 */
 	private function check_if_subscription_and_reroute( $order_id, $post_type ) {
 		$logger = new Logger();
 
 		try {
 				// If it's a subscription, route through sub update
 			if (
-					'shop_subscription' === $post_type ||
-					'shop_order_placehold' === $post_type ||
-					(
-						function_exists( 'wcs_is_subscription' ) &&
-						wcs_is_subscription( $order_id )
-					)
+				(
+					'shop_subscription' === $post_type && function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id )
+					) ||
+				(
+					'shop_order_placehold' === $post_type && function_exists( 'wcs_is_subscription' ) && wcs_is_subscription( $order_id )
+				)
 				) {
 				$wc_subscription = $this->get_wc_subscription( $order_id );
 				$subscription_id = $wc_subscription->get_id();
 
 				if ( wcs_is_subscription( $subscription_id ) ) {
-					$logger->debug(
-						'Order update accidentally triggered from subscription. Routing order to subscription instead.',
-						array(
-							'order_id'                 => $order_id,
-							'subscription_id'          => $subscription_id,
-							'subscription item count'  => $wc_subscription->get_item_count(),
-							'is_subscription on order' => wcs_is_subscription( $order_id ),
-							'is_subscription on subscription' => wcs_is_subscription( $subscription_id ),
-						)
-					);
-
+					// Check if the update is completely valid at this time.
 					if ( $this->check_update_validity( $wc_subscription ) ) {
-						do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', [ $wc_subscription ] );
+						$logger->debug(
+							'Order update accidentally triggered from subscription status update. Routing order to subscription instead.',
+							array(
+								'order_id'                 => $order_id,
+								'subscription_id'          => $subscription_id,
+								'subscription item count'  => $wc_subscription->get_item_count(),
+								'is_subscription on order' => wcs_is_subscription( $order_id ),
+								'is_subscription on subscription' => wcs_is_subscription( $subscription_id ),
+							)
+						);
+
+						do_action( 'activecampaign_for_woocommerce_route_order_update_to_subscription', array( $wc_subscription ) );
 					}
 
 					return true;
@@ -502,9 +511,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 		} catch (Throwable $t ) {
 			$logger->warning(
 				'Something went wrong validating post type as shop_subscription',
-				[
+				array(
 					'message' => $t->getMessage(),
-				]
+				)
 			);
 		}
 

@@ -199,5 +199,4 @@ class Activecampaign_For_Woocommerce_Cart_Emptied_Event implements Triggerable {
 		do_action( 'activecampaign_for_woocommerce_cart_emptied' );
 	}
 	// phpcs:enable
-
 }

@@ -57,10 +57,10 @@ class Activecampaign_For_Woocommerce_Uninstall_Plugin_Command implements Executa
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue removing the ActiveCampaign user meta data.',
-				[
+				array(
 					'action to take' => 'Manually delete the data if necessary.',
 					'message'        => $t->getMessage(),
-				]
+				)
 			);
 		}
 
@@ -71,10 +71,10 @@ class Activecampaign_For_Woocommerce_Uninstall_Plugin_Command implements Executa
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue removing the ActiveCampaign DB version value.',
-				[
+				array(
 					'action to take' => 'Manually delete the field if you plan on reinstalling this plugin.',
 					'message'        => $t->getMessage(),
-				]
+				)
 			);
 		}
 
@@ -85,11 +85,11 @@ class Activecampaign_For_Woocommerce_Uninstall_Plugin_Command implements Executa
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'There was an issue removing the ' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table from your database. This process may not have permission.',
-				[
+				array(
 					'action to take' => 'Manually delete the ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table if necessary.',
 					'message'        => $t->getMessage(),
 					'ac_code'        => 'UPC_59',
-				]
+				)
 			);
 		}
 
@@ -100,10 +100,10 @@ class Activecampaign_For_Woocommerce_Uninstall_Plugin_Command implements Executa
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'There was an issue removing the old activecampaign_for_woocommerce_abandoned_cart table from your database. This process may not have permission.',
-				[
+				array(
 					'action to take' => 'Manually delete the ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table if necessary.',
 					'message'        => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}

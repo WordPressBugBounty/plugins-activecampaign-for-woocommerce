@@ -34,7 +34,7 @@ class Activecampaign_For_Woocommerce_Connection implements Ecom_Model, Has_Id {
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'externalid'  => 'externalid', // the site URL
 		'id'          => 'id', // set by Hosted
 		'name'        => 'name', // the site title
@@ -42,7 +42,7 @@ class Activecampaign_For_Woocommerce_Connection implements Ecom_Model, Has_Id {
 		'logo_url'    => 'logoUrl', // the site logo
 		'link_url'    => 'linkUrl', // the shop URL
 		'is_internal' => 'isInternal',
-	];
+	);
 
 	/**
 	 * The externalid.

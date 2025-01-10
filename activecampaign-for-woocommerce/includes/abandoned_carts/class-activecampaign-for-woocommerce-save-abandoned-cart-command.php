@@ -22,9 +22,9 @@ use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Synced_Status {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -149,10 +149,10 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'Abandoned sync: Encountered an error on gathering customer and/or session data for the abandonment sync',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -173,9 +173,9 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 			$this->delete_abandoned_cart_by_filter( 'customer_id', $customer_data['id'] );
 			$this->logger->debug(
 				'This cart is empty and cannot be saved.',
-				[
+				array(
 					wc()->cart->get_cart(),
-				]
+				)
 			);
 			return;
 		}
@@ -192,10 +192,10 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Abandoned sync: Encountered an error on gathering cart totals for the abandonment sync',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 
@@ -242,21 +242,21 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 					if ( $wpdb->last_error ) {
 						$this->logger->warning(
 							'Save abandoned cart command: There was an error selecting the id for a customer abandoned cart record.',
-							[
+							array(
 								'wpdb_last_error' => $wpdb->last_error,
 								'customer_id'     => $customer_data['id'],
-							]
+							)
 						);
 					}
 				}
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Save abandoned cart command: There was an error attempting to save this abandoned cart',
-					[
+					array(
 						'message'       => $t->getMessage(),
 						'customer_data' => $customer_data,
 						'trace'         => $this->logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 
@@ -266,16 +266,16 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Save abandoned cart command: There was an error checking and clearing the abandoned cart',
-					[
+					array(
 						'message'       => $t->getMessage(),
 						'customer_data' => $customer_data,
 						'trace'         => $this->logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 
 			try {
-				$store_data = [
+				$store_data = array(
 					'customer_id'                    => $customer_data['id'],
 					'customer_email'                 => $customer_data['email'],
 					'customer_first_name'            => $customer_data['first_name'],
@@ -286,7 +286,7 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 					'cart_ref_json'                  => wp_json_encode( $cart, JSON_UNESCAPED_UNICODE ),
 					'cart_totals_ref_json'           => wp_json_encode( $cart_totals, JSON_UNESCAPED_UNICODE ),
 					'removed_cart_contents_ref_json' => wp_json_encode( $removed_cart_contents, JSON_UNESCAPED_UNICODE ),
-				];
+				);
 
 				if ( isset( $customer_data['id'] ) && User_Meta_Service::get_current_user_ac_customer_id( $customer_data['id'] ) ) {
 					$store_data['ac_customer_id'] = User_Meta_Service::get_current_user_ac_customer_id( $customer_data['id'] );
@@ -315,11 +315,11 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Save abandoned cart command: There was an error attempting to save this abandoned cart',
-					[
+					array(
 						'message'       => $t->getMessage(),
 						'customer_data' => $customer_data,
 						'trace'         => $this->logger->clean_trace( $t->getTrace() ),
-					]
+					)
 				);
 			}
 		}

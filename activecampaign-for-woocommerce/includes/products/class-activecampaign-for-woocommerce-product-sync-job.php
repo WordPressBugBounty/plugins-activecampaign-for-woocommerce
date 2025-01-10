@@ -27,8 +27,9 @@ use AcVendor\Brick\Math\BigDecimal;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Arg_Data_Gathering;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Arg_Data_Gathering;
+
 	/**
 	 * The custom ActiveCampaign logger
 	 *
@@ -146,19 +147,19 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				$cofe_data = array();
 				$logger->debug(
 					'Product status changed, update COFE product status.',
-					[
+					array(
 						'product_id'           => $product_id,
 						'product_stock_status' => $product_stock_status,
-					]
+					)
 				);
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'There was an issue setting up product data for update product sync.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
 						'func'    => 'save_or_update_product',
-					]
+					)
 				);
 			}
 
@@ -171,9 +172,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				} else {
 					$logger->warning(
 						'Save or update product could not retrieve connection id.',
-						[
+						array(
 							'product_id' => $product_id,
-						]
+						)
 					);
 
 					return;
@@ -181,11 +182,11 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'There was an issue adding product data',
-					[
+					array(
 						'message'       => $t->getMessage(),
 						'product'       => $product,
 						'connection_id' => $connection_id,
-					]
+					)
 				);
 			}
 
@@ -202,11 +203,11 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				} catch ( Throwable $t ) {
 					$this->logger->warning(
 						'There was an issue getting child product data.',
-						[
+						array(
 							'product' => $product,
 							'message' => $t->getMessage(),
 							'trace'   => $t->getTrace(),
-						]
+						)
 					);
 
 					$this->add_failed_product_to_status( $status, $product );
@@ -220,20 +221,20 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 					if ( ! $response ) {
 						$this->logger->warning(
 							'Create bulk product data returned false. Check error logs.',
-							[
+							array(
 								'found_in'  => 'product_cofe_sync',
 								'response'  => $response,
 								'cofe_data' => $cofe_data,
-							]
+							)
 						);
 					}
 				} catch ( Throwable $t ) {
 					$this->logger->error(
 						'There was a fatal error creating a bulk cofe call.',
-						[
+						array(
 							'message' => $t->getMessage(),
 							'trace'   => $t->getTrace(),
-						]
+						)
 					);
 				}
 			}
@@ -283,9 +284,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 		if ( $sync ) {
 			$this->logger->debug_calls(
 				'Sync connection initiated.',
-				[
+				array(
 					$sync,
-				]
+				)
 			);
 		}
 	}
@@ -369,13 +370,13 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 */
 	public function schedule_background_product_sync( $offset, $batch_limit ) {
 		$logger = new Logger();
-		$data   = [
-			[
+		$data   = array(
+			array(
 				'start_record' => (int) $offset,
 				'batch_limit'  => (int) $batch_limit,
 				'direct_mode'  => (int) $this->direct_mode,
-			],
-		];
+			),
+		);
 		try {
 			if (
 				empty(
@@ -391,7 +392,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 
 			$logger->debug(
 				'Schedule next product sync',
-				[
+				array(
 					'current_time' => time(),
 					'batch_limit'  => $batch_limit,
 					'start_record' => $offset,
@@ -399,18 +400,18 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 						ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME,
 						$data
 					),
-				]
+				)
 			);
 
 			update_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_SCHEDULED_STATUS_NAME, true );
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'There was an issue scheduling continued bulk product sync. Product sync may hang.',
-				[
+				array(
 					'message'  => $t->getMessage(),
 					'trace'    => $t->getTrace(),
 					'function' => 'schedule_background_product_sync',
-				]
+				)
 			);
 		}
 	}
@@ -434,15 +435,15 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 
 		try {
 			if ( isset( $product ) ) {
-				$this->product_cofe_sync( $this->add_args_to_status( false ), [ $product ] );
+				$this->product_cofe_sync( $this->add_args_to_status( false ), array( $product ) );
 			}
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'There was an issue syncing single product data',
-				[
+				array(
 					'message'    => $t->getMessage(),
 					'product_id' => $product_id,
-				]
+				)
 			);
 		}
 	}
@@ -455,8 +456,8 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 */
 	public function product_cofe_sync( Sync_Status $status, $products_list = null ) {
 		/**
-		  * We are grabbing offset and limit from $this because $this gets populated by the job scheduler, which is
-		  * more accurate than $status (which is populated from the db).
+		 * We are grabbing offset and limit from $this because $this gets populated by the job scheduler, which is
+		 * more accurate than $status (which is populated from the db).
 		 */
 		if ( ! isset( $products_list ) || empty( $products_list ) ) {
 			$offset = $this->start_record;
@@ -483,9 +484,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			if ( ! $product ) {
 				$this->logger->notice(
 					'Product ID is empty, skipping.',
-					[
+					array(
 						'product' => $product,
-					]
+					)
 				);
 
 				continue;
@@ -496,11 +497,11 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'There was an issue adding product data',
-					[
+					array(
 						'message'       => $t->getMessage(),
 						'product'       => $product,
 						'connection_id' => $connection_id,
-					]
+					)
 				);
 			}
 
@@ -517,10 +518,10 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				} catch ( Throwable $t ) {
 					$this->logger->notice(
 						'There was an issue getting child product data.',
-						[
+						array(
 							'message' => $t->getMessage(),
 							'trace'   => $t->getTrace(),
-						]
+						)
 					);
 
 					$this->add_failed_product_to_status( $status, $product );
@@ -535,11 +536,11 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				if ( ! $response ) {
 					$this->logger->warning(
 						'Create bulk product data returned false. Check error logs.',
-						[
+						array(
 							'found_in'  => 'product_cofe_sync',
 							'response'  => $response,
 							'cofe_data' => $cofe_data,
-						]
+						)
 					);
 
 					Sync_Status::halt( $status );
@@ -547,10 +548,10 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			} catch ( Throwable $t ) {
 				$this->logger->error(
 					'There was a fatal error creating a bulk cofe call.',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
-					]
+					)
 				);
 			}
 		}
@@ -573,12 +574,12 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Product sync failed sync for Offset:',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'offset'  => $this->start_record,
 					'limit'   => $this->batch_limit,
 					'trace'   => $t->getTrace(),
-				]
+				)
 			);
 		}
 
@@ -634,11 +635,11 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				if ( ! $response ) {
 					$this->logger->warning(
 						'Create bulk product data returned false. Check error logs.',
-						[
+						array(
 							'found_in'     => 'add_product_data',
 							'response'     => $response,
 							'product_data' => $product_data,
-						]
+						)
 					);
 					Sync_Status::halt( $status );
 				}
@@ -656,10 +657,10 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Error with bulk product create call',
-					[
+					array(
 						'message' => $t->getMessage(),
 						'trace'   => $t->getTrace(),
-					]
+					)
 				);
 				$this->add_failed_product_to_status( $status, $product );
 			}
@@ -787,9 +788,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 
 				$logger->debug(
 					'Product delete triggered',
-					[
+					array(
 						'product' => $product_id,
-					]
+					)
 				);
 
 				// Try to find the order in AC
@@ -808,10 +809,10 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue deleting the order from AC.',
-				[
+				array(
 					'order_id' => $product_id,
 					'message'  => $t->getMessage(),
-				]
+				)
 			);
 		}
 	}

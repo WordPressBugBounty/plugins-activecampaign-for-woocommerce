@@ -24,8 +24,8 @@ use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
-	use Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Order_Line_Item_Gathering;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Order_Line_Item_Gathering;
 
 	private function init() {
 		$admin_storage = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_CONNECTION_STORAGE_NAME );
@@ -84,7 +84,7 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 				$ecom_subscription->set_customer_data( null );
 			}
 
-			if ( in_array( $ecom_subscription->get_wc_customer_id(), [ 0, '0', null ], true ) ) {
+			if ( in_array( $ecom_subscription->get_wc_customer_id(), array( 0, '0', null ), true ) ) {
 				$customer_id = $this->get_customer_id_from_subscription( $wc_subscription );
 				$ecom_subscription->set_wc_customer_id( $customer_id );
 			}
@@ -98,14 +98,14 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 			}
 
 			$data            = $wc_subscription->get_data();
-			$cofe_line_items = [
+			$cofe_line_items = array(
 				'categories'        => array(),
 				'names'             => array(),
 				'skus'              => array(),
 				'brands'            => array(),
 				'tags'              => array(),
 				'store_primary_ids' => array(),
-			];
+			);
 
 			foreach ( $data['line_items'] as $item_id => $item ) {
 				$cofe_line_items = $this->populate_line_item_data( $cofe_line_items, $item_id, $item );
@@ -122,13 +122,13 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 			$logger = new Logger();
 			$logger->error(
 				'There was an exception creating the subscription object for AC.',
-				[
+				array(
 					'wc_order'         => $wc_subscription->get_id(),
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please check the message for explanation or error and if the issue continues contact ActiveCampaign support.',
 					'ac_code'          => 'SG_154',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;
@@ -180,21 +180,21 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 			} else {
 				$logger->warning(
 					'Could not populate line item data for this subscription',
-					[
+					array(
 						'id'      => $id,
 						'item'    => $item,
 						'ac_code' => 'SBG_185',
-					]
+					)
 				);
 			}
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'Could no populate line item data for subscription',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
 					'ac_code' => 'SBG_200',
-				]
+				)
 			);
 		}
 
@@ -223,11 +223,11 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$logger->debug(
 				'Customer ID fetch threw an error on the subscription object.',
-				[
+				array(
 					$subscription,
 					$t->getMessage(),
 					'ac_code' => 'SG_312',
-				]
+				)
 			);
 		}
 
@@ -236,7 +236,7 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 			$customer_row = $wpdb->get_row(
 				$wpdb->prepare(
 					'SELECT order_id, customer_id FROM ' . $wpdb->prefix . 'wc_order_stats where order_id = %s LIMIT 1;',
-					[ $subscription->get_id() ]
+					array( $subscription->get_id() )
 				)
 			);
 
@@ -246,23 +246,23 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'Customer fetch threw an error for subscription from the table.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'order'   => $subscription,
 					'ac_code' => 'SG_335',
-				]
+				)
 			);
 		}
 
 		$logger->warning(
 			'Could not find a customer ID matching the subscription for COFE builder.',
-			[
+			array(
 				'order'         => $subscription,
 				'id'            => self::validate_object( $subscription, 'get_id' ) ? $subscription->get_id() : null,
 				'order_number'  => self::validate_object( $subscription, 'get_order_number' ) ? $subscription->get_order_number() : null,
 				'billing_email' => self::validate_object( $subscription, 'get_billing_email' ) ? $subscription->get_billing_email() : null,
 				'ac_code'       => 'SG_346',
-			]
+			)
 		);
 
 		return null;

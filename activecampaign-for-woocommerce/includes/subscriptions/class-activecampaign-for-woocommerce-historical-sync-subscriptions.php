@@ -24,11 +24,11 @@ use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Executable, Synced_Status {
-	use Activecampaign_For_Woocommerce_Historical_Status,
-		Activecampaign_For_Woocommerce_Data_Validation,
-		Activecampaign_For_Woocommerce_Synced_Status_Handler,
-		Activecampaign_For_Woocommerce_Historical_Utilities,
-		Activecampaign_For_Woocommerce_Global_Utilities;
+	use Activecampaign_For_Woocommerce_Historical_Status;
+	use Activecampaign_For_Woocommerce_Data_Validation;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Historical_Utilities;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -61,7 +61,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 			);
 			// phpcs:enable
 			$this->clean_bad_data_from_table();
-			$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, [ 'synced_to_ac' => self::STATUS_DELETE ] );
+			$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, array( 'synced_to_ac' => self::STATUS_DELETE ) );
 			$this->mark_subscriptions_for_prep();
 			$current_offset  = 0;
 			$orders_id_array = true;
@@ -79,17 +79,17 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 				} catch ( Throwable $t ) {
 					$this->logger->warning(
 						'Historical sync prep encountered an error and will skip this page.',
-						[
+						array(
 							'page'        => $current_offset,
 							'batch_limit' => $batch_limit,
 							'exclude'     => $exclude,
 							'message'     => $t->getMessage(),
 							'trace'       => $t->getTrace(),
 							'ac_code'     => 'HSS_74',
-						]
+						)
 					);
 
-					$current_offset++;
+					++$current_offset;
 					continue;
 				}
 			}
@@ -139,7 +139,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 			unset( $registered_order_ids ); // save memory
 			$unique_order_ids = array_diff( $orders_id_array, $result_int );
 			unset( $result_int );
-			$data = [];
+			$data = array();
 
 			if ( count( $unique_order_ids ) >= 1 ) {
 				foreach ( $unique_order_ids as $order_id ) {
@@ -161,11 +161,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 			$logger = new Logger();
 			$logger->error(
 				'Could not prepare line item data for subscription',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
 					'ac_code' => 'HSS_162',
-				]
+				)
 			);
 		}
 	}
@@ -179,7 +179,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 
 		$in_str = implode(
 			',',
-			[
+			array(
 				self::STATUS_SUBSCRIPTION_SYNCED,
 				self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_PREP,
 				self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_FINISH,
@@ -187,7 +187,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 				self::STATUS_SUBSCRIPTION_FAILED_BILLING,
 				self::STATUS_SUBSCRIPTION_INCOMPATIBLE,
 				self::STATUS_SUBSCRIPTION_FAILED_SYNC,
-			]
+			)
 		);
 
 		// Do the subscriptions
@@ -199,7 +199,6 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 			WHERE `wc_order_id` IS NOT NULL AND `synced_to_ac` IN (' . $in_str . ')'
 		);
 		// phpcs:enable
-
 	}
 
 	/**
@@ -211,10 +210,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 		try {
 			// $externalcheckout_id = get_metadata_raw( 'post', $order_id, 'activecampaign_for_woocommerce_external_checkout_id', true );
 
-			$store_data = [
+			$store_data = array(
 				'synced_to_ac' => self::STATUS_SUBSCRIPTION_HISTORICAL_SYNC_QUEUE,
 				'wc_order_id'  => $order_id,
-			];
+			);
 
 			return $store_data;
 
@@ -222,10 +221,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 			$logger = new Logger();
 			$logger->warning(
 				'There was an issue forming the order data for historical sync.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 
 			return null;
@@ -285,11 +284,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Subscriptions implements Ex
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'Could not get subscription ids by page for historical sync',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
 					'ac_code' => 'HSS_291',
-				]
+				)
 			);
 		}
 

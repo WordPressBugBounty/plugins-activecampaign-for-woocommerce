@@ -28,8 +28,7 @@ use AcVendor\Brick\Math\BigDecimal;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, Has_Id, Has_Email {
-	use Activecampaign_For_Woocommerce_Data_Validation ,
-		Api_Serializable {
+	use Activecampaign_For_Woocommerce_Data_Validation, Api_Serializable {
 		serialize_to_array as serialize_all_but_products_to_array;
 		set_properties_from_serialized_array as set_all_but_products_as_properties_from_serialized_array;
 	}
@@ -39,7 +38,7 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 	 *
 	 * @var array
 	 */
-	public $api_mappings = [
+	public $api_mappings = array(
 		'legacy_connectionid'         => 'legacyConnectionId', // how is this different from connectionId?
 		'subscription_id'             => 'storeRecurringPaymentId',
 		'email'                       => 'email',
@@ -72,19 +71,19 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 		'line_item_tags'              => 'lineItemTags',
 		'line_item_store_primary_ids' => 'lineItemStorePrimaryIds',
 		'source'                      => 'suppressAutomations',
-	];
+	);
 
 	/**
 	 * The required fields for an ecom subscription
 	 *
 	 * @var array
 	 */
-	private $required_fields = [
+	private $required_fields = array(
 		'legacy_connectionid',
 		'email',
 		'total_price',
 		'source',
-	];
+	);
 
 	/**
 	 * The subscription ID set by WC.
@@ -332,19 +331,19 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 	 * @param enum $billing_period
 	 */
 	public function set_billing_period( $billing_period ) {
-		if ( in_array( $billing_period, [ 'day', 'daily' ], false ) ) {
+		if ( in_array( $billing_period, array( 'day', 'daily' ), false ) ) {
 			$this->billing_period = new Enumish( 'DAILY' );
 			return;
 		}
-		if ( in_array( $billing_period, [ 'week', 'weekly' ], false ) ) {
+		if ( in_array( $billing_period, array( 'week', 'weekly' ), false ) ) {
 			$this->billing_period = new Enumish( 'WEEKLY' );
 			return;
 		}
-		if ( in_array( $billing_period, [ 'month', 'monthly' ], false ) ) {
+		if ( in_array( $billing_period, array( 'month', 'monthly' ), false ) ) {
 			$this->billing_period = new Enumish( 'MONTHLY' );
 			return;
 		}
-		if ( in_array( $billing_period, [ 'year', 'yearly' ], false ) ) {
+		if ( in_array( $billing_period, array( 'year', 'yearly' ), false ) ) {
 			$this->billing_period = new Enumish( 'YEARLY' );
 			return;
 		}
@@ -868,7 +867,7 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 	 * @param bool $source The source (1 or 0).
 	 */
 	public function set_source( $source ) {
-		if ( in_array( $source, [ 0, '0' ], false ) ) {
+		if ( in_array( $source, array( 0, '0' ), false ) ) {
 			$this->source = true;
 		} else {
 			$this->source = false;
@@ -1053,13 +1052,13 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 		} catch ( Throwable $t ) {
 			$logger->warning(
 				'There was an issue setting properties from serialized array for the cofe ecom subscription',
-				[
+				array(
 					'message'          => $t->getMessage(),
 					'suggested_action' => 'Please refer to the message for explanation.',
 					'passed_array'     => $array,
 					'ac_code'          => 'WSM_1060',
 					'trace'            => $logger->clean_trace( $t->getTrace() ),
-				]
+				)
 			);
 		}
 	}
@@ -1169,11 +1168,11 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 		} catch ( Throwable $t ) {
 			$logger->error(
 				'Could not set all properties from subscription data.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $t->getTrace(),
 					'ac_code' => 'WSM_1175',
-				]
+				)
 			);
 		}
 	}
@@ -1226,11 +1225,11 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 			$logger = new Logger();
 			$logger->warning(
 				'The serialize_to_array function encountered an issue. A valid subscription object may not exist.',
-				[
+				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
 					'ac_code' => 'WSM_1232',
-				]
+				)
 			);
 
 			return null;

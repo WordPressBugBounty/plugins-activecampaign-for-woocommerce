@@ -145,6 +145,49 @@
 				<?php endif; ?>
 			</td>
 		</tr>
+		<tr>
+			<td data-export-label="Browse Tracking Setting"><?php esc_html_e( 'Browse Tracking Setting', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></td>
+			<td>
+				<?php
+				if ( ! isset( $this->get_options()['browse_tracking'] ) || empty( $this->get_options()['browse_tracking'] ) ) {
+					/* Translators: %1$s: Database prefix, %2$s: Docs link. */
+					echo '<mark class="disabled"> Disabled</mark>';
+				} else {
+					if ('1' === $this->get_options()['browse_tracking'] ) {
+						$this->output_yes_mark( esc_html( 'Enabled track by default' ) );
+					}
+					if ('2' === $this->get_options()['browse_tracking'] ) {
+						$this->output_yes_mark( esc_html( 'Enabled but do not track by default' ) );
+					}
+					if ('3' === $this->get_options()['browse_tracking'] ) {
+						echo '<mark class="disabled"> Staging mode</mark>';
+					}
+				}
+				?>
+			</td>
+		</tr>
+		<?php if ( isset( $this->get_options()['browse_tracking'] ) && ! empty( $this->get_options()['browse_tracking'] ) && isset( $this->get_options()['tracking_id'] ) ) : ?>
+			<tr>
+				<td>
+					Tracking ID:
+				</td>
+				<td>
+					<?php echo esc_html( $this->get_options()['tracking_id'] ); ?>
+				</td>
+			</tr>
+			<?php if (isset( $activecampaign_for_woocommerce_status_data['whitelist'] ) ) : ?>
+			<tr>
+				<td>
+					AC whitelisted domains:
+				</td><td>
+					<?php echo esc_html( implode( ', ', $activecampaign_for_woocommerce_status_data['whitelist'] ) ); ?>
+				</td>
+			</tr>
+			<?php endif; ?>
+		<?php endif; ?>
+		<?php if (isset( $activecampaign_for_woocommerce_status_data['other_ac_tracking'] ) ) : ?>
+		<tr><td>ActiveCampaign Forms Tracking</td><td>Enabled</td></tr>
+		<?php endif; ?>
 		<tr><td colspan="2"><hr/></td></tr>
 
 		<?php if ( isset( $activecampaign_for_woocommerce_status_data['wc_database'] ) ) : ?>

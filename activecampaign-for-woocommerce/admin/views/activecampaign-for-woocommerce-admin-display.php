@@ -216,7 +216,7 @@ $activecampaign_for_woocommerce_ba_session_timeout_options                      
 	'8'  => esc_html__( '8 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 	'24' => esc_html__( '24 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 );
-$activecampaign_for_woocommerce_ba_product_url_valid_variables                    = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc' );
+$activecampaign_for_woocommerce_ba_product_url_valid_variables                    = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductSlug', 'variantSlug' );
 
 $activecampaign_for_woocommerce_ac_debug_options = array(
 	// value  // label
@@ -344,6 +344,7 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 					<input type="hidden" name="ba_min_page_view_time" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_browse_abandonment_minimum_page_view_time_options ) ); ?>">
 					<input type="hidden" name="ba_product_url_patterns" value="<?php echo esc_html( stripslashes_deep( json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns ) ) ); ?>">
 					<input type="hidden" name="ba_session_timeout" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_ba_session_timeout_options ) ); ?>">
+					<input type="hidden" id="browse_tracking" name="browse_tracking" value="0">
 					<input type="hidden" id="ac_debug" name="ac_debug" value="0">
 					<input type="hidden" id="ac_debug_calls" name="ac_debug_calls" value="0">
 					<input type="hidden" id="ac_debug_excess" name="ac_debug_excess" value="0">
@@ -599,9 +600,6 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 										<input type="text" name="ba_product_url_patterns-1" class="ba_product_url_inputs" id="ba_product_url_patterns-1" size="23"
 											placeholder="<?php echo esc_html( $activecampaign_for_woocommerce_ba_product_url_patterns_placeholder_text ); ?>"
 											value="<?php echo esc_html( stripslashes_deep( $activecampaign_for_woocommerce_ba_product_url_patterns ) ); ?>">
-										<button type="button" id="validate_ba_product_url-1" class="activecampaign-for-woocommerce button validation">
-											<?php esc_html_e( 'Validate Url', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-										</button>
 										<button type="button" id="ba_product_url_patterns_rmv-1" class="activecampaign-for-woocommerce button removal">
 											<?php esc_html_e( 'Clear', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 										</button>
@@ -754,6 +752,16 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 									}
 									?>
 								> Off
+							</label>
+							<label class="radio" style="display:none;">
+								<input type="radio" id="browse_tracking3" name="browse_tracking" value="3"
+								<?php
+								if ( '3' === $activecampaign_for_woocommerce_browse_tracking ) {
+									echo 'checked';
+								}
+								?>
+								/>
+								Staging test
 							</label>
 						</div>
 					<?php endif; ?>

@@ -20,7 +20,7 @@ use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
 use Activecampaign_For_Woocommerce_Api_Client as Api_Client;
 use Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository as AC_Tracking_Code_Repository;
 use Activecampaign_For_Woocommerce_Ac_Tracking_Repository as AC_Tracking;
-use Activecampaign_For_Woocommerce_AC_Whitelist as AC_Whitelist;
+use Activecampaign_For_Woocommerce_Whitelist_Repository as AC_Whitelist_Repository;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -853,23 +853,23 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		$api_url_changing = $this->api_url_is_changing( $data, $current_settings );
 
+		if ( $current_settings ) {
+			$data = array_merge( $current_settings, $data );
+		}
+
 		if (
-			isset( $current_settings['browse_tracking'] ) &&
-			in_array( $current_settings['browse_tracking'], array( 1, '1' ) )
+			isset( $data['browse_tracking'] ) &&
+			in_array( $data['browse_tracking'], array( 1, '1' ) )
 		) {
 			$this->add_standard_urls_to_ac_whitelist( site_url() );
 
 			if (
-				! isset( $current_settings['tracking_id'] ) ||
-				empty( $current_settings['tracking_id'] )
+				! isset( $data['tracking_id'] ) ||
+				empty( $data['tracking_id'] )
 			) {
 				$tracking_id         = $this->activecampaign_fetch_accountid();
 				$data['tracking_id'] = $tracking_id;
 			}
-		}
-
-		if ( $current_settings ) {
-			$data = array_merge( $current_settings, $data );
 		}
 
 		if ( ! isset( $current_settings['webhooks_deleted'] ) ) {
@@ -1450,7 +1450,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 */
 	private function add_standard_urls_to_ac_whitelist( $url ) {
 		$logger         = new Logger();
-		$whitelist_repo = new Activecampaign_For_Woocommerce_Whitelist_Repository( $this->api_client );
+		$whitelist_repo = new AC_Whitelist_Repository( $this->api_client );
 
 		$site_list = array(
 			site_url(),

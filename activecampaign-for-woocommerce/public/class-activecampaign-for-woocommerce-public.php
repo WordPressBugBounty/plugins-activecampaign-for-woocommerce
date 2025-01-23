@@ -175,6 +175,14 @@ class Activecampaign_For_Woocommerce_Public {
 			) {
 				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'] );
 			}
+
+			if (
+				isset( $options['browse_tracking'] ) &&
+				in_array( $options['browse_tracking'], array( 3, '3' ), true ) &&
+				isset( $options['tracking_id'] )
+			) {
+				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'], true );
+			}
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_Public: There was an issue with enabling site tracking.',
@@ -374,6 +382,14 @@ class Activecampaign_For_Woocommerce_Public {
 			) {
 				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'] );
 			}
+
+			if (
+				isset( $options['browse_tracking'] ) &&
+				in_array( $options['browse_tracking'], array( 3, '3' ), true ) &&
+				isset( $options['tracking_id'] )
+			) {
+				$this->activecampaign_frontend_sitetracking_scripts( $options['tracking_id'], true );
+			}
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
 				'Activecampaign_For_Woocommerce_Public: There was an issue with loading site tracking.',
@@ -390,12 +406,12 @@ class Activecampaign_For_Woocommerce_Public {
 	 *
 	 * @param string $tracking_id the tracking ID to use.
 	 */
-	public function activecampaign_frontend_sitetracking_scripts( $tracking_id ) {
+	public function activecampaign_frontend_sitetracking_scripts( $tracking_id, $use_staging_url = false ) {
 		$ac_forms_settings = get_option( 'settings_activecampaign' ); // This is the setting from the other AC plugin
 
 		if (
 			isset( $ac_forms_settings['activecampaign_site_tracking_default'], $ac_forms_settings['site_tracking'] ) &&
-			in_array( $ac_forms_settings['site_tracking'], array( '1', 1 ) )
+			in_array( $ac_forms_settings['site_tracking'], array( '1', 1 ), true )
 		) {
 			// Don't perform this stuff, the other plugin will do it
 			return;
@@ -411,8 +427,10 @@ class Activecampaign_For_Woocommerce_Public {
 
 		unset( $ac_forms_settings['api_url'] );
 		unset( $ac_forms_settings['api_key'] );
-		$current_user = wp_get_current_user();
-		$user_email   = '';
+		$current_user          = wp_get_current_user();
+		$user_email            = '';
+		$site_tracking_staging = 0;
+
 		if ( isset( $current_user->data->user_email ) ) {
 			$user_email = $current_user->data->user_email;
 		}
@@ -422,11 +440,16 @@ class Activecampaign_For_Woocommerce_Public {
 			$tracking_id = $ac_forms_settings['tracking_actid'];
 		}
 
+		if ( true === $use_staging_url ) {
+			$site_tracking_staging = 1;
+		}
+
 		$data = array(
 			'ac_settings' => array(
 				'tracking_actid'        => $tracking_id,
 				'site_tracking_default' => 1,
 				'site_tracking'         => 1,
+				'site_tracking_staging' => $site_tracking_staging,
 			),
 			'user_email'  => $user_email,
 		);

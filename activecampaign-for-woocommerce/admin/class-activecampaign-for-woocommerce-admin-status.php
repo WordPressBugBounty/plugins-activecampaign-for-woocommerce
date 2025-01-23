@@ -85,10 +85,44 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		$data = $this->get_woocommerce_data( $data );
 		$data = $this->get_recent_ac_data( $data );
 		$data = $this->get_log_data( $data );
+		$data = $this->get_whitelist( $data );
 
 		return $data;
 	}
 
+	/**
+	 * Gets the whitelist for the support page.
+	 *
+	 * @param mixed $data all the data for the page.
+	 *
+	 * @return mixed
+	 */
+	public function get_whitelist( $data ) {
+		$logger = new Logger();
+
+		try {
+			if ( isset( $this->api_client ) ) {
+				$whitelist_repo = new Activecampaign_For_Woocommerce_Whitelist_Repository( $this->api_client );
+
+				if ( $whitelist_repo ) {
+					$data['whitelist'] = $whitelist_repo->list_all();
+				}
+			}
+		} catch ( Throwable $t ) {
+			$logger->warning( 'There was an issue retrieving the whitelist from ActiveCampaign.', array( $t->getMessage() ) );
+		}
+
+		$ac_forms_settings         = get_option( 'settings_activecampaign' ); // This is the setting from the other AC plugin
+		$data['other_ac_tracking'] = false;
+		if (
+			isset( $ac_forms_settings['activecampaign_site_tracking_default'], $ac_forms_settings['site_tracking'] ) &&
+			in_array( $ac_forms_settings['site_tracking'], array( '1', 1 ) )
+		) {
+			$data['other_ac_tracking'] = true;
+		}
+
+		return $data;
+	}
 	/**
 	 * Clears the error log history.
 	 */

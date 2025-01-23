@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const $ = window.jQuery;
     let cobraListOfValidProductIds = [2,3,4,5,6,7,8,9,10];
     let finalUrlList = [];
-    // Lading Product Urls from settings. They get Put into first input array
+    // Loading Product Urls from settings. They get Put into first input array
     // must format that correctly
     let compiledProductInputField = document.getElementById('ba_product_url_patterns');
     let primaryProductInputField = document.getElementById('ba_product_url_patterns-1');
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // https://my-woocommerce-store.shop/**/products/{{sku}}
     function validProductUrlPattern(pattern) {
-        let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc'];
+        let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductSlug', 'variantSlug'];
         const regexp = /\{\{(.*?)}}/g;
 
         if(pattern == '') {
@@ -192,6 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
         if(!finalUrlList.includes(pattern)) {
             if (validProductUrlPattern(pattern) && pattern != '') {
+                finalUrlList.splice(patternUrlInputField - 1,1)
                 finalUrlList.push(pattern);
                 baProductField.value = JSON.stringify(finalUrlList);
                 removalButtonField.style.display = 'block'
@@ -207,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateMainProductUrlFormField(e);
     });
     $('#ba_product_url_patterns-1').on('change', function(e) {
-        showSaveToolTip(e);
+        updateMainProductUrlFormField(e);
     });
     $('#ba_product_url_patterns_rmv-1').click(function(e){
         let baProductField = document.getElementById('ba_product_url_patterns');
@@ -249,20 +250,11 @@ document.addEventListener("DOMContentLoaded", function () {
         input.setAttribute('class', 'ba_product_url_inputs');
         input.setAttribute('size', 23);
         input.onchange = function(e) {
-            showSaveToolTip(e);
+            updateMainProductUrlFormField(e);
         };
         if(inputValue) {
             input.value = inputValue;
         }
-        // Product Url Validate Button
-        let validator = document.createElement('button');
-        validator.setAttribute('id', 'validate_ba_product_url-' + id);
-        validator.setAttribute('class', 'activecampaign-for-woocommerce button validation');
-        validator.setAttribute("type", "button");
-        validator.innerHTML = "Validate Url";
-        validator.onclick = function(e) {
-            updateMainProductUrlFormField(e);
-        };
         // Product Url Input Removal Button
         let remove = document.createElement('button');
         remove.setAttribute('id', 'ba_product_url_patterns_rmv-' + id);
@@ -277,7 +269,6 @@ document.addEventListener("DOMContentLoaded", function () {
         var reqs = document.getElementById("additional_ba_product_url_patterns_list");
         var listItem = document.createElement('li');
         listItem.appendChild(input);
-        listItem.appendChild(validator);
         listItem.appendChild(remove);
         reqs.appendChild(listItem);
     }
@@ -302,6 +293,9 @@ document.addEventListener("DOMContentLoaded", function () {
             $("#update-notifications").append('<div class="update-notice notice-success notice is-dismissible"><p>Settings saved</p><button id="my-dismiss-admin-message" class="notice-dismiss" type="button"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
             window.location.search += '&manual_setup=1';
         }).fail(response => {
+            if(response.status !== 200 || response.responseJSON.success === false){
+                $("#update-notifications").append('<div class="update-notice error notice is-dismissible"><p>Settings not saved - ' + response.status + ' ' + response.statusText + '</p><button id="my-dismiss-admin-message" class="notice-dismiss" type="button"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
+            }
             if (response.responseJSON.data.errors && response.responseJSON.data.errors.length > 0) {
                 let errors = response.responseJSON.data.errors;
                 $.each(errors, function( key, error) {

@@ -355,7 +355,7 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 			try {
 				$this->repository->create( $connection_option );
 
-				$this->logger->info( 'Create or update connection option command:  single connection option created -' . $connection_option->get_option() );
+				$this->logger->info( 'Create or update connection option command:  single connection option created -', ['option' => $connection_option->get_option(), 'value' => $connection_option->get_value()] );
 			} catch ( Throwable $t ) {
 				$this->admin->add_async_processing_notification(
 					'Issue saving singular connection option setting. Option not saved for option - ' . $connection_option->get_option(),
@@ -378,7 +378,7 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 			try {
 				$this->repository->update( $connection_option );
 
-				$this->logger->info( 'Create or update connection option command:  single connection option updated - ' . $connection_option->get_option() );
+				$this->logger->info( 'Create or update connection option command:  single connection option updated - ', ['option' => $connection_option->get_option(), 'value' => $connection_option->get_value()] );
 			} catch ( Throwable $t ) {
 				$this->admin->add_async_processing_notification(
 					'Issue updating singular connection option setting. Option not saved for option - ' . $connection_option->get_option(),

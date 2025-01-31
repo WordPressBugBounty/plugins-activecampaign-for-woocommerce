@@ -134,9 +134,9 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 			do_action( 'activecampaign_for_woocommerce_ready_existing_historical_data' );
 
 			wp_schedule_single_event(
-				time() + 10,
+				time() + 30,
 				'activecampaign_for_woocommerce_prep_historical_data',
-				array()
+				array('current_page' => 0)
 			);
 
 			wp_send_json_success( 'Historical sync scheduled.' );

@@ -203,6 +203,8 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				)
 			);
 		}
+
+		return $args;
 	}
 
 	/**
@@ -240,6 +242,8 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 					$this->mark_order_as_incompatible( $wc_order_id );
 					return false;
 				}
+
+				$this->add_meta_to_order( $wc_order );
 
 				$ac_customer_id = $this->get_ac_customer_id( $wc_order->get_billing_email() );
 				$ac_order       = $this->single_sync_cofe_data( $wc_order, false, $ac_customer_id );
@@ -298,19 +302,9 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				$now      = date_create( 'NOW' );
 				$last_run = get_option( 'activecampaign_for_woocommerce_abandoned_cart_last_run' );
 
-				// Try and keep this event from running too many times.
-				// The cron will run every minute but this needs to run every 10 instead.
-				if ( false !== $last_run ) {
-					$interval         = date_diff( $now, $last_run );
-					$interval_minutes = $interval->format( '%i' );
-				} else {
-					$interval_minutes = 10;
-				}
+				$unsynced_order_data = $this->get_unsynced_orders_from_table( null, false );
+				$recovered_orders    = $this->get_unsynced_orders_from_table( null, true );
 
-				if ( ! isset( $interval_minutes ) || empty( $interval_minutes ) || $interval_minutes >= 10 ) {
-					$unsynced_order_data = $this->get_unsynced_orders_from_table( null, false );
-					$recovered_orders    = $this->get_unsynced_orders_from_table( null, true );
-				}
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->warning(
@@ -347,6 +341,8 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				)
 			);
 		}
+
+		return $args;
 	}
 
 	private function mark_single_order_synced( $wc_order_id ) {
@@ -493,7 +489,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 	 * Process to sync a single record
 	 *
 	 * @param WC_Order $wc_order The WC order.
-	 * @param string   $externalcheckoutid The external checkout ID passed only if it's recovered order.
+	 * @param string   $externalcheckoutid The external checkout ID passed only if it's an unsynced recovered order.
 	 *
 	 * @return false|void
 	 */
@@ -542,7 +538,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			$ecom_order->set_accepts_marketing( $wc_order->get_meta( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCEPTS_MARKETING_NAME ) );
 
 			$result = $this->cofe_order_repository->upsert_order( $ecom_order->serialize_to_array() );
-
+			delete_transient( 'activecampaign_for_woocommerce_contact' . $wc_order->get_billing_email() );
 			// Change this to return the response from AC if we have a data response
 			return $result;
 		}
@@ -729,6 +725,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		try {
 			// Get the expired carts from our table
 			if ( null !== $id ) {
+				// We have an order ID, get that specific one.
 				if ( true === $recovered ) {
 					$where = 'abandoned_date IS NOT NULL';
 				} else {
@@ -754,13 +751,27 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				// phpcs:enable
 				);
 
-			} else {
-				if ( true === $recovered ) {
-					$where = 'AND abandoned_date IS NOT NULL';
-				} else {
-					$where = 'AND abandoned_date IS NULL';
-				}
+			} elseif ( true === $recovered ) {
+					$orders = $wpdb->get_results(
+					// phpcs:disable
+						$wpdb->prepare( 'SELECT id, wc_order_id, ac_externalcheckoutid, customer_email, ac_customer_id
+					FROM
+						`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
+					WHERE
+						wc_order_id IS NOT NULL 
+						AND abandoned_date IS NOT NULL
+						AND (
+							synced_to_ac = %d
+							OR synced_to_ac = %d
+							)
+						ORDER BY id ASC
+						LIMIT 50',
+							self::STATUS_ABANDONED_CART_RECOVERED, self::STATUS_UNSYNCED
 
+						)
+					// phpcs:enable
+					);
+			} else {
 				$orders = $wpdb->get_results(
 				// phpcs:disable
 					$wpdb->prepare( 'SELECT id, wc_order_id, ac_externalcheckoutid, customer_email, ac_customer_id
@@ -768,10 +779,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 						`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
 					WHERE
 						wc_order_id IS NOT NULL 
-						'.$where.'
+						AND abandoned_date IS NULL
 						AND synced_to_ac = %d
 						ORDER BY id ASC
-						LIMIT 100',
+						LIMIT 50',
 						0
 
 					)
@@ -854,13 +865,45 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 		} else {
 			$wc_order->add_meta_data( 'ac_datahash', md5( json_encode( $wc_order->get_data() ) ), true );
 		}
-		$disable_meta_save = false;
-		$settings          = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
-		if (isset( $settings['disable_meta_save'] ) ) {
-			$disable_meta_save = $settings['disable_meta_save'];
+
+		// Update order meta with relevant data from the stored data so we do not lose it
+		global $wpdb;
+		$ac_stored_row = $wpdb->get_row(
+		// phpcs:disable
+			 $wpdb->prepare( 'SELECT id, wc_order_id, ac_externalcheckoutid, customer_email, abandoned_date, ac_customer_id
+						FROM
+							`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
+						WHERE wc_order_id = %s
+							LIMIT 1',
+				$wc_order->get_id()
+
+			)
+		// phpcs:enable
+		);
+
+		if (isset( $ac_stored_row->ac_externalcheckoutid ) && ! empty( $ac_stored_row->ac_externalcheckoutid ) ) {
+			$wc_order->add_meta_data(
+				ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PERSISTENT_CART_ID_NAME,
+				$ac_stored_row->ac_externalcheckoutid,
+				true
+			);
 		}
-		if ( false === $disable_meta_save ) {
-			$wc_order->save_meta_data();
+
+		if ( ! empty( $ac_stored_row->abandoned_date ) ) {
+			$wc_order->add_meta_data(
+				'activecampaign_for_woocommerce_abandoned_date',
+				$ac_stored_row->abandoned_date,
+				false
+			);
+
 		}
+
+		$settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
+
+		if ( isset( $settings['disable_meta_save'] ) && 1 === $settings['disable_meta_save'] ) {
+			return;
+		}
+
+		$wc_order->save_meta_data();
 	}
 }

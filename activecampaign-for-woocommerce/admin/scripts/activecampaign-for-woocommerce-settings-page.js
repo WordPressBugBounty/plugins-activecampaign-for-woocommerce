@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // https://my-woocommerce-store.shop/**/products/{{sku}}
     function validProductUrlPattern(pattern) {
-        let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductSlug', 'variantSlug'];
+        let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug'];
         const regexp = /\{\{(.*?)}}/g;
 
         if(pattern == '') {

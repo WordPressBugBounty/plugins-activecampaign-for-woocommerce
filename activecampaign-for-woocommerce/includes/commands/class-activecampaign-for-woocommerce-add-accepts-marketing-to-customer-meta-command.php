@@ -72,7 +72,7 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 		 */
 		if ( ! isset( $args[0] ) ) {
 			$this->logger->notice( 'Accepts Marketing: Valid order not passed in args.' );
-			return;
+			return $args;
 		}
 
 		$order = $args[0];

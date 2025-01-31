@@ -14,6 +14,7 @@ use Activecampaign_For_Woocommerce_Admin as Admin;
 use Activecampaign_For_Woocommerce_Ecom_Order_Factory as Ecom_Order_Factory;
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Customer_Utilities as Customer_Utilities;
+use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
 
 /**
  * The Order_Finished Event Class.
@@ -277,6 +278,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			}
 
 			if ( $this->is_renewal( $wc_order ) ) {
+				// A renewal may not have set the external checkout ID so make sure it's set.
 				$wc_order->update_meta_data(
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PERSISTENT_CART_ID_NAME,
 					$externalcheckoutid
@@ -285,7 +287,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			// phpcs:disable
 			$stored_row = $wpdb->get_row(
 				$wpdb->prepare(
-					'SELECT id, wc_order_id FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
+					'SELECT id, wc_order_id, abandoned_date FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
 					WHERE wc_order_id = %d LIMIT 1',
 					[ $order_id ]
 				)
@@ -298,7 +300,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 
 			$stored_row = $wpdb->get_row(
 				$wpdb->prepare(
-					'SELECT id, wc_order_id FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
+					'SELECT id, wc_order_id, abandoned_date FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
 					WHERE ac_externalcheckoutid = %s OR activecampaignfwc_order_external_uuid = %s LIMIT 1',
 					[ $externalcheckoutid, $cart_uuid ]
 				)
@@ -315,6 +317,10 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				$stored_id = $stored_row->id;
 			}
 
+			$was_abandoned = false;
+			if ( null !== $stored_row->abandoned_date ) {
+				$was_abandoned = true;
+			}
 			if (
 				isset( wc()->session ) &&
 				! is_null( wc()->session ) &&
@@ -417,8 +423,27 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			return;
 		}
 
+		if ( $was_abandoned ) {
+			// Abandoned cart item mark as recovered in synced_to_ac
+			$store_data['synced_to_ac'] = Synced_Status::STATUS_ABANDONED_CART_RECOVERED;
+		}
+
 		try {
-			if ( isset( $stored_id ) && ! empty( $stored_id ) ) {
+			if ( ! empty( $abandoned_cart_id ) ) {
+				// Abandoned cart item mark as recovered in synced_to_ac
+				$store_data['synced_to_ac'] = Synced_Status::STATUS_ABANDONED_CART_RECOVERED;
+				$wpdb->update(
+					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
+					$store_data,
+					array(
+						'id' => $abandoned_cart_id,
+					)
+				);
+			} elseif ( isset( $stored_id ) && ! empty( $stored_id ) ) {
+				if ( $was_abandoned ) {
+					// Abandoned cart item mark as recovered in synced_to_ac
+					$store_data['synced_to_ac'] = Synced_Status::STATUS_ABANDONED_CART_RECOVERED;
+				}
 				$wpdb->update(
 					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
 					$store_data,
@@ -428,16 +453,8 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				);
 
 				$this->schedule_sync_job( $order_id );
-			} elseif ( ! empty( $abandoned_cart_id ) ) {
-				// Abandoned cart item mark as recovered in synced_to_ac
-				$wpdb->update(
-					$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
-					$store_data,
-					array(
-						'id' => $abandoned_cart_id,
-					)
-				);
 			} else {
+
 				if ( ! isset( $stored_id ) ) {
 					$stored_id = null;
 				}
@@ -487,7 +504,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		try {
 			// wp_clear_scheduled_hook('activecampaign_for_woocommerce_cart_updated_recurring_event');
 			if ( ! wp_next_scheduled( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME ) ) {
-				wp_schedule_event( time() + 10, 'every_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
+				wp_schedule_event( time() + 10, 'ten_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, null, true );
 			} elseif ( function_exists( 'wp_get_scheduled_event' ) ) {
 				$logger->debug_excess(
 					'Recurring order sync already scheduled',
@@ -511,26 +528,29 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 	/**
 	 * Schedules the sync job.
 	 *
-	 * @param int $row_id The row id.
+	 * @param int $order_id The order id.
 	 */
-	private function schedule_sync_job( $row_id ) {
+	private function schedule_sync_job( $order_id ) {
 		try {
-			if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'row_id' => $row_id ) ) ) {
+			if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ) ) {
 				wp_schedule_single_event(
-					time() + 10,
-					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME,
+					time() + 40,
+					'activecampaign_for_woocommerce_admin_sync_single_order_active',
 					array(
-						'row_id' => $row_id,
-					)
+						'wc_order_id' => $order_id,
+						'event'       => 'onetime',
+					),
+					true
 				);
 			}
 
 			$this->logger->debug(
 				'Schedule finished order for immediate sync.',
 				array(
-					'row_id'       => $row_id,
-					'current_time' => time() + 10,
-					'schedule'     => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'row_id' => $row_id ) ),
+					'wc_order_id'         => $order_id,
+					'current_time'        => time(),
+					'scheduled_time'      => time() + 40,
+					'schedule validation' => wp_get_scheduled_event( 'activecampaign_for_woocommerce_admin_sync_single_order_active', array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ),
 				)
 			);
 		} catch ( Throwable $t ) {

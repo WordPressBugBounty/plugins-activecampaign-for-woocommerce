@@ -41,18 +41,20 @@ $activecampaign_for_woocommerce_ba_product_url_patterns         = '';
 $activecampaign_for_woocommerce_ba_product_url_default_patterns = array(
 	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/?product={{storeBaseProductId}}' ) ),
 	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/?**product={{storeBaseProductId}}&**' ) ),
-	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/product/{{storeBaseProductId}}' ) ),
-	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/shop/{{storeBaseProductId}}' ) ),
-	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/shop/**/{{storeBaseProductId}}' ) ),
+	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/product/{{baseProductUrlSlug}}' ) ),
+	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/product/{{baseProductUrlSlug}}/**' ) ),
+	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/shop/{{baseProductUrlSlug}}' ) ),
+	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/shop/**/{{baseProductUrlSlug}}' ) ),
+
 );
-$activecampaign_for_woocommerce_optin_checkbox_text             = esc_html__( 'Keep me up to date on news and exclusive offers', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
-$activecampaign_for_woocommerce_optin_checkbox_display_option   = 'visible_checked_by_default';
-$activecampaign_for_woocommerce_custom_email_field              = esc_html__( 'billing_email', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
-$activecampaign_for_woocommerce_debug_excess                    = 0;
-$activecampaign_for_woocommerce_desc_select                     = '0';
-$activecampaign_for_woocommerce_browse_tracking                 = '0';
-$activecampaign_for_woocommerce_debug_disable_meta_save         = '0';
-$activecampaign_for_woocommerce_debug_disable_ots               = '0';
+$activecampaign_for_woocommerce_optin_checkbox_text           = esc_html__( 'Keep me up to date on news and exclusive offers', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
+$activecampaign_for_woocommerce_optin_checkbox_display_option = 'visible_checked_by_default';
+$activecampaign_for_woocommerce_custom_email_field            = esc_html__( 'billing_email', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
+$activecampaign_for_woocommerce_debug_excess                  = 0;
+$activecampaign_for_woocommerce_desc_select                   = '0';
+$activecampaign_for_woocommerce_browse_tracking               = '0';
+$activecampaign_for_woocommerce_debug_disable_meta_save       = '0';
+$activecampaign_for_woocommerce_debug_disable_ots             = '0';
 
 if ( is_array( $activecampaign_for_woocommerce_options ) ) {
 	if ( isset( $activecampaign_for_woocommerce_options['api_url'], $activecampaign_for_woocommerce_options['api_key'] ) ) {
@@ -216,7 +218,7 @@ $activecampaign_for_woocommerce_ba_session_timeout_options                      
 	'8'  => esc_html__( '8 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 	'24' => esc_html__( '24 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 );
-$activecampaign_for_woocommerce_ba_product_url_valid_variables                    = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductSlug', 'variantSlug' );
+$activecampaign_for_woocommerce_ba_product_url_valid_variables                    = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug' );
 
 $activecampaign_for_woocommerce_ac_debug_options = array(
 	// value  // label

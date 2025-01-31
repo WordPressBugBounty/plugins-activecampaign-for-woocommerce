@@ -1022,6 +1022,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		}
 
 		$this->set_accepts_marketing( $this->get_order_metadata( $order_data, 'activecampaign_for_woocommerce_accepts_marketing' ) );
+		$this->set_externalcheckoutid( $this->get_order_metadata( $order_data, 'activecampaign_for_woocommerce_external_checkout_id' ) );
 
 		if ( ! empty( $order_data['date_created'] ) ) {
 			try {

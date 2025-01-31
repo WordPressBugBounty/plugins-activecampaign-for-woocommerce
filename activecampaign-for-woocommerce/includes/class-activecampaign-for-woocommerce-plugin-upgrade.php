@@ -363,6 +363,11 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 
 		$this->logger->info( 'Plugin Upgrade Command: Table upgrade finished!' );
 		$this->disable_old_webhooks();
+
+		// v1.1.6 //
+		// Clear the scheduled hooks and build new ten minute ones.
+		wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+		wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
 	}
 
 	/**

@@ -113,11 +113,12 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 			);
 
 			if ( isset( $subscription_id ) && null !== $subscription_id && ! empty( $subscription_id ) ) {
-				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $subscription_id ) ) ) {
+				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $subscription_id, 'event' => 'onetime' ) ) ) {
 					wp_schedule_single_event(
 						time() + 30,
 						'activecampaign_for_woocommerce_update_subscription',
-						array( 'wc_order_id' => $subscription_id )
+						array( 'wc_order_id' => $subscription_id, 'event' => 'onetime' ),
+						true
 					);
 				}
 			}
@@ -157,11 +158,12 @@ class Activecampaign_For_Woocommerce_Subscription_Events implements Synced_Statu
 			$order_id = $wc_subscription->get_id(); // This is actually the ID for a subscription but it's handled as an order.
 			$this->update_status( $wc_subscription, 0 );
 			if ( isset( $subscription_id ) && null !== $subscription_id && ! empty( $subscription_id ) ) {
-				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $subscription_id ) ) ) {
+				if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $subscription_id, 'event' => 'onetime' ) ) ) {
 					wp_schedule_single_event(
 						time() + 30,
 						'activecampaign_for_woocommerce_update_subscription',
-						array( 'wc_order_id' => $subscription_id )
+						array( 'wc_order_id' => $subscription_id, 'event' => 'onetime' ),
+						true
 					);
 				}
 			}

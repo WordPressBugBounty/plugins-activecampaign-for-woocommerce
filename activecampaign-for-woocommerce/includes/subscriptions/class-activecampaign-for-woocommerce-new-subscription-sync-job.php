@@ -601,6 +601,7 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 
 		if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
 			$this->execute( array( 'wc_order_id' => $wc_order_id ) );
+			return $args;
 		} else {
 			return false;
 		}
@@ -627,13 +628,12 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 		} else {
 			$wc_subscription->add_meta_data( 'ac_datahash', md5( json_encode( $wc_subscription->get_data() ) ), true );
 		}
-		$disable_meta_save = false;
-		$settings          = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
-		if ( isset( $settings['disable_meta_save'] ) ) {
-			$disable_meta_save = $settings['disable_meta_save'];
+
+		$settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
+		if ( isset( $settings['disable_meta_save'] ) && 1 === $settings['disable_meta_save'] ) {
+			return;
 		}
-		if ( false === $disable_meta_save ) {
-			$wc_subscription->save_meta_data();
-		}
+
+		$wc_subscription->save_meta_data();
 	}
 }

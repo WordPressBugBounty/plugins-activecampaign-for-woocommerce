@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.7.1
-Stable tag: 2.8.3
+Stable tag: 2.8.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -67,7 +67,7 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 == Installation ==
 
 = WooCommerce Compatibility =
-* Tested up to version: 9.5.2
+* Tested up to version: 9.6.0
 * Minimal version requirement: 7.4.0
 * HPOS Compatible
 
@@ -93,6 +93,12 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.8.4 2025-01-30 =
+* Improvement - Recovered orders should track better
+* Bugfix - Fixing issues discovered in WC version 9.6.0
+* Bugfix - Abandoned carts would sometimes not get picked up
+* Bugfix - Metadata relevant to order syncing was not being saved by WC
 
 = 2.8.3 2025-01-16 =
 * Feature - Adding slugs to tracking options

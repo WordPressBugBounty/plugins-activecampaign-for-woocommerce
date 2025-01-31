@@ -197,6 +197,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 				self::STATUS_UNSYNCED,
 				self::STATUS_ON_HOLD,
 				self::STATUS_REFUND,
+				self::STATUS_ABANDONED_CART_RECOVERED,
 			)
 		);
 

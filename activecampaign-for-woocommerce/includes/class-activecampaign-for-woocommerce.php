@@ -438,6 +438,12 @@ class Activecampaign_For_Woocommerce {
 			return;
 		}
 
+		$this->loader->add_filter(
+			'cron_schedules',
+			$this->admin,
+			'cron_add_ten_minute'
+		);
+
 		// Cart actions
 		$this->loader->add_action(
 			'woocommerce_update_cart_action_cart_updated',
@@ -461,7 +467,8 @@ class Activecampaign_For_Woocommerce {
 		$this->loader->add_action(
 			'woocommerce_checkout_update_order_meta',
 			$this->cart_events,
-			'cart_emptied'
+			'cart_emptied',
+			60
 		);
 
 		$this->loader->add_action(
@@ -651,7 +658,7 @@ class Activecampaign_For_Woocommerce {
 			ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME,
 			$this->new_order_sync,
 			'execute',
-			1,
+			9,
 			2
 		);
 
@@ -755,8 +762,7 @@ class Activecampaign_For_Woocommerce {
 			'activecampaign_for_woocommerce_prep_historical_data',
 			$this->historical_sync,
 			'prep_data',
-			1,
-			2
+			1
 		);
 
 		$this->loader->add_action(
@@ -866,7 +872,7 @@ class Activecampaign_For_Woocommerce {
 			ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME,
 			$this->new_subscription_sync,
 			'execute',
-			2,
+			8,
 			2
 		);
 
@@ -962,6 +968,13 @@ class Activecampaign_For_Woocommerce {
 		// Order checkout finished, order created, transition cart to order
 		$this->loader->add_action(
 			'woocommerce_checkout_create_order',
+			$this->cart_events,
+			'cart_to_order_transition'
+		);
+
+		// For blocks
+		$this->loader->add_action(
+			'woocommerce_store_api_checkout_order_processed',
 			$this->cart_events,
 			'cart_to_order_transition'
 		);
@@ -1289,6 +1302,12 @@ class Activecampaign_For_Woocommerce {
 					$this->add_accepts_marketing_to_customer_meta_command,
 					'execute',
 					90
+				);
+
+				$this->loader->add_action(
+					'woocommerce_store_api_checkout_order_processed',
+					$this->add_accepts_marketing_to_customer_meta_command,
+					'execute'
 				);
 
 				// Add the checkbox to the billing form

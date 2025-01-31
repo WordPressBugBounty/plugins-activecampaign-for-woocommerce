@@ -126,7 +126,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 					) ) {
 					wp_schedule_single_event(
 						time() + 10,
-						'activecampaign_for_woocommerce_admin_sync_single_order_active',
+						'activecampaign_for_woocommerce_admin_sync_single_order_status',
 						array(
 							'wc_order_id' => $order_id,
 							'status'      => $wc_order->get_status(),

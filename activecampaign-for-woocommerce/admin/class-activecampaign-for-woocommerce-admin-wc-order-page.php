@@ -72,81 +72,80 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 		$activecampaign_for_woocommerce_data = array();
 
 		try {
-			$order = ( $post_or_order_object instanceof WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
+			$wc_order = ( $post_or_order_object instanceof WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
 
-			if ( isset( $order->ID ) ) {
-				$wc_order_id = $order->ID;
+			if ( isset( $wc_order->ID ) ) {
+				$wc_order_id = $wc_order->ID;
 			} else {
-				$wc_order_id = $order->get_id();
+				$wc_order_id = $wc_order->get_id();
 			}
 
-			$order = wc_get_order( $wc_order_id );
+			$wc_order = wc_get_order( $wc_order_id );
 
-			if ( isset( $order ) && self::validate_object( $order, 'get_id' ) ) {
-				$table_data = $wpdb->get_row(
-					// phpcs:disable
-					$wpdb->prepare( 'SELECT id, synced_to_ac, ac_order_id, wc_order_id, ac_customer_id, abandoned_date, customer_email, ac_externalcheckoutid, customer_first_name, customer_last_name
-						FROM
-						`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
-						WHERE wc_order_id = %d
-						LIMIT 1',
-						$wc_order_id
-					)
-					// phpcs:enable
-				);
+			if ( self::validate_object( $wc_order, 'get_id' ) ) {
+				$table_data = self::get_table_data( $wc_order_id );
 
-				if ( ! isset( $table_data, $table_data->id ) ) {
-					$order_ac    = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->check_for_synced_order( $wc_order_id );
-					$order_ac_id = $order_ac->get_id();
+				if ( ! isset( $table_data, $table_data->id, $table_data->ac_order_id ) ) {
+					$ac_order    = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->check_for_synced_order( $wc_order_id );
+					$order_ac_id = $ac_order->get_id();
 				}
 
 				if (
-					! isset( $order_ac ) &&
+					! isset( $ac_order ) &&
 					isset( $table_data->synced_to_ac ) &&
-					in_array( $table_data->synced_to_ac, array( 0, '0' ) )
+					in_array( $table_data->synced_to_ac, array( self::STATUS_UNSYNCED, self::STATUS_ABANDONED_CART_UNSYNCED, self::STATUS_ABANDONED_CART_RECOVERED ) )
 				) {
-					$order_ac    = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->check_for_synced_order( $wc_order_id );
-					$order_ac_id = $order_ac->get_id();
+					$ac_order    = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->check_for_synced_order( $wc_order_id );
+					$order_ac_id = $ac_order->get_id();
+				}
+
+				if (
+					isset( $ac_order ) &&
+					self::validate_object( $ac_order, 'get_id' )
+				) {
+					$table_data->ac_order_id    = $ac_order->get_id();
+					$table_data->ac_customer_id = $ac_order->get_customerid();
+					self::save_table_data( $wc_order, $table_data );
 				}
 
 				if ( ! isset( $table_data, $table_data->id ) ) {
 					if ( isset( $order_ac_id ) && ! empty( $order_ac_id ) ) {
-						self::save_table_data( $order, null, 1 );
+						self::save_table_data( $wc_order, null, 1 );
 					}
 
 					$table_data = self::get_table_data( $wc_order_id );
 				}
 
-				$ac_contact = get_transient( 'activecampaign_for_woocommerce_contact' . $order->get_billing_email() );
+				$ac_contact = get_transient( 'activecampaign_for_woocommerce_contact' . $wc_order->get_billing_email() );
 
-				if ( ! isset( $ac_contact ) || false === $ac_contact ) {
-					$ac_contact = $contact_repository->find_by_email( $order->get_billing_email() );
-					set_transient( 'activecampaign_for_woocommerce_contact' . $order->get_billing_email(), $ac_contact, 3600 );
+				if ( ! isset( $ac_contact ) || false === $ac_contact || '' === $ac_contact ) {
+					$ac_contact = $contact_repository->find_by_email( $wc_order->get_billing_email() );
+					set_transient( 'activecampaign_for_woocommerce_contact' . $wc_order->get_billing_email(), $ac_contact, 300 );
 				}
 
-				if ( isset( $table_data ) && is_null( $table_data->customer_email ) ) {
-					self::save_table_data( $order, $table_data );
+				if ( isset( $table_data ) && is_null( $table_data->customer_email ) || ! isset( $table_data->ac_order_id ) ) {
+					self::save_table_data( $wc_order, $table_data );
 
 					$table_data = self::get_table_data( $wc_order_id );
 				}
 
 				if (
-					isset( $order_ac_id ) &&
 					! empty( $order_ac_id ) &&
 					isset( $table_data->synced_to_ac ) &&
 					in_array( $table_data->synced_to_ac, array( 0, '0' ) )
 				) {
-					$table_data->synced_to_ac = 1;
-					self::save_table_data( $order, $table_data );
+					self::save_table_data( $wc_order, $table_data );
 				}
 
 				if ( isset( $table_data ) ) {
-					$activecampaign_for_woocommerce_data = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->get_order_page_data( $table_data, $ac_contact );
+					$activecampaign_for_woocommerce_data                        = ( new Activecampaign_For_Woocommerce_Admin_WC_Order_Page() )->get_order_page_data( $table_data, $ac_contact );
+					$activecampaign_for_woocommerce_data['meta_abandoned_date'] = $wc_order->get_meta( 'activecampaign_for_woocommerce_abandoned_date', $wc_order_id );
 				}
+
 				require_once plugin_dir_path( __FILE__ ) . 'partials/activecampaign-for-woocommerce-order-meta.php';
 			}
 		} catch ( Throwable $t ) {
-			$logger->warning( 'There was an issue retrieving or loading the order data for this page.', array( $post_or_order_object ) );
+			$logger->warning( 'There was an issue retrieving or loading the order data for this page.', array($t->getMessage(), $post_or_order_object, 'trace' => $t->getTrace() ) );
 		}
 	}
 
@@ -229,6 +228,11 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 		return $activecampaign_for_woocommerce_data;
 	}
 
+	/**
+	 * Runs through a hook ac_ajax_sync_single_record.
+	 *
+	 * @return void
+	 */
 	public function ac_ajax_sync_single_record() {
 		$nonce = self::get_request_data( 'activecampaign_for_woocommerce_settings_nonce_field' );
 		$valid = wp_verify_nonce( $nonce, 'activecampaign_for_woocommerce_order_form' );
@@ -243,8 +247,10 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 				);
 
 				if ( 'new' === $type ) {
+					$data['type'] = 'new';
 					do_action( 'activecampaign_for_woocommerce_admin_sync_single_order_active', $data );
 				} elseif ( 'historical' === $type ) {
+					$data['type'] = 'historical';
 					do_action( 'activecampaign_for_woocommerce_admin_sync_single_order_historical', $data );
 				}
 
@@ -312,6 +318,14 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 
 				if ( isset( $table_data->synced_to_ac ) ) {
 					$store_data['synced_to_ac'] = $table_data->synced_to_ac;
+				}
+
+				if ( isset( $table_data->ac_order_id ) ) {
+					$store_data['ac_order_id'] = $table_data->ac_order_id;
+				}
+
+				if ( isset( $table_data->ac_customer_id ) ) {
+					$store_data['ac_customer_id'] = $table_data->ac_customer_id;
 				}
 
 				if ( isset( $status_override ) && ! empty( $status_override ) ) {

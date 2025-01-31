@@ -71,8 +71,8 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 			'help'  => '',
 		),
 		23 => array(
-			'title' => 'Abandoned cart recovered',
-			'help'  => '',
+			'title' => 'Abandoned cart recovered, not synced',
+			'help'  => 'This order was abandoned, recovered, but has not been synced.',
 		),
 		24 => array(
 			'title' => 'Abandoned cart failed sync',
@@ -125,10 +125,11 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	);
 
 	public function get_readable_sync_status( $status_ref ) {
-		$mappings = $this->readable_status_mapping;
+		$status_ref = (int) $status_ref;
+		$mappings   = $this->readable_status_mapping;
 
 		foreach ( $mappings as $local_numeric => $readable ) {
-			if ( $status_ref == $local_numeric ) {
+			if ( $status_ref === $local_numeric ) {
 				return $readable;
 			}
 		}

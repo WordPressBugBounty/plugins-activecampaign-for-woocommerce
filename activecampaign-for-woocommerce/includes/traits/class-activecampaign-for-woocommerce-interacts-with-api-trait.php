@@ -63,7 +63,7 @@ trait Activecampaign_For_Woocommerce_Interacts_With_Api {
 			try {
 
 				if ( ! is_object( $result ) || ! self::validate_object( $result, 'getBody' ) ) {
-					$logger->debug(
+					$logger->debug_excess(
 						'Result of get and set model from get_and_set_model_properties_from_api_by_id',
 						array(
 							'result'        => $result,

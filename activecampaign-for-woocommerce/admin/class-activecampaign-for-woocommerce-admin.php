@@ -125,6 +125,16 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		$this->api_client            = $api_client;
 	}
 
+	public function cron_add_ten_minute( $schedules ) {
+		// Adds once weekly to the existing schedules.
+		$schedules['ten_minute'] = array(
+			'interval' => 600,
+			'display'  => __( 'Ten Minutes', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+		);
+
+		return $schedules;
+	}
+
 	/**
 	 * Register the JavaScript for the admin area.
 	 * Loaded via action hook.
@@ -1163,8 +1173,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				$this->is_connected() &&
 				$this->is_configured()
 			) {
-				wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-				wp_schedule_event( time() + 10, 'every_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
+				wp_schedule_event( time() + 10, 'ten_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+				wp_schedule_event( time() + 10, 'ten_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
 				wp_schedule_event( time() + 15, 'every_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
 			}
 		} catch ( Throwable $t ) {

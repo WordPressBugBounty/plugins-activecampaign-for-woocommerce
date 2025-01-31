@@ -14,11 +14,12 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
 use Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command as Abandoned_Cart;
 use Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository as Browse_Session_Repository;
+use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
 
 class Activecampaign_For_Woocommerce_Cart_Events {
 	use Activecampaign_For_Woocommerce_Data_Validation;
 	use Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities;
-
+	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
 
 	/**
 	 * The logger interface.
@@ -133,6 +134,9 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 		 * @var WC_Order $order
 		 */
 		$logger = new Logger();
+		if ( ! is_admin() && ! WC()->session->has_session() ) {
+			WC()->session->set_customer_session_cookie( true );
+		}
 
 		try {
 			set_transient( 'acforwc_cart_to_order_transition_hook', wp_date( DATE_ATOM ), 604800 );
@@ -155,7 +159,7 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 
 				if ( ! $user_id ) {
 					// Guest checkout
-					$persistant_cart_id_name = $this->generate_externalcheckoutid(
+					$persistant_cart_id = $this->generate_externalcheckoutid(
 						wc()->session->get_customer_id(),
 						$order->get_billing_email()
 					);
@@ -172,7 +176,7 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 
 					if ( $cart_id ) {
 						// Registered user (customer) initiated cart and completed checkout
-						$persistant_cart_id_name = $cart_id;
+						$persistant_cart_id = $cart_id;
 					} else {
 						// Registered user (customer) only completed checkout (guest initiated cart)
 
@@ -198,7 +202,7 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 
 						$woocommerce_session_hash = $woocommerce_session_cookie[0];
 
-						$persistant_cart_id_name = $this->generate_externalcheckoutid(
+						$persistant_cart_id = $this->generate_externalcheckoutid(
 							$woocommerce_session_hash,
 							$order->get_billing_email()
 						);
@@ -208,13 +212,9 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 				// This ends up as the externalcheckoutid in Hosted
 				$order->add_meta_data(
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PERSISTENT_CART_ID_NAME,
-					$persistant_cart_id_name,
+					$persistant_cart_id,
 					true
 				);
-				// $order->update_meta_data(
-				// ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PERSISTENT_CART_ID_NAME,
-				// $persistant_cart_id_name
-				// );
 
 				return $order;
 			} else {

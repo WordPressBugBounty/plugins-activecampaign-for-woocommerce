@@ -66,6 +66,9 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 
 		// Store the cart
 		try {
+			if ( ! is_admin() && ! WC()->session->has_session() ) {
+				WC()->session->set_customer_session_cookie( true );
+			}
 			$this->prep_abandoned_cart_data();
 		} catch ( Throwable $e ) {
 			$this->logger->debug( 'Could not prep abandoned cart data' );

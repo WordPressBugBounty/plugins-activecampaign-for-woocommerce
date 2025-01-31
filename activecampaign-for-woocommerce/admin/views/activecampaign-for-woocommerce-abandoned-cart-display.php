@@ -218,7 +218,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										if (
 												! empty( $activecampaign_for_woocommerce_ab_cart->order_date ) &&
 												! empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) &&
-												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 23, '23', 1, '1' ), true )
+												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 23, '23', 1, '1', 0, '0' ), true )
 										) :
 											?>
 											<?php esc_html_e( 'Recovered:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?> <?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_ab_cart->order_date ) ); ?>
@@ -250,7 +250,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										<?php
 										if (
 												( empty( $activecampaign_for_woocommerce_ab_cart->order_date ) && empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) ) ||
-												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 0, 20, '0', '20' ), true )
+												in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 20, '20' ), true )
 										) :
 											?>
 											<?php if ( isset( $activecampaign_for_woocommerce_ab_cart->ready_state ) && in_array( $activecampaign_for_woocommerce_ab_cart->ready_state, array( '1', 1 ), true ) ) : ?>
@@ -334,17 +334,31 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 												<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_email ); ?>
 											</div>
 											<?php
-											$activecampaign_for_woocommerce_array_data = json_decode( $activecampaign_for_woocommerce_ab_cart->customer_ref_json, true );
-											if ( is_array( $activecampaign_for_woocommerce_array_data ) ) {
-												echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocommerce_array_data ) ) );
+											if (isset( $activecampaign_for_woocommerce_ab_cart->customer_ref_json ) ) {
+												$activecampaign_for_woocommerce_array_data = json_decode( $activecampaign_for_woocommerce_ab_cart->customer_ref_json, true );
+												if ( is_array( $activecampaign_for_woocommerce_array_data ) ) {
+													echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocommerce_array_data ) ) );
+												} else {
+													echo 'There was an issue parsing this data.';
+												}
+											} else {
+												echo 'Cart data could not be retrieved for this record.';
+
 											}
 											?>
 											<hr/>
 											<h2>Cart details</h2>
 											<?php
-											$activecampaign_for_woocommerce_array_data = json_decode( $activecampaign_for_woocommerce_ab_cart->cart_ref_json, true );
-											if ( is_array( $activecampaign_for_woocommerce_array_data ) ) {
-												echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( array_values( $activecampaign_for_woocommerce_array_data )[0] ) ) );
+											if (isset( $activecampaign_for_woocommerce_ab_cart->cart_ref_json ) ) {
+												$activecampaign_for_woocommerce_array_data = json_decode( $activecampaign_for_woocommerce_ab_cart->cart_ref_json, true );
+												if ( is_array( $activecampaign_for_woocommerce_array_data ) ) {
+													echo nl2br( esc_html( activecampaign_for_woocommerce_parse_array( array_values( $activecampaign_for_woocommerce_array_data )[0] ) ) );
+												} else {
+													echo '<h2>There was an issue parsing this data.</h2>';
+												}
+											} else {
+												echo 'Cart data could not be retrieved for this record.';
+
 											}
 											?>
 										</div>

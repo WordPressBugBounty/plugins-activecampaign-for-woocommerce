@@ -62,11 +62,14 @@ function activecampaign_for_woocommerce_convert_date_to_local( $datetime ) {
 							<?php echo esc_html( $activecampaign_for_woocommerce_data['ac_order_id'] ); ?>
 						</p>
 					<?php endif; ?>
-
 					<?php if ( ! empty( $activecampaign_for_woocommerce_data['abandoned_date'] ) ) : ?>
 						<p>
 							<?php esc_html_e( 'This is a recovered order. Abandoned on: ', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-							<?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_data['abandoned_date'] ) ); ?>
+							<?php if ( isset( $activecampaign_for_woocommerce_data['meta_abandoned_date'] ) ) : ?>
+								<?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_data['meta_abandoned_date'] ) ); ?>
+							<?php else : ?>
+								<?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_data['abandoned_date'] ) ); ?>
+							<?php endif; ?>
 						</p>
 					<?php endif; ?>
 
@@ -116,7 +119,7 @@ function activecampaign_for_woocommerce_convert_date_to_local( $datetime ) {
 			</div>
 		</div>
 
-		<?php if ( $activecampaign_for_woocommerce_data['debug'] ) : ?>
+		<?php if ( isset( $activecampaign_for_woocommerce_data['debug'] ) && in_array( $activecampaign_for_woocommerce_data['debug'], array( 1, '1') ) ) : ?>
 			<div style="margin-top:20px;border-top:1px solid #ccc;">
 				<h4><?php esc_html_e( 'ActiveCampaign Debug info', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></h4>
 				<?php if ( ! empty( $activecampaign_for_woocommerce_data['ac_customer_id'] ) ) : ?>

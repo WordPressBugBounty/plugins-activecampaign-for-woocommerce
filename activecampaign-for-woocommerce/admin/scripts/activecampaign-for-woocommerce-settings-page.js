@@ -7,11 +7,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let compiledProductInputField = document.getElementById('ba_product_url_patterns');
     let primaryProductInputField = document.getElementById('ba_product_url_patterns-1');
     if (primaryProductInputField) {
-        finalUrlList = (primaryProductInputField.value != '') ? JSON.parse(primaryProductInputField.value) : [];
+        finalUrlList = (primaryProductInputField.value !== '') ? JSON.parse(primaryProductInputField.value) : [];
     }
     
     for(let i = 0; i < finalUrlList.length;i++) {
-        if(i == 0) {
+        if(i === 0) {
             compiledProductInputField.value = primaryProductInputField.value
             primaryProductInputField.value = finalUrlList[i];
         } else {
@@ -129,8 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function validProductUrlPattern(pattern) {
         let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug'];
         const regexp = /\{\{(.*?)}}/g;
-
-        if(pattern == '') {
+        if('' === pattern) {
             return true;
         }
         // Wildcard validation
@@ -142,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // https://my-woocommerce-store.shop/**/products/{{sku}}/{{id}}
         // https://my-woocommerce-store.shop/**/products/{{id}}
         const matches = [...pattern.matchAll(regexp)]
-        if (matches.length !== 1) {
+        if (1 !== matches.length) {
             return false;
         } else {
             let variable = matches[0][1]
@@ -167,13 +166,14 @@ document.addEventListener("DOMContentLoaded", function () {
         let button = ev.target;
         let div = button.parentElement;
         let oldValue = div.firstChild.value;
-        let usable_id = div.firstChild.getAttribute('id').split('-')[1];
+        let usable_id = div.firstChild.getAttribute('ref');
         let baProductField = document.getElementById('ba_product_url_patterns');
+
         let indexofRemoval = finalUrlList.indexOf(oldValue);
 
         // Remove pattern from final result and add that id to usable list
         finalUrlList.splice(indexofRemoval,1);
-        if(finalUrlList.length == 0) {
+        if(0 === finalUrlList.length) {
             baProductField.value = '';
         } else {
             baProductField.value = JSON.stringify(finalUrlList);
@@ -183,17 +183,19 @@ document.addEventListener("DOMContentLoaded", function () {
         div.remove();
     }
     function updateMainProductUrlFormField(ev) {
-        let patternUrlInputFieldId = ev.currentTarget.getAttribute('id').split('-')[1];
-        let patternUrlInputField = document.getElementById('ba_product_url_patterns-'+patternUrlInputFieldId);
-        let removalButtonField = document.getElementById('ba_product_url_patterns_rmv-'+patternUrlInputFieldId);
-        let pattern = patternUrlInputField.value;
         let baProductField = document.getElementById('ba_product_url_patterns');
         let showSaveToolTip = document.getElementById('ba_product_url_save_tooltip');
-        
+
+        let patternUrlInputFieldId = ev.currentTarget.getAttribute('id');
+        let patternUrlInputFieldRef = Number(ev.currentTarget.getAttribute('ref'));
+        let itemIndex = patternUrlInputFieldRef - 1;
+        let removalButtonField = document.getElementById('ba_product_url_patterns_rmv-'+patternUrlInputFieldRef);
+        let patternUrlInputField = document.getElementById('ba_product_url_patterns-'+patternUrlInputFieldRef);
+        let pattern = patternUrlInputField.value;
+
         if(!finalUrlList.includes(pattern)) {
-            if (validProductUrlPattern(pattern) && pattern != '') {
-                finalUrlList.splice(patternUrlInputField - 1,1)
-                finalUrlList.push(pattern);
+            if (validProductUrlPattern(pattern) && '' !== '' !== pattern) {
+                finalUrlList.splice(itemIndex,1, pattern);
                 baProductField.value = JSON.stringify(finalUrlList);
                 removalButtonField.style.display = 'block'
                 showSaveToolTip.style.display = 'none'
@@ -216,7 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let allInputs = document.getElementsByTagName("input");
 
         for(let i = 0; i < allInputs.length; i++) {
-            if(allInputs[i].id.indexOf('ba_product_url_patterns-') == 0) {
+            if(allInputs[i].id.indexOf('ba_product_url_patterns-') === 0) {
                 productPatternInputs.push(allInputs[i]);
             }
         }
@@ -224,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function () {
         productPatternInputs.forEach((productPatternInput) => {
             let freeId = productPatternInput.getAttribute('id').split('-')[1]
 
-            if (freeId == 1) {
+            if (freeId === 1) {
                 productPatternInput.value = ''
             } else {
                 productPatternInput.parentElement.remove();   
@@ -247,8 +249,13 @@ document.addEventListener("DOMContentLoaded", function () {
         let input = document.createElement('input');
         input.type = "text";
         input.setAttribute('id', 'ba_product_url_patterns-' + id);
+        input.setAttribute('ref', id);
         input.setAttribute('class', 'ba_product_url_inputs');
         input.setAttribute('size', 23);
+
+        if(document.getElementsByClassName("ba_product_url_inputs").length <= 0) {
+            input.setAttribute('placeholder', 'Enter a custom regex here ex. https://yoursite.com/shop/{{baseProductUrlSlug}}')
+        }
         input.onchange = function(e) {
             updateMainProductUrlFormField(e);
         };
@@ -259,6 +266,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let remove = document.createElement('button');
         remove.setAttribute('id', 'ba_product_url_patterns_rmv-' + id);
         remove.setAttribute('class', 'activecampaign-for-woocommerce button removal');
+        remove.setAttribute('ref', id);
         remove.setAttribute("type", "button");
         remove.style.display = removeDisplayValue;
         remove.innerHTML = "Remove Product Url";
@@ -272,7 +280,8 @@ document.addEventListener("DOMContentLoaded", function () {
         listItem.appendChild(remove);
         reqs.appendChild(listItem);
     }
-    $("#ac-add-ba_product_url").click(function(e){ 
+
+    $("#ac-add-ba_product_url").click(function(e){
         if (cobraListOfValidProductIds.length > 0) {
             let item_id = cobraListOfValidProductIds.shift();
             createProductUrlInputFields(item_id, false);

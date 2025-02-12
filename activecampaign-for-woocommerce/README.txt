@@ -94,6 +94,9 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 
 == Changelog ==
 
+= 2.8.5 2025-02-10 =
+* Improvement - Browse Session Timeouts saved as minutes
+
 = 2.8.4 2025-01-30 =
 * Improvement - Recovered orders should track better
 * Bugfix - Fixing issues discovered in WC version 9.6.0

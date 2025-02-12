@@ -16,7 +16,7 @@ $activecampaign_for_woocommerce_options = $this->get_options();
 $activecampaign_for_woocommerce_storage = $this->get_storage();
 
 
-$activecampaign_for_woocommerce_ba_product_url_patterns_placeholder_text = esc_html__( 'Enter a custom regex here', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
+$activecampaign_for_woocommerce_ba_product_url_patterns_placeholder_text = esc_html__( 'Enter a custom regex here ex. https://yoursite.com/shop/{{baseProductUrlSlug}}', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 
 // Default values
 
@@ -178,7 +178,7 @@ if ( is_array( $activecampaign_for_woocommerce_storage ) ) {
 	if ( isset( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) && is_string( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) ) {
 		$activecampaign_for_woocommerce_ba_product_url_patterns = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) );
 	} else {
-		$activecampaign_for_woocommerce_ba_product_url_patterns = json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns );
+		$activecampaign_for_woocommerce_ba_product_url_patterns = wp_json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns );
 	}
 
 	if ( isset( $activecampaign_for_woocommerce_settings['ac_desc_select'] ) ) {
@@ -213,10 +213,10 @@ $activecampaign_for_woocommerce_browse_abandonment_minimum_page_view_time_option
 	'30' => esc_html__( '30 seconds', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 );
 $activecampaign_for_woocommerce_ba_session_timeout_options                        = array(
-	'1'  => esc_html__( '1 hour', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
-	'3'  => esc_html__( '3 hours (recommended)', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
-	'8'  => esc_html__( '8 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
-	'24' => esc_html__( '24 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+	'60'  => esc_html__( '1 hour', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+	'180'  => esc_html__( '3 hours (recommended)', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+	'480'  => esc_html__( '8 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+	'1440' => esc_html__( '24 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 );
 $activecampaign_for_woocommerce_ba_product_url_valid_variables                    = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug' );
 
@@ -344,7 +344,7 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 					<input type="hidden" name="checkbox_display_option" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_checkbox_display_options ) ); ?>">
 					<input type="hidden" name="abcart_wait" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_ab_cart_options ) ); ?>">
 					<input type="hidden" name="ba_min_page_view_time" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_browse_abandonment_minimum_page_view_time_options ) ); ?>">
-					<input type="hidden" name="ba_product_url_patterns" value="<?php echo esc_html( stripslashes_deep( json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns ) ) ); ?>">
+					<input type="hidden" name="ba_product_url_patterns" value="<?php echo esc_html( stripslashes_deep( wp_json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns ) ) ); ?>">
 					<input type="hidden" name="ba_session_timeout" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_ba_session_timeout_options ) ); ?>">
 					<input type="hidden" id="browse_tracking" name="browse_tracking" value="0">
 					<input type="hidden" id="ac_debug" name="ac_debug" value="0">
@@ -599,7 +599,7 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 								<input type="hidden" name="ba_product_url_patterns" id="ba_product_url_patterns" size="53" readonly>
 								<ul id="additional_ba_product_url_patterns_list">
 									<li>
-										<input type="text" name="ba_product_url_patterns-1" class="ba_product_url_inputs" id="ba_product_url_patterns-1" size="23"
+										<input type="text" name="ba_product_url_patterns-1" class="ba_product_url_inputs" id="ba_product_url_patterns-1" ref="1" size="23"
 											placeholder="<?php echo esc_html( $activecampaign_for_woocommerce_ba_product_url_patterns_placeholder_text ); ?>"
 											value="<?php echo esc_html( stripslashes_deep( $activecampaign_for_woocommerce_ba_product_url_patterns ) ); ?>">
 										<button type="button" id="ba_product_url_patterns_rmv-1" class="activecampaign-for-woocommerce button removal">

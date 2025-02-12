@@ -72,6 +72,13 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	private $ac_debug_excess;
 
 	/**
+	 * Subname
+	 *
+	 * @var string
+	 */
+	private $plugin_subname;
+
+	/**
 	 * Logger constructor.
 	 *
 	 * @param WC_Logger_Interface|null $logger      optional logger parameter used for testing.

@@ -504,7 +504,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		try {
 			// wp_clear_scheduled_hook('activecampaign_for_woocommerce_cart_updated_recurring_event');
 			if ( ! wp_next_scheduled( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME ) ) {
-				wp_schedule_event( time() + 10, 'ten_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, null, true );
+				wp_schedule_event( time() + 10, 'ten_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
 			} elseif ( function_exists( 'wp_get_scheduled_event' ) ) {
 				$logger->debug_excess(
 					'Recurring order sync already scheduled',

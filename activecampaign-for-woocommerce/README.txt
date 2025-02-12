@@ -94,6 +94,9 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 
 == Changelog ==
 
+= 2.8.6 2025-02-12 =
+* Bugfix - Fix cron event fatal error during order sync
+
 = 2.8.5 2025-02-10 =
 * Improvement - Browse Session Timeouts saved as minutes
 

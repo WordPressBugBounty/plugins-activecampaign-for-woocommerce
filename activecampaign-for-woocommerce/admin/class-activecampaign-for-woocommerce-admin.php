@@ -854,14 +854,13 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		$logger = new Logger();
 
 		$current_settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
+		$api_url_changing = $this->api_url_is_changing( $data, $current_settings );
 
 		$this->validate_options_update( $data, $current_settings );
 
 		if ( $this->response_has_errors() ) {
 			return $this->response;
 		}
-
-		$api_url_changing = $this->api_url_is_changing( $data, $current_settings );
 
 		if ( $current_settings ) {
 			$data = array_merge( $current_settings, $data );
@@ -897,11 +896,15 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		update_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME, $data );
 
-		$this->event->trigger(
-			array(
-				'api_url_changed' => $api_url_changing,
-			)
-		);
+		if ($api_url_changing ) {
+			$this->event->trigger(
+				array(
+					'api_url_changed' => $api_url_changing,
+				)
+			);
+		}
+
+		do_action( 'activecampaign_for_woocommerce_update_connection_options', array('update_from_settings') );
 
 		return $this->get_local_settings();
 	}
@@ -1090,8 +1093,17 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 * @return bool
 	 */
 	private function api_url_is_changing( $new_data, $current_data ) {
-		return ( isset( $new_data['api_url'] ) && isset( $current_data['api_url'] ) ) && // both are set
-				$new_data['api_url'] !== $current_data['api_url'];                        // and changing
+		if (
+			(
+				isset( $new_data['api_url'], $current_data['api_url'] ) &&
+				$new_data['api_url'] !== $current_data['api_url']
+			) ||
+			isset( $new_data['api_url'] ) && ! isset( $current_data['api_url'] )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

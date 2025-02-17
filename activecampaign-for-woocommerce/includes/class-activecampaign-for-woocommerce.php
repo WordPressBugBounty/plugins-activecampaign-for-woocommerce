@@ -553,6 +553,18 @@ class Activecampaign_For_Woocommerce {
 		);
 
 		$this->loader->add_action(
+			'activecampaign_for_woocommerce_update_connection_options',
+			$this->create_or_update_connection_option_command,
+			'execute_update_all_options'
+		);
+
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_retrieve_connection_options',
+			$this->create_or_update_connection_option_command,
+			'execute_retrieve_all_options'
+		);
+
+		$this->loader->add_action(
 			'activecampaign_for_woocommerce_ready_new_order',
 			$this->new_order_created_event,
 			'execute'

@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // must format that correctly
     let compiledProductInputField = document.getElementById('ba_product_url_patterns');
     let primaryProductInputField = document.getElementById('ba_product_url_patterns-1');
+
     if (primaryProductInputField) {
         finalUrlList = (primaryProductInputField.value !== '') ? JSON.parse(primaryProductInputField.value) : [];
     }
@@ -281,12 +282,59 @@ document.addEventListener("DOMContentLoaded", function () {
         reqs.appendChild(listItem);
     }
 
+    function clearInputFields(){
+        let baProductField = document.getElementById('ba_product_url_patterns');
+        let productPatternInputs = [];
+        let allInputs = document.getElementsByTagName("input");
+
+        for(let i = 0; i < allInputs.length; i++) {
+            if(allInputs[i].id.indexOf('ba_product_url_patterns-') === 0) {
+                productPatternInputs.push(allInputs[i]);
+            }
+        }
+
+        productPatternInputs.forEach((productPatternInput) => {
+            let freeId = productPatternInput.getAttribute('id').split('-')[1]
+
+            if (freeId === 1) {
+                productPatternInput.value = ''
+            } else {
+                productPatternInput.parentElement.remove();
+            }
+            cobraListOfValidProductIds.push(freeId);
+        });
+        finalUrlList = [];
+        baProductField.value = '';
+    }
+
     $("#ac-add-ba_product_url").click(function(e){
         if (cobraListOfValidProductIds.length > 0) {
             let item_id = cobraListOfValidProductIds.shift();
             createProductUrlInputFields(item_id, false);
         }
     });
+
+    $("#ac-add-default-ba_product_url").click(function(e){
+        clearInputFields();
+        defaultProductInputFieldData = e.currentTarget.getAttribute('ref');
+        compiledProductInputField.value = defaultProductInputFieldData;
+        primaryProductInputField.value = defaultProductInputFieldData;
+        if (primaryProductInputField) {
+            finalUrlList = (primaryProductInputField.value !== '') ? JSON.parse(primaryProductInputField.value) : [];
+        }
+
+        for(let i = 0; i < finalUrlList.length;i++) {
+            if(i === 0) {
+                compiledProductInputField.value = primaryProductInputField.value
+                primaryProductInputField.value = finalUrlList[i];
+            } else {
+                let item_id = cobraListOfValidProductIds.shift();
+                createProductUrlInputFields(item_id, true, finalUrlList[i]);
+            }
+        }
+    });
+
+
 
     form.submit(function(e) {
         let url = form.attr("action");

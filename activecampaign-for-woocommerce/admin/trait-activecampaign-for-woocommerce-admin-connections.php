@@ -73,6 +73,7 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 
 				if ( self::validate_object( $connection, 'serialize_to_array' ) ) {
 					delete_transient( 'activecampaign_for_woocommerce_all_connections' );
+					do_action( 'activecampaign_for_woocommerce_update_connection_options', array('update_connection') );
 					wp_send_json_success( $connection->serialize_to_array() );
 				} elseif ( isset( $connection['type'] ) && 'error' === $connection['type'] ) {
 					wp_send_json_error(
@@ -168,8 +169,10 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 
 			if ( isset( $connection ) && $connection->get_id() && $connection->get_externalid() ) {
 				delete_option( 'activecampaign_for_woocommerce_connection_health_check_last_run' );
+				$this->delete_options_from_storage();
 				$this->update_storage_from_connection( $connection );
 				do_action( 'activecampaign_for_woocommerce_run_sync_connection' );
+				do_action( 'activecampaign_for_woocommerce_update_connection_options', array('new_connection') );
 				wp_send_json_success( 'Connection saved: ' . wp_json_encode( $connection->serialize_to_array() ) );
 			} else {
 				wp_send_json_error( 'Connection could not be created.' );
@@ -179,6 +182,15 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 		}
 	}
 
+	private function delete_options_from_storage() {
+		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_CONNECTION_STORAGE_NAME );
+		$settings = $this->get_local_settings();
+		unset( $settings['ba_product_url_patterns'] );
+		unset( $settings['ba_session_timeout'] );
+		unset( $settings['ba_min_page_view_time'] );
+
+		update_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME, $settings );
+	}
 	/**
 	 * Ajax call. Select an existing connection.
 	 */
@@ -204,8 +216,9 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 
 			if ( isset( $connection ) && $connection->get_id() && $connection->get_externalid() ) {
 				delete_option( 'activecampaign_for_woocommerce_connection_health_check_last_run' );
+				$this->delete_options_from_storage();
 				$this->update_storage_from_connection( $connection );
-
+				do_action( 'activecampaign_for_woocommerce_retrieve_connection_options', array('select_connection') );
 				wp_send_json_success( 'Connection saved.' );
 			}
 		}

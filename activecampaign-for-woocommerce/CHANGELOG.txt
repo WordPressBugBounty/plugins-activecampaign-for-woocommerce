@@ -2,6 +2,25 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.8.6 2025-02-12 =
+* Bugfix - Fix cron event fatal error during order sync
+
+= 2.8.5 2025-02-10 =
+* Improvement - Browse Session Timeouts saved as minutes
+
+= 2.8.4 2025-01-30 =
+* Improvement - Recovered orders should track better
+* Bugfix - Fixing issues discovered in WC version 9.6.0
+* Bugfix - Abandoned carts would sometimes not get picked up
+* Bugfix - Metadata relevant to order syncing was not being saved by WC
+
+= 2.8.3 2025-01-16 =
+* Feature - Adding slugs to tracking options
+* Bugfix - Tracking no longer requires saving settings twice
+
+= 2.8.2 2025-01-13 =
+* Bugfix - Resolving missing whitelist class
+
 = 2.8.1 2025-01-09 =
 * Feature - Browse Abandonment Settings Page Management
 * Bugfix - Issue with synced order in ActiveCampaign not being visible in WooCommerce

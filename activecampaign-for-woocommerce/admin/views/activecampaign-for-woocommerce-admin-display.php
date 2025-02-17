@@ -36,7 +36,7 @@ $activecampaign_for_woocommerce_debug_calls                     = '0';
 $activecampaign_for_woocommerce_email_option                    = '0';
 $activecampaign_for_woocommerce_abcart_wait                     = '1';
 $activecampaign_for_woocommerce_ba_min_page_view_time           = '10';
-$activecampaign_for_woocommerce_ba_session_timeout              = '3';
+$activecampaign_for_woocommerce_ba_session_timeout              = '180';
 $activecampaign_for_woocommerce_ba_product_url_patterns         = '';
 $activecampaign_for_woocommerce_ba_product_url_default_patterns = array(
 	esc_html( sanitize_text_field( $activecampaign_for_woocommerce_external_id . '/?product={{storeBaseProductId}}' ) ),
@@ -175,10 +175,10 @@ if ( is_array( $activecampaign_for_woocommerce_storage ) ) {
 		$activecampaign_for_woocommerce_optin_checkbox_text = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_settings['optin_checkbox_text'] ) );
 	}
 
-	if ( isset( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) && is_string( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) ) {
+	if (
+		isset( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) && is_string( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] )
+	) {
 		$activecampaign_for_woocommerce_ba_product_url_patterns = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_settings['ba_product_url_patterns'] ) );
-	} else {
-		$activecampaign_for_woocommerce_ba_product_url_patterns = wp_json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns );
 	}
 
 	if ( isset( $activecampaign_for_woocommerce_settings['ac_desc_select'] ) ) {
@@ -212,13 +212,20 @@ $activecampaign_for_woocommerce_browse_abandonment_minimum_page_view_time_option
 	'10' => esc_html__( '10 seconds (recommended)', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 	'30' => esc_html__( '30 seconds', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 );
-$activecampaign_for_woocommerce_ba_session_timeout_options                        = array(
-	'60'  => esc_html__( '1 hour', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+
+$activecampaign_for_woocommerce_ba_session_timeout_options = array(
+	'60'   => esc_html__( '1 hour', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 	'180'  => esc_html__( '3 hours (recommended)', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 	'480'  => esc_html__( '8 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 	'1440' => esc_html__( '24 hours', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 );
-$activecampaign_for_woocommerce_ba_product_url_valid_variables                    = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug' );
+
+// If they have an outdated timeout update to default.
+if ( ! isset( $activecampaign_for_woocommerce_ba_session_timeout_options[ $activecampaign_for_woocommerce_ba_session_timeout ] ) ) {
+	$activecampaign_for_woocommerce_ba_session_timeout = esc_html( '180' );
+}
+
+$activecampaign_for_woocommerce_ba_product_url_valid_variables = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug' );
 
 $activecampaign_for_woocommerce_ac_debug_options = array(
 	// value  // label
@@ -344,8 +351,7 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 					<input type="hidden" name="checkbox_display_option" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_checkbox_display_options ) ); ?>">
 					<input type="hidden" name="abcart_wait" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_ab_cart_options ) ); ?>">
 					<input type="hidden" name="ba_min_page_view_time" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_browse_abandonment_minimum_page_view_time_options ) ); ?>">
-					<input type="hidden" name="ba_product_url_patterns" value="<?php echo esc_html( stripslashes_deep( wp_json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns ) ) ); ?>">
-					<input type="hidden" name="ba_session_timeout" value="<?php echo esc_html( key( $activecampaign_for_woocommerce_ba_session_timeout_options ) ); ?>">
+					<input type="hidden" name="ba_session_timeout" value="<?php echo esc_html( $activecampaign_for_woocommerce_ba_session_timeout ); ?>">
 					<input type="hidden" id="browse_tracking" name="browse_tracking" value="0">
 					<input type="hidden" id="ac_debug" name="ac_debug" value="0">
 					<input type="hidden" id="ac_debug_calls" name="ac_debug_calls" value="0">
@@ -592,6 +598,9 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 							<div>
 								<button type="button" id="ac-add-ba_product_url" class="activecampaign-for-woocommerce button button-primary">
 									<?php esc_html_e( 'Add Additional Product Url', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+								</button>
+								<button type="button" id="ac-add-default-ba_product_url" class="activecampaign-for-woocommerce button button-primary" ref="<?php echo esc_html( stripslashes_deep( wp_json_encode( $activecampaign_for_woocommerce_ba_product_url_default_patterns ) ) ); ?>">
+									<?php esc_html_e( 'Set default Product Urls', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 								</button>
 								<div id="ba_product_url_save_tooltip" class="error"  style="display: none"> 
 									<?php esc_html_e( 'Your Url Patterns have not been Validated. Unvalidated URLs will not be saved.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>

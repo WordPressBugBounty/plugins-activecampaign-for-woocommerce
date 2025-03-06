@@ -21,6 +21,7 @@ use Activecampaign_For_Woocommerce_Api_Client as Api_Client;
 use Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository as AC_Tracking_Code_Repository;
 use Activecampaign_For_Woocommerce_Ac_Tracking_Repository as AC_Tracking;
 use Activecampaign_For_Woocommerce_Whitelist_Repository as AC_Whitelist_Repository;
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -103,6 +104,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 */
 	private $api_client;
 
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -125,6 +127,13 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		$this->api_client            = $api_client;
 	}
 
+	/**
+	 * Adds a cron task for every 10 minutes.
+	 *
+	 * @param mixed $schedules The schedules.
+	 *
+	 * @return mixed
+	 */
 	public function cron_add_ten_minute( $schedules ) {
 		// Adds once weekly to the existing schedules.
 		$schedules['ten_minute'] = array(
@@ -778,7 +787,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				$storage = $this->get_connection_storage();
 
 				if ( ! isset( $storage['connection_id'] ) || empty( $storage['connection_id'] ) ) {
-					$this->clear_cron_syncs();
+					AC_Scheduler::remove_all_events();
 				}
 			}
 
@@ -1175,19 +1184,15 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 * Generate the cron sync scheduled processes
 	 */
 	public function schedule_cron_syncs() {
-		wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
-		wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
-		wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-
 		try {
 			if (
 				isset( $this->get_connection_storage()['connection_id'] ) &&
 				$this->is_connected() &&
 				$this->is_configured()
 			) {
-				wp_schedule_event( time() + 10, 'ten_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-				wp_schedule_event( time() + 10, 'ten_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
-				wp_schedule_event( time() + 15, 'every_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
+				$ac_scheduler = new AC_Scheduler();
+				// clear and reschedule all of these events ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR, ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, activecampaign_for_woocommerce_cart_updated_recurring_event
+				$ac_scheduler->schedule_all_recurring_events( true );
 			}
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
@@ -1198,15 +1203,6 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Unschedules cron syncs
-	 */
-	public function clear_cron_syncs() {
-		wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
-		wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-		wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
 	}
 
 	/**
@@ -1250,13 +1246,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	private function clear_plugin_settings() {
 		try {
 			if ( delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME ) && delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_CONNECTION_STORAGE_NAME ) ) {
-				wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-				wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
-				wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME );
-				wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
-				wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_SYNC_NAME );
-				wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_SCHEDULED_STATUS_NAME );
-				wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_prep_historical_data' );
+				AC_Scheduler::remove_all_events();
 				delete_transient( 'activecampaign_for_woocommerce_all_connections' );
 				delete_transient( 'activecampaign_for_woocommerce_connection' );
 				delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_HISTORICAL_SYNC_RUNNING_STATUS_NAME );

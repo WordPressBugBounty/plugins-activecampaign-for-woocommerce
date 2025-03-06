@@ -12,7 +12,7 @@
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
 use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
-
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 /**
  * Save the cart to a table to keep the record in case it gets abandoned
  *
@@ -74,7 +74,21 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 			$this->logger->debug( 'Could not prep abandoned cart data' );
 		}
 		// Schedule single event for a logged in user if there's a cart
-		$this->schedule_recurring_abandon_cart_task();
+		// $this->schedule_recurring_abandon_cart_task(); removed
+		$scheduler = new Activecampaign_For_Woocommerce_Scheduler_Handler();
+
+		try {
+			if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::RECURRING_ABANDONED_SYNC ) ) {
+				AC_Scheduler::schedule_ac_event( AC_Scheduler::RECURRING_ABANDONED_SYNC, array(), true );
+			}
+		} catch ( Throwable $t ) {
+			$this->logger->debug(
+				'There was an issue scheduling the abandoned cart event.',
+				array(
+					'message' => $t->getMessage(),
+				)
+			);
+		}
 	}
 
 	/**
@@ -98,7 +112,22 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 			} catch ( Throwable $e ) {
 				$this->logger->debug( 'Could not prep abandoned cart data' );
 			}
-			$this->schedule_recurring_abandon_cart_task();
+			// removed function
+			// $this->schedule_recurring_abandon_cart_task();
+			$scheduler = new Activecampaign_For_Woocommerce_Scheduler_Handler();
+
+			try {
+				if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::RECURRING_ABANDONED_SYNC ) ) {
+					AC_Scheduler::schedule_ac_event( AC_Scheduler::RECURRING_ABANDONED_SYNC, array(), true );
+				}
+			} catch ( Throwable $t ) {
+				$this->logger->debug(
+					'There was an issue scheduling the abandoned cart event.',
+					array(
+						'message' => $t->getMessage(),
+					)
+				);
+			}
 
 			return true;
 		}

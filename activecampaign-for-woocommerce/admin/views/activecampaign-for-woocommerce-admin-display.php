@@ -764,7 +764,11 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 									?>
 								> Off
 							</label>
-							<label class="radio" style="display:none;">
+							<label class="radio" 
+							<?php
+							if ( ! $this->debug_mode() ) :
+								?>
+								style="display:none;"<?php endif; ?>>
 								<input type="radio" id="browse_tracking3" name="browse_tracking" value="3"
 								<?php
 								if ( '3' === $activecampaign_for_woocommerce_browse_tracking ) {

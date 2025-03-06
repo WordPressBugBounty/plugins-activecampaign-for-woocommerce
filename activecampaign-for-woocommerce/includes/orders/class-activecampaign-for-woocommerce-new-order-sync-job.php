@@ -151,6 +151,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 					'args'        => $args,
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
+					'ac_code'     => 'NOSJ_154',
 				)
 			);
 			if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
@@ -276,6 +277,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 					'args'        => $args,
 					'message'     => $t->getMessage(),
 					'stack_trace' => $t->getTrace(),
+					'ac_code'     => 'NOSJ_280',
 				)
 			);
 			if ( isset( $wc_order_id ) && ! empty( $wc_order_id ) ) {
@@ -602,7 +604,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				}
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
-					'customerid not set or threw an error',
+					'New order sync on customerid not set or threw an error',
 					array(
 						'unsynced_order' => $unsynced_order,
 						'ac_order'       => $ac_order,
@@ -673,9 +675,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 
 			if ( $wpdb->last_error ) {
 				$this->logger->error(
-					'Abandonement sync: There was an error updating an abandoned cart record as synced.',
+					'There was an error checking if this order record synced.',
 					array(
 						'wpdb_last_error' => $wpdb->last_error,
+						'ac_code'         => 'NOSJ_681',
 					)
 				);
 			}
@@ -792,9 +795,10 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 
 			if ( $wpdb->last_error ) {
 				$this->logger->error(
-					'Abandonment sync: There was an error getting results for abandoned cart records.',
+					'There was an error getting results for unsynced records.',
 					array(
 						'wpdb_last_error' => $wpdb->last_error,
+						'ac_code'         => 'NOSJ_801',
 					)
 				);
 			}
@@ -810,6 +814,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
+					'ac_code' => 'NOSJ_813',
 				)
 			);
 		}

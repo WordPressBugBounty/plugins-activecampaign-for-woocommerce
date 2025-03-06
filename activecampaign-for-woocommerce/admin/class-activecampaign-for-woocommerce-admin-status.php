@@ -12,6 +12,7 @@
 
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Schedule;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -499,6 +500,34 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		return $data;
 	}
 
+	private function check_for_event_data( $event_schedule ) {
+		$logger     = new Logger();
+		$event_data = array();
+
+		if ( ! empty( $event_schedule ) ) {
+			$event_data['timestamp']      = wp_date( DATE_ATOM, $event_schedule );
+			$event_data['next_scheduled'] = wp_date( DATE_ATOM, $event_schedule );
+			$event_data['error']          = false;
+
+			if ( ! empty( $event_data['timestamp'] ) ) {
+				return $event_data;
+			}
+		}
+		if ( is_object( $event_schedule ) && ! empty( $event_schedule->timestamp ) ) {
+			$event_data['timestamp'] = wp_date( DATE_ATOM, $event_schedule->timestamp );
+
+			if ( $event_schedule->timestamp && $event_schedule->interval ) {
+				$next = $event_schedule->timestamp + $event_schedule->interval - time();
+				$data['abandoned_schedule']['next_scheduled'] = $next;
+			}
+
+			$event_data['schedule'] = $event_schedule->schedule;
+			$event_data['error']    = false;
+		}
+
+		return $event_data;
+	}
+
 	/**
 	 * Gets the cron related data.
 	 *
@@ -509,98 +538,43 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 	private function get_cron_data( $data ) {
 		$logger = new Logger();
 
-		try {
-			if ( function_exists( 'wp_get_scheduled_event' ) ) {
-				$abandoned_schedule        = wp_get_scheduled_event( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-				$new_order_schedule        = wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
-				$historical_order_schedule = wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
+		$abandoned_schedule         = AC_Schedule::get_schedule( AC_Schedule::RECURRING_ABANDONED_SYNC );
+		$data['abandoned_schedule'] = $this->check_for_event_data( $abandoned_schedule );
+		if ( ! $data['abandoned_schedule'] ) {
+			AC_Schedule::schedule_ac_event( AC_Schedule::RECURRING_ABANDONED_SYNC, array(), true, false );
 
-				if ( $abandoned_schedule ) {
-					$data['abandoned_schedule']['timestamp'] = wp_date( DATE_ATOM, $abandoned_schedule->timestamp );
+			$abandoned_schedule         = AC_Schedule::get_schedule( AC_Schedule::RECURRING_ABANDONED_SYNC );
+			$data['abandoned_schedule'] = $this->check_for_event_data( $abandoned_schedule );
+		}
+		if ( ! $data['abandoned_schedule'] ) {
+			$data['abandoned_schedule']['error'] = true;
+			$logger->warning( 'Abandoned cart is not scheduled.', array( 'abandoned_cart_schedule' => $data['abandoned_schedule'] ) );
+		}
 
-					if ( $abandoned_schedule->timestamp && $abandoned_schedule->interval ) {
-						$next = $abandoned_schedule->timestamp + $abandoned_schedule->interval - time();
-						$data['abandoned_schedule']['next_scheduled'] = $next;
-					}
+		$new_order_schedule         = AC_Schedule::get_schedule( AC_Schedule::RECURRING_ORDER_SYNC );
+		$data['new_order_schedule'] = $this->check_for_event_data( $new_order_schedule );
+		if ( ! $data['new_order_schedule'] ) {
+			AC_Schedule::schedule_ac_event( AC_Schedule::RECURRING_ORDER_SYNC, array(), true, false );
 
-					$data['abandoned_schedule']['schedule'] = $abandoned_schedule->schedule;
-					$data['abandoned_schedule']['error']    = false;
-				} else {
-					$data['abandoned_schedule']['error'] = true;
-					$logger->warning(
-						'Abandoned cart is not scheduled.',
-						array(
-							'abandoned_cart_schedule' => $abandoned_schedule,
-						)
-					);
-				}
-
-				if ( $new_order_schedule ) {
-					$data['new_order_schedule']['error']     = false;
-					$data['new_order_schedule']['timestamp'] = wp_date( DATE_ATOM, $new_order_schedule->timestamp );
-					$data['new_order_schedule']['schedule']  = $new_order_schedule->schedule;
-					if ( $new_order_schedule->timestamp && $new_order_schedule->interval ) {
-						$next = $new_order_schedule->timestamp + $new_order_schedule->interval - time();
-						$data['new_order_schedule']['next_scheduled'] = $next;
-					}
-				} else {
-					$data['new_order_schedule']['error'] = true;
-					$logger->warning(
-						'New order sync is not scheduled.',
-						array(
-							'new_order_schedule' => $new_order_schedule,
-						)
-					);
-				}
-
-				if ( $historical_order_schedule ) {
-					$data['historical_order_schedule']['error']     = false;
-					$data['historical_order_schedule']['timestamp'] = wp_date( DATE_ATOM, $historical_order_schedule->timestamp );
-					$data['historical_order_schedule']['schedule']  = $historical_order_schedule->schedule;
-					if ( $historical_order_schedule->timestamp && $historical_order_schedule->interval ) {
-						$next = $historical_order_schedule->timestamp + $historical_order_schedule->interval - time();
-						$data['historical_order_schedule']['next_scheduled'] = $next;
-					}
-				} else {
-					$data['historical_order_schedule']['error'] = true;
-					$logger->warning(
-						'Historical order sync is not scheduled.',
-						array(
-							'historical_order_schedule' => $historical_order_schedule,
-						)
-					);
-				}
-			} elseif ( function_exists( 'wp_next_scheduled' ) ) {
-				$logger->warning( 'The wp_get_scheduled_event function may not exist. Performing wp_next_scheduled instead.' );
-				$abandoned_schedule                             = wp_next_scheduled( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-				$new_order_schedule                             = wp_next_scheduled( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
-				$historical_order_schedule                      = wp_next_scheduled( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
-				$data['abandoned_schedule']['timestamp']        = wp_date( DATE_ATOM, $abandoned_schedule );
-				$data['new_order_schedule']['timestamp']        = wp_date( DATE_ATOM, $new_order_schedule );
-				$data['historical_order_schedule']['timestamp'] = wp_date( DATE_ATOM, $historical_order_schedule );
-				$data['new_order_schedule']['error']            = false;
-				if ( ! $new_order_schedule || ! $abandoned_schedule ) {
-					$logger->warning(
-						'An order sync is not scheduled.',
-						array(
-							'new_order_schedule'        => $new_order_schedule,
-							'historical_order_schedule' => $historical_order_schedule,
-							'abandoned_cart_schedule'   => $abandoned_schedule,
-						)
-					);
-				}
-			} else {
-				$data['new_order_schedule']['error'] = true;
-				$logger->warning( 'One of the cron syncs may not be scheduled.' );
-			}
-		} catch ( Throwable $t ) {
-			$logger->warning(
-				'ActiveCampaign status page threw an error',
-				array(
-					'message' => $t->getMessage(),
-				)
-			);
+			$new_order_schedule         = AC_Schedule::get_schedule( AC_Schedule::RECURRING_ORDER_SYNC );
+			$data['new_order_schedule'] = $this->check_for_event_data( $new_order_schedule );
+		}
+		if ( ! $data['new_order_schedule'] ) {
 			$data['new_order_schedule']['error'] = true;
+			$logger->warning( 'New order sync is not scheduled.', array( 'new_order_schedule' => $data['new_order_schedule'] ) );
+		}
+
+		$historical_order_schedule         = AC_Schedule::get_schedule( AC_Schedule::RECURRING_HISTORICAL_SYNC );
+		$data['historical_order_schedule'] = $this->check_for_event_data( $historical_order_schedule );
+		if ( ! $data['historical_order_schedule'] ) {
+			AC_Schedule::schedule_ac_event( AC_Schedule::RECURRING_HISTORICAL_SYNC, array(), true, false );
+
+			$historical_order_schedule         = AC_Schedule::get_schedule( AC_Schedule::RECURRING_HISTORICAL_SYNC );
+			$data['historical_order_schedule'] = $this->check_for_event_data( $historical_order_schedule );
+		}
+		if ( ! $data['historical_order_schedule'] ) {
+			$data['historical_order_schedule']['error'] = true;
+			$logger->warning( 'Historical order sync is not scheduled.', array( 'historical_order_schedule' => $data['historical_order_schedule'] ) );
 		}
 
 		return $data;

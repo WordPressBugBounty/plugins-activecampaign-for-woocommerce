@@ -173,6 +173,7 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 				$this->update_storage_from_connection( $connection );
 				do_action( 'activecampaign_for_woocommerce_run_sync_connection' );
 				do_action( 'activecampaign_for_woocommerce_update_connection_options', array('new_connection') );
+				Activecampaign_For_Woocommerce_Scheduler_Handler::schedule_all_recurring_events( true );
 				wp_send_json_success( 'Connection saved: ' . wp_json_encode( $connection->serialize_to_array() ) );
 			} else {
 				wp_send_json_error( 'Connection could not be created.' );
@@ -218,10 +219,13 @@ trait Activecampaign_For_Woocommerce_Admin_Connections {
 				delete_option( 'activecampaign_for_woocommerce_connection_health_check_last_run' );
 				$this->delete_options_from_storage();
 				$this->update_storage_from_connection( $connection );
+				Activecampaign_For_Woocommerce_Scheduler_Handler::schedule_all_recurring_events( false );
 				do_action( 'activecampaign_for_woocommerce_retrieve_connection_options', array('select_connection') );
 				wp_send_json_success( 'Connection saved.' );
 			}
 		}
+
+		Activecampaign_For_Woocommerce_Scheduler_Handler::remove_all_events();
 		wp_send_json_error( 'Something went wrong with setting the connection.' );
 	}
 

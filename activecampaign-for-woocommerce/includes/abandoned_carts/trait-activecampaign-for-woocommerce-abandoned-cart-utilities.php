@@ -12,6 +12,7 @@
 
 use Activecampaign_For_Woocommerce_Customer_Utilities as Customer_Utilities;
 use Activecampaign_For_Woocommerce_Logger as Logger;
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 
 /**
  * The Order_Finished Event Class.
@@ -42,7 +43,7 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 						`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
 					WHERE
 						id = %s
-						AND order_date IS NULL',
+						AND order_date IS NULL LIMIT 50',
 					$id
 				)
 			// phpcs:enable
@@ -239,22 +240,24 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 
 	/**
 	 * This schedules the recurring event and verifies it's still set up
+	 *
+	 * @deprecated
 	 */
 	public function schedule_recurring_abandon_cart_task() {
 		// If not scheduled, set up our recurring event
 		$logger = new Logger();
 
 		try {
-			if ( ! wp_next_scheduled( 'activecampaign_for_woocommerce_cart_updated_recurring_event' ) ) {
-				wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
+			if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::RECURRING_ABANDONED_SYNC ) ) {
+				AC_Scheduler::schedule_ac_event( AC_Scheduler::RECURRING_ABANDONED_SYNC, array(), true, false );
 			} elseif ( function_exists( 'wp_get_scheduled_event' ) ) {
-					$logger->debug_excess(
-						'Recurring cron already scheduled',
-						array(
-							'time_now' => time(),
-							'myevent'  => wp_get_scheduled_event( 'activecampaign_for_woocommerce_cart_updated_recurring_event' ),
-						)
-					);
+				$logger->debug_excess(
+					'Recurring cron already scheduled',
+					array(
+						'time_now' => time(),
+						'myevent'  => AC_Scheduler::get_schedule( AC_Scheduler::RECURRING_ABANDONED_SYNC ),
+					)
+				);
 			}
 		} catch ( Throwable $t ) {
 			$logger->debug(

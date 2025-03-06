@@ -27,6 +27,13 @@ trait Activecampaign_For_Woocommerce_Subscription_Data_Gathering {
 	use Activecampaign_For_Woocommerce_Data_Validation;
 	use Activecampaign_For_Woocommerce_Order_Line_Item_Gathering;
 
+	/**
+	 * The connection id.
+	 *
+	 * @var string
+	 */
+	private $connection_id;
+
 	private function init() {
 		$admin_storage = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_CONNECTION_STORAGE_NAME );
 		if ( ! empty( $admin_storage ) && isset( $admin_storage['connection_id'] ) ) {

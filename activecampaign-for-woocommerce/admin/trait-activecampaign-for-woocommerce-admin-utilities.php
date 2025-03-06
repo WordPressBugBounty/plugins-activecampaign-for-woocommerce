@@ -216,4 +216,17 @@ trait Activecampaign_For_Woocommerce_Admin_Utilities {
 		}
 		return $options_to_be_saved;
 	}
+
+	private function debug_mode() {
+		if (defined( 'ACFWC_DEBUG' ) ) {
+			if (
+				ACFWC_DEBUG !== null &&
+				in_array( ACFWC_DEBUG, array(true, 1, '1') )
+			) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

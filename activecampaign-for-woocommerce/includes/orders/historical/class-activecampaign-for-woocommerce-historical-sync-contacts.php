@@ -16,6 +16,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Executable_Interface as Executable;
 use Activecampaign_For_Woocommerce_AC_Contact_Batch as AC_Contact_Batch;
 use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Batch_Repository;
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 
 /**
  * The Historical_Sync Event Class.
@@ -193,11 +194,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Contacts implements Executa
 	}
 
 	private function schedule_next( $start ) {
-		wp_schedule_single_event(
-			time() + 50,
-			'activecampaign_for_woocommerce_run_historical_sync_contacts',
-			array( 'start' => $start )
-		);
+		AC_Scheduler::schedule_ac_event( AC_Scheduler::HISTORICAL_SYNC_CONTACTS, array( 'start' => $start ), false, false );
 	}
 
 	/**

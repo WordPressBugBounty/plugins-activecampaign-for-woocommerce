@@ -134,19 +134,17 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 
 		set_transient( 'acforwc_abandoned_task_hook', wp_date( DATE_ATOM ), 604800 );
 
-		$now      = date_create( 'NOW' );
-		$last_run = get_option( 'activecampaign_for_woocommerce_abandoned_cart_last_run' );
+		$now              = date_create( 'NOW' );
+		$last_run         = get_option( 'activecampaign_for_woocommerce_abandoned_cart_last_run' );
+		$interval_minutes = 0;
 
 		if ( false !== $last_run ) {
 			$interval         = date_diff( $now, $last_run );
 			$interval_minutes = $interval->format( '%i' );
-		} else {
-			$interval_minutes = 0;
 		}
 
 		if ( false === $last_run || 5 <= $interval_minutes ) {
 			do_action( 'activecampaign_for_woocommerce_verify_tables' );
-
 			$this->run_abandoned_carts();
 		}
 	}
@@ -168,13 +166,11 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 			$cart_count += count( $abandoned_carts );
 		}
 
-		// Check for legacy abandoned carts
-		$abandoned_carts = $this->get_all_abandoned_carts_from_table_legacy();
+		// Process first failure records
+		$abandoned_carts = $this->get_all_abandoned_carts_from_table( self::STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY );
 		if ( ! empty( $abandoned_carts ) ) {
 			$this->process_abandoned_carts_per_record( $abandoned_carts ); // Process this group
 			$cart_count += count( $abandoned_carts );
-		} else {
-			$this->logger->debug_excess( 'Abandoned cart hourly task: No legacy abandoned carts to process...' );
 		}
 
 		// Check for abandoned carts new value
@@ -184,6 +180,14 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 			$cart_count += count( $abandoned_carts );
 		} else {
 			$this->logger->debug_excess( 'Abandoned cart hourly task: No abandoned carts to process...' );
+		}
+
+		$abandoned_carts = $this->get_all_abandoned_carts_from_table_use_code_sort();
+		if ( ! empty( $abandoned_carts ) ) {
+			$this->process_abandoned_carts_per_record( $abandoned_carts ); // Process this group
+			$cart_count += count( $abandoned_carts );
+		} else {
+			$this->logger->debug_excess( 'Abandoned cart hourly task: No code based abandoned carts to process...' );
 		}
 
 		$this->clean_old_synced_abandoned_carts();
@@ -261,10 +265,11 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 	}
 
 	/**
-	 * Get all active carts.
+	 * Get all abandoned carts.
 	 *
-	 * @return mixed Whether or not there are abandoned carts.
-	 * @throws Throwable Thrown message.
+	 * @param int $synced_to_ac Status to request.
+	 *
+	 * @return array|false|object|stdClass[]|void
 	 */
 	private function get_all_abandoned_carts_from_table( $synced_to_ac = self::STATUS_ABANDONED_CART_UNSYNCED ) {
 		global $wpdb;
@@ -297,7 +302,7 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 						OR last_access_time < str_to_date("' . $expire_datetime->format( 'Y-m-d H:i:s' ) . '", "Y-m-d H:i:s") 
 					)
 					AND order_date IS NULL
-					AND synced_to_ac = ' . $synced_to_ac . ';'
+					AND synced_to_ac = ' . $synced_to_ac . ' LIMIT 50;'
 			);
 			// phpcs:enable
 
@@ -312,9 +317,6 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 					)
 				);
 			}
-
-			$this->clean_old_synced_abandoned_carts();
-			$this->clean_all_old_abandoned_carts();
 
 			if ( ! empty( $abandoned_carts ) ) {
 				return $abandoned_carts; // abandoned carts found
@@ -334,18 +336,16 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 	}
 
 	/**
-	 * Get all active carts.
+	 * Use code to sort out if the cart is ready to sync.
 	 *
-	 * @deprecated This will need to be removed after a few versions as we moved from a common unsynced value of 0 to 20 for abandoned carts specifically.
-	 *
-	 * @return mixed Whether or not there are abandoned carts.
-	 * @throws Throwable Thrown message.
+	 * @return array|false|void
 	 */
-	private function get_all_abandoned_carts_from_table_legacy() {
+	private function get_all_abandoned_carts_from_table_use_code_sort() {
 		global $wpdb;
 
 		// default is 1 hour abandon cart expiration
 		$this->expire_time = 1;
+		$synced_to_ac      = array( self::STATUS_ABANDONED_CART_UNSYNCED, self::STATUS_ABANDONED_CART_FAILED_WAIT, self::STATUS_ABANDONED_CART_FAILED_2, self::STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY );
 
 		// Get the expire time period from the db
 		$activecampaign_for_woocommerce_settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
@@ -360,41 +360,48 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 		try {
 			// Get the expired carts from our table
 			// phpcs:disable
-			$abandoned_carts = $wpdb->get_results(
-				'SELECT id, synced_to_ac, customer_ref_json, cart_ref_json, cart_totals_ref_json, removed_cart_contents_ref_json, activecampaignfwc_order_external_uuid, last_access_time, ADDTIME(last_access_time, "' . $this->expire_time . ':00:00") as calc_abandoned_date 
-					FROM
-						`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
-					WHERE
-						( last_access_time < "' . $expire_datetime->format( 'Y-m-d H:i:s' ) . '"
-						OR last_access_time < str_to_date("' . $expire_datetime->format( 'Y-m-d H:i:s' ) . '", "Y-m-d H:i:s") )
-						AND order_date IS NULL
-						AND synced_to_ac = 0;'
+			$all_carts = $wpdb->get_results( '
+				SELECT
+					id, synced_to_ac, customer_ref_json, cart_ref_json, cart_totals_ref_json, removed_cart_contents_ref_json, activecampaignfwc_order_external_uuid, last_access_time, abandoned_date
+				FROM
+					`' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '`
+				WHERE
+					last_access_time IS NOT NULL 
+					AND order_date IS NULL
+					AND synced_to_ac IN (' . implode(',', $synced_to_ac) . ') ORDER BY order_date ASC LIMIT 50;'
 			);
 			// phpcs:enable
 
+			$parsed_carts = array();
+			foreach ($all_carts as $cart ) {
+				$last = new DateTime( $cart->last_access_time );
+				if ($last->getTimestamp() < $expire_datetime->getTimestamp() ) {
+					$parsed_carts[] = $cart;
+				}
+			}
 			if ( $wpdb->last_error ) {
-				$this->logger->notice(
-					'Abandonment sync: There was an error getting results for abandoned cart records.',
+				$this->logger->error(
+					'A database error was encountered while getting results for abandoned cart records.',
 					array(
-						'wpdb_last_error' => $wpdb->last_error,
+						'wpdb_last_error'  => $wpdb->last_error,
+						'wpdb_last_query'  => $wpdb->last_query,
+						'suggested_action' => 'Please verify that the query is correct and cron process has read access to the ' . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' table',
+						'ac_code'          => 'RASC_301',
 					)
 				);
 			}
 
-			$this->clean_all_old_abandoned_carts();
-
-			if ( ! empty( $abandoned_carts ) ) {
-				// abandoned carts found
-				return $abandoned_carts;
+			if ( ! empty( $parsed_carts ) ) {
+				return $parsed_carts; // abandoned carts found
 			} else {
-				// no abandoned carts
-				return false;
+				return false; // no abandoned carts to process
 			}
 		} catch ( Throwable $t ) {
-			$this->logger->notice(
-				'Abandonment Sync: There was an error with preparing or getting abandoned cart results.',
+			$this->logger->error(
+				'An error was thrown while preparing or getting abandoned cart results.',
 				array(
 					'message' => $t->getMessage(),
+					'ac_code' => 'RASC_320',
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
 				)
 			);
@@ -1026,26 +1033,26 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 	 */
 	private function calculate_abandoned_date( $cart ) {
 		$logger = new Logger();
+		$now    = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 
 		if ( isset( $cart->last_access_time ) && ( ! isset( $cart->abandoned_date ) || empty( $cart->abandoned_date ) ) ) {
-
-				$now = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
-
-				// 1 hour is the default
+			// 1 hour is the default
 			if ( ! isset( $this->expire_time ) || empty( $this->expire_time ) ) {
 				$this->expire_time = 1;
 			}
 
-				$expire_datetime = new DateTime( 'now -' . $this->expire_time . ' hours', new DateTimeZone( 'UTC' ) );
-				$ab_date         = new DateTime( $cart->last_access_time . ' + ' . $this->expire_time . ' hours', new DateTimeZone( 'UTC' ) );
+			// The expiration datetime limit
+			$expire_datetime = new DateTime( 'now -' . $this->expire_time . ' hours', new DateTimeZone( 'UTC' ) );
+			// The calculated abandoned date if we used the last access time with added expiration
+			$ab_date = new DateTime( $cart->last_access_time . ' + ' . $this->expire_time . ' hours', new DateTimeZone( 'UTC' ) );
 
-				$i        = 0;
-				$hourdiff = 0;
+			$i        = 0;
+			$hourdiff = 0;
 
 			try {
-				$diff           = $expire_datetime->diff( $ab_date, true );
+				$diff           = $expire_datetime->diff( $ab_date, true ); // The difference from expiration to abandonment
 				$hours_in_days  = $diff->format( '%d' ) * 24; // get number of hours in days
-				$hours_in_hours = $diff->format( '%h' ); // add number of hours in hours
+				$hours_in_hours = $diff->format( '%h' ); // add number of hours in hours for total hours
 
 				if ( ! empty( $hours_in_days ) ) {
 					$i += intval( $hours_in_days );
@@ -1069,7 +1076,8 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 
 			try {
 				// secondary method to check
-				$hourdiff = round( ( strtotime( $cart->last_access_time + $this->expire_time ) - strtotime( $expire_datetime->format( 'Y-m-d H:i:s' ) ) ) / 3600, 0 );
+				$timestamp_offset = $this->expire_time * 3600; // offset in hours (expire_time is in hours)
+				$hourdiff         = ( strtotime( $expire_datetime->format( 'Y-m-d H:i:s' ) ) - strtotime( $cart->last_access_time ) + $timestamp_offset ) / 3600;
 			} catch ( Throwable $t ) {
 				// cannot use this method
 				$this->logger->debug(
@@ -1082,10 +1090,12 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 					)
 				);
 			}
+
 			try {
 				// calc_abandoned_date is calculated by the DB
 				if ( ! empty( $cart->calc_abandoned_date ) && empty( $cart->abandoned_date ) ) {
 					$c_ab_date = new DateTime( $cart->calc_abandoned_date, new DateTimeZone( 'UTC' ) );
+
 					return $c_ab_date->format( 'Y-m-d H:i:s e' );
 				} elseif ( empty( $cart->calc_abandoned_date ) && empty( $cart->abandoned_date ) ) {
 					// If the DB somehow fails to calculate the date
@@ -1095,7 +1105,7 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 					}
 				}
 
-				// If this is manually force synced and not old enough use now as the time
+				// This is manually force synced and not old enough, use now as the time
 				return $now->format( 'Y-m-d H:i:s e' );
 			} catch ( Throwable $t ) {
 				$logger->warning(
@@ -1108,15 +1118,19 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 
 				if ( isset( $cart->calc_abandoned_date ) && ! empty( $cart->calc_abandoned_date ) ) {
 					$ab_date = new DateTime( $cart->abandoned_date, new DateTimeZone( 'UTC' ) );
+
+					// Return the abandoned date
 					return $ab_date->format( 'Y-m-d H:i:s e' );
 				}
 			}
 		} elseif ( isset( $cart->abandoned_date ) && ! empty( $cart->abandoned_date ) ) {
+			// pass back the recorded date in UTC
 			$ab_date = new DateTime( $cart->abandoned_date, new DateTimeZone( 'UTC' ) );
+
 			return $ab_date->format( 'Y-m-d H:i:s e' );
 		}
 
-		$now = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		// Just return now
 		return $now->format( 'Y-m-d H:i:s e' );
 	}
 }

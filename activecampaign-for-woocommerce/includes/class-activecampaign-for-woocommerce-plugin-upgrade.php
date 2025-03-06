@@ -349,7 +349,6 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		try {
 			wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
 			// erase and reconfigure to use a faster time sequence.
-			wp_schedule_event( time() + 10, 'every_minute', 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an error upgrading the table for v1.1.5.',

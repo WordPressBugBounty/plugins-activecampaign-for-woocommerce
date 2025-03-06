@@ -29,6 +29,7 @@ if ( isset( $activecampaign_for_woocommerce_settings['abcart_wait'] ) && ! empty
 	$activecampaign_for_woocommerce_expire_time = $activecampaign_for_woocommerce_settings['abcart_wait'];
 }
 
+$activecampaign_for_woocommerce_now_datetime    = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 $activecampaign_for_woocommerce_expire_datetime = new DateTime( 'now -' . $activecampaign_for_woocommerce_expire_time . ' hours', new DateTimeZone( 'UTC' ) );
 
 $activecampaign_for_woocommerce_abandoned_carts = $this->get_abandoned_carts( $activecampaign_for_woocommerce_offset );
@@ -119,6 +120,11 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 						unknown
 					<?php endif; ?>
 				</h3>
+				<table><tr>
+						<td>Abandonment cutoff time UTC:</td><td><?php echo esc_html( $activecampaign_for_woocommerce_expire_datetime->format( DATE_ATOM ) ); ?></td>
+					</tr><tr>
+						<td>Current time UTC:</td><td><?php echo esc_html( $activecampaign_for_woocommerce_now_datetime->format( DATE_ATOM ) ); ?></td>
+					</tr></table>
 				<h3>
 					Total Abandoned Carts
 				</h3>

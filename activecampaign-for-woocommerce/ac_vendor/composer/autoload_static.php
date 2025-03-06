@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd9bb3bd7e18ccd70aab112aebbce8079
+class ComposerStaticInit175e130378661b488bf176f44e675036
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -464,6 +464,7 @@ class ComposerStaticInitd9bb3bd7e18ccd70aab112aebbce8079
         'Activecampaign_For_Woocommerce_Resource_Unprocessable_Exception' => __DIR__ . '/../..' . '/includes/exceptions/class-activecampaign-for-woocommerce-resource-unprocessable-exception.php',
         'Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command' => __DIR__ . '/../..' . '/includes/abandoned_carts/class-activecampaign-for-woocommerce-run-abandonment-sync-command.php',
         'Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command' => __DIR__ . '/../..' . '/includes/abandoned_carts/class-activecampaign-for-woocommerce-save-abandoned-cart-command.php',
+        'Activecampaign_For_Woocommerce_Scheduler_Handler' => __DIR__ . '/../..' . '/includes/events/class-activecampaign-for-woocommerce-scheduler-handler.php',
         'Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-set-connection-id-cache-command.php',
         'Activecampaign_For_Woocommerce_Simple_Graphql_Serializer' => __DIR__ . '/../..' . '/includes/models/serializers/class-activecampaign-for-woocommerce-simple-graphql-serializer.php',
         'Activecampaign_For_Woocommerce_Subscription_Customer_Model' => __DIR__ . '/../..' . '/includes/subscriptions/models/class-activecampaign-for-woocommerce-subscription-customer-model.php',
@@ -492,9 +493,9 @@ class ComposerStaticInitd9bb3bd7e18ccd70aab112aebbce8079
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitd9bb3bd7e18ccd70aab112aebbce8079::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd9bb3bd7e18ccd70aab112aebbce8079::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitd9bb3bd7e18ccd70aab112aebbce8079::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit175e130378661b488bf176f44e675036::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit175e130378661b488bf176f44e675036::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit175e130378661b488bf176f44e675036::$classMap;
 
         }, null, ClassLoader::class);
     }

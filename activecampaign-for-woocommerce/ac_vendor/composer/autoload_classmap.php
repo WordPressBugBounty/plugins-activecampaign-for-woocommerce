@@ -381,6 +381,7 @@ return array(
     'Activecampaign_For_Woocommerce_Resource_Unprocessable_Exception' => $baseDir . '/includes/exceptions/class-activecampaign-for-woocommerce-resource-unprocessable-exception.php',
     'Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command' => $baseDir . '/includes/abandoned_carts/class-activecampaign-for-woocommerce-run-abandonment-sync-command.php',
     'Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command' => $baseDir . '/includes/abandoned_carts/class-activecampaign-for-woocommerce-save-abandoned-cart-command.php',
+    'Activecampaign_For_Woocommerce_Scheduler_Handler' => $baseDir . '/includes/events/class-activecampaign-for-woocommerce-scheduler-handler.php',
     'Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command' => $baseDir . '/includes/commands/class-activecampaign-for-woocommerce-set-connection-id-cache-command.php',
     'Activecampaign_For_Woocommerce_Simple_Graphql_Serializer' => $baseDir . '/includes/models/serializers/class-activecampaign-for-woocommerce-simple-graphql-serializer.php',
     'Activecampaign_For_Woocommerce_Subscription_Customer_Model' => $baseDir . '/includes/subscriptions/models/class-activecampaign-for-woocommerce-subscription-customer-model.php',

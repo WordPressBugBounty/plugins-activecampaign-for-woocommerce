@@ -15,7 +15,7 @@ use Activecampaign_For_Woocommerce_Ecom_Order_Factory as Ecom_Order_Factory;
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Customer_Utilities as Customer_Utilities;
 use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
-
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 /**
  * The Order_Finished Event Class.
  *
@@ -503,14 +503,14 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 
 		try {
 			// wp_clear_scheduled_hook('activecampaign_for_woocommerce_cart_updated_recurring_event');
-			if ( ! wp_next_scheduled( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME ) ) {
-				wp_schedule_event( time() + 10, 'ten_minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
+			if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::RECURRING_ORDER_SYNC ) ) {
+				AC_Scheduler::schedule_ac_event( AC_Scheduler::RECURRING_ORDER_SYNC, array(), true, false );
 			} elseif ( function_exists( 'wp_get_scheduled_event' ) ) {
 				$logger->debug_excess(
 					'Recurring order sync already scheduled',
 					array(
 						'time_now' => time(),
-						'myevent'  => wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME ),
+						'myevent'  => AC_Scheduler::get_schedule( AC_Scheduler::RECURRING_ORDER_SYNC ),
 					)
 				);
 
@@ -532,15 +532,15 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 	 */
 	private function schedule_sync_job( $order_id ) {
 		try {
-			if ( ! wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ) ) {
-				wp_schedule_single_event(
-					time() + 40,
-					'activecampaign_for_woocommerce_admin_sync_single_order_active',
+			if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ) ) {
+				AC_Scheduler::schedule_ac_event(
+					AC_Scheduler::SYNC_ONE_ORDER_ACTIVE,
 					array(
 						'wc_order_id' => $order_id,
 						'event'       => 'onetime',
 					),
-					true
+					false,
+					false
 				);
 			}
 
@@ -550,7 +550,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 					'wc_order_id'         => $order_id,
 					'current_time'        => time(),
 					'scheduled_time'      => time() + 40,
-					'schedule validation' => wp_get_scheduled_event( 'activecampaign_for_woocommerce_admin_sync_single_order_active', array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ),
+					'schedule validation' => AC_Scheduler::get_schedule( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ),
 				)
 			);
 		} catch ( Throwable $t ) {

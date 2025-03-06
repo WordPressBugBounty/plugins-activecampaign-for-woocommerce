@@ -12,7 +12,7 @@
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Ecom_Order_Repository as Order_Repository;
 use Activecampaign_For_Woocommerce_Api_Client as Api_Client;
-
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 /**
  * The Order_Finished Event Class.
  *
@@ -45,12 +45,10 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			set_transient( 'acforwc_order_created_hook', wp_date( DATE_ATOM ), 604800 );
 
 			if ( isset( $order_id ) && null !== $order_id && ! empty( $order_id ) ) {
-				if ( ! wp_get_scheduled_event( 'activecampaign_for_woocommerce_ready_new_order', array( 'order_id' => $order_id ) ) ) {
-					wp_schedule_single_event(
-						time() + 30,
-						'activecampaign_for_woocommerce_ready_new_order',
-						array( 'order_id' => $order_id )
-					);
+				$schedule_array = array( 'order_id' => $order_id );
+
+				if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::SYNC_ONE_NEW_ORDER, $schedule_array ) ) {
+					AC_Scheduler::schedule_ac_event( AC_Scheduler::SYNC_ONE_NEW_ORDER, $schedule_array, false, false );
 				}
 
 				$logger->debug(
@@ -109,29 +107,16 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			// Check if order is valid
 			if ( self::validate_object( $wc_order, 'get_data' ) && $this->check_update_validity( $wc_order ) ) {
 				set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
+				$event_array = array(
+					'wc_order_id' => $order_id,
+					'status'      => $wc_order->get_status(),
+				);
 
-				if ( ! wp_get_scheduled_event(
-					'activecampaign_for_woocommerce_admin_sync_single_order_active',
-					array(
-						'wc_order_id' => $order_id,
-						'status'      => $wc_order->get_status(),
-					)
-				) &&
-					! wp_get_scheduled_event(
-						'activecampaign_for_woocommerce_admin_sync_single_order_status',
-						array(
-							'wc_order_id' => $order_id,
-							'status'      => $wc_order->get_status(),
-						)
-					) ) {
-					wp_schedule_single_event(
-						time() + 10,
-						'activecampaign_for_woocommerce_admin_sync_single_order_status',
-						array(
-							'wc_order_id' => $order_id,
-							'status'      => $wc_order->get_status(),
-						)
-					);
+				if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, $event_array )
+					&& ! AC_Scheduler::is_scheduled( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $event_array )
+				) {
+					// Schedule one time event
+					AC_Scheduler::schedule_ac_event( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $event_array, false, false );
 				}
 			} else {
 				$logger->warning(
@@ -190,22 +175,12 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			// Check if order is valid
 			if ( self::validate_object( $wc_order, 'get_data' ) ) {
 				set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
-
-				if ( ! wp_get_scheduled_event(
-					'activecampaign_for_woocommerce_admin_sync_single_order_status',
-					array(
-						'wc_order_id' => $order_id,
-						'status'      => $to_status,
-					)
-				) ) {
-					wp_schedule_single_event(
-						time() + 10,
-						'activecampaign_for_woocommerce_admin_sync_single_order_status',
-						array(
-							'wc_order_id' => $order_id,
-							'status'      => $to_status,
-						)
-					);
+				$event_array = array(
+					'wc_order_id' => $order_id,
+					'status'      => $to_status,
+				);
+				if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $event_array ) ) {
+					AC_Scheduler::schedule_ac_event( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $event_array, false, false );
 				}
 			}
 		} else {
@@ -237,20 +212,17 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 				return;
 			}
 
-			if ( ! wp_get_scheduled_event(
-				'activecampaign_for_woocommerce_admin_sync_single_order_status',
-				array(
-					'wc_order_id' => $order_id,
-					'event_type'  => 'status_' . $new_status,
-				)
-			) ) {
-				wp_schedule_single_event(
-					time() + 10,
-					'activecampaign_for_woocommerce_admin_sync_single_order_status',
-					array(
-						'wc_order_id' => $order_id,
-						'status'      => $new_status,
-					)
+			$schedule_array = array(
+				'wc_order_id' => $order_id,
+				'status'      => $new_status,
+			);
+
+			if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $schedule_array ) ) {
+				AC_Scheduler::schedule_ac_event(
+					AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER,
+					$schedule_array,
+					false,
+					false
 				);
 			}
 		}

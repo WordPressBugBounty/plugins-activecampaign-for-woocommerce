@@ -12,6 +12,7 @@
 
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Historical_Sync_Prep as Historical_Prep;
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -47,6 +48,7 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 
 		return false;
 	}
+
 	/**
 	 * Fetches the next historical sync cron time.
 	 *
@@ -56,40 +58,30 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 		$logger = new Logger();
 		$data   = null;
 
-		try {
-			if ( function_exists( 'wp_get_scheduled_event' ) ) {
-				$historical_order_schedule = wp_get_scheduled_event( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
-				if ( $historical_order_schedule ) {
-					$data['historical_order_schedule']['error']     = false;
-					$data['historical_order_schedule']['timestamp'] = wp_date( DATE_ATOM, $historical_order_schedule->timestamp );
-					$data['historical_order_schedule']['schedule']  = $historical_order_schedule->schedule;
-					if ( $historical_order_schedule->timestamp && $historical_order_schedule->interval ) {
-						$next = $historical_order_schedule->timestamp + $historical_order_schedule->interval - time();
-						$data['historical_order_schedule']['next_scheduled'] = $next;
-					}
-				} else {
-					$data['historical_order_schedule']['error'] = true;
-					$logger->warning(
-						'Historical order sync is not scheduled.',
-						array(
-							'historical_order_schedule' => $historical_order_schedule,
-						)
-					);
-				}
-			} elseif ( function_exists( 'wp_next_scheduled' ) ) {
-				$logger->warning( 'The wp_get_scheduled_event function may not exist. Performing wp_next_scheduled instead.' );
-				$historical_order_schedule                      = wp_next_scheduled( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_RECUR );
-				$data['historical_order_schedule']['timestamp'] = wp_date( DATE_ATOM, $historical_order_schedule );
-			}
-		} catch ( Throwable $t ) {
+		$historical_order_schedule = AC_Scheduler::get_schedule( AC_Scheduler::RECURRING_HISTORICAL_SYNC );
+
+		if ( ! $historical_order_schedule ) {
+			$data['historical_order_schedule']['error'] = true;
 			$logger->warning(
-				'There was an issue getting the historical sync cron information.',
+				'Historical order sync is not scheduled.',
 				array(
-					'message' => $t->getMessage(),
-					'trace'   => $t->getTrace(),
-					'ac_code' => 'AHS_80',
+					'historical_order_schedule' => $historical_order_schedule,
 				)
 			);
+		} elseif (is_int( $historical_order_schedule ) ) {
+			$data['historical_order_schedule']['error']          = false;
+			$data['historical_order_schedule']['timestamp']      = wp_date( DATE_ATOM, $historical_order_schedule );
+			$data['historical_order_schedule']['schedule']       = false;
+			$data['historical_order_schedule']['next_scheduled'] = false;
+		} else {
+			$data['historical_order_schedule']['error']     = false;
+			$data['historical_order_schedule']['timestamp'] = wp_date( DATE_ATOM, $historical_order_schedule->timestamp );
+			$data['historical_order_schedule']['schedule']  = $historical_order_schedule->schedule;
+
+			if ( $historical_order_schedule->timestamp && $historical_order_schedule->interval ) {
+				$next = $historical_order_schedule->timestamp + $historical_order_schedule->interval - time();
+				$data['historical_order_schedule']['next_scheduled'] = $next;
+			}
 		}
 
 		return $data;
@@ -133,11 +125,8 @@ trait Activecampaign_For_Woocommerce_Admin_Historical_Sync {
 
 			do_action( 'activecampaign_for_woocommerce_ready_existing_historical_data' );
 
-			wp_schedule_single_event(
-				time() + 30,
-				'activecampaign_for_woocommerce_prep_historical_data',
-				array('current_page' => 0)
-			);
+			// schedule activecampaign_for_woocommerce_prep_historical_data
+			AC_Scheduler::schedule_ac_event( AC_Scheduler::PREP_HISTORICAL_SYNC, array('current_page' => 0), false, false );
 
 			wp_send_json_success( 'Historical sync scheduled.' );
 		} catch ( Throwable $t ) {

@@ -285,6 +285,7 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 					'message' => $t->getMessage(),
 					'coupon'  => $coupon,
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
+					'ac_code' => 'ODG_288',
 				)
 			);
 		}
@@ -381,9 +382,11 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 
 			if ( $wpdb->last_error ) {
 				$logger->error(
-					'Abandonment sync: There was an error getting results for abandoned cart records.',
+					'There was an error getting external checkout ID for record.',
 					array(
 						'wpdb_last_error' => $wpdb->last_error,
+						'order_id'        => $order_id,
+						'ac_code'         => 'ODG_388',
 					)
 				);
 			}
@@ -394,10 +397,11 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 			}
 		} catch ( Throwable $t ) {
 			$logger->error(
-				'Abandonment Sync: There was an error with preparing or getting abandoned cart results.',
+				'There was an error getting external checkout ID for record.',
 				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
+					'ac_code' => 'ODG_402',
 				)
 			);
 		}
@@ -430,9 +434,11 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 
 			if ( $wpdb->last_error ) {
 				$logger->error(
-					'Abandonment sync: There was an error getting results for abandoned cart records.',
+					'There was an error getting AC order id from the order record',
 					array(
 						'wpdb_last_error' => $wpdb->last_error,
+						'order_id'        => $order_id,
+						'ac_code'         => 'ODG_438',
 					)
 				);
 			}
@@ -443,10 +449,11 @@ trait Activecampaign_For_Woocommerce_Order_Data_Gathering {
 			}
 		} catch ( Throwable $t ) {
 			$logger->error(
-				'Abandonment Sync: There was an error with preparing or getting abandoned cart results.',
+				'There was a fatal error retrieving AC order id from order record.',
 				array(
 					'message' => $t->getMessage(),
 					'trace'   => $logger->clean_trace( $t->getTrace() ),
+					'ac_code' => 'ODG_453',
 				)
 			);
 		}

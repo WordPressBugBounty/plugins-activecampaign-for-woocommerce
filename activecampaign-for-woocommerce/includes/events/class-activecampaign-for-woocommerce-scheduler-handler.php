@@ -365,9 +365,12 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 		}
 
 		$logger->debug(
-			'Schedule event result',
+			'Schedule event',
 			[
-				$scheduled_event,
+				'event'      => $event,
+				'event_id'   => $scheduled_event,
+				'start_time' => $start_time,
+				'args'       => $args,
 			]
 		);
 

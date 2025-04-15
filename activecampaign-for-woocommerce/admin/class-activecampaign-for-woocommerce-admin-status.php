@@ -50,7 +50,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 	 *
 	 * @var float
 	 */
-	private $max_php_version = 8.1;
+	private $max_php_version = 8.3;
 
 	/**
 	 * Initialize the class and set its properties.

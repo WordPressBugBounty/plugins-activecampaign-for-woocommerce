@@ -463,40 +463,65 @@ class Activecampaign_For_Woocommerce {
 			'cart_updated'
 		);
 
-		// Order complete hooks
+		$this->loader->add_action(
+			'woocommerce_cart_emptied',
+			$this->cart_events,
+			'cart_emptied'
+		);
+
 		$this->loader->add_action(
 			'woocommerce_checkout_update_order_meta',
 			$this->cart_events,
 			'cart_emptied',
 			60
 		);
+		// end cart actions
 
-		$this->loader->add_action(
-			'woocommerce_checkout_update_order_meta',
-			$this->new_order_created_event,
-			'execute_with_order_id',
-			20
-		);
-
+		// order created actions
+		// New order created via any method
+		// 'woocommerce_new_order', $order->get_id(), $order
 		$this->loader->add_action(
 			'woocommerce_new_order',
 			$this->new_order_created_event,
 			'ac_woocommerce_new_order',
-			20
+			20,
+			2
 		);
 
+		/**
+		 * Payment has been processed
+		 * 'woocommerce_payment_complete', $this->get_id(), $transaction_id
+		 */
 		$this->loader->add_action(
 			'woocommerce_payment_complete',
 			$this->new_order_created_event,
 			'ac_woocommerce_payment_complete',
-			20
+			20,
+			2
 		);
 
+		/**
+		 * Action hook fired after an order is created used to add custom meta to the order.
+		 * woocommerce_checkout_update_order_meta WC hook
+		 * $order_id, $data
+		 *
+		 * @TODO use woocommerce_checkout_order_processed instead?
+		 */
+		$this->loader->add_action(
+			'woocommerce_checkout_update_order_meta', // Action hook fired after an order is created used to add custom meta to the order.
+			$this->new_order_created_event,
+			'ac_woocommerce_checkout_update_order_meta',
+			20,
+			2
+		);
+
+		// New checkout order created via checkout, uses order object.
 		$this->loader->add_action(
 			'woocommerce_checkout_order_created',
 			$this->new_order_created_event,
 			'ac_woocommerce_checkout_order_created',
-			20
+			20,
+			1
 		);
 		// End order complete hooks
 
@@ -506,11 +531,6 @@ class Activecampaign_For_Woocommerce {
 			'trigger'
 		);
 
-		$this->loader->add_action(
-			'woocommerce_cart_emptied',
-			$this->cart_events,
-			'cart_emptied'
-		);
 	}
 
 	/**
@@ -1209,6 +1229,12 @@ class Activecampaign_For_Woocommerce {
 			'wp_ajax_activecampaign_for_woocommerce_manual_abandonment_sync',
 			$this->admin,
 			'handle_abandon_cart_sync'
+		);
+
+		$this->loader->add_action(
+			'wp_ajax_activecampaign_for_woocommerce_reset_failed_abandonment_sync',
+			$this->admin,
+			'handle_reset_abandon_cart_sync'
 		);
 
 		$this->loader->add_action(

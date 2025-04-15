@@ -539,7 +539,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 
 			$ecom_order->set_accepts_marketing( $wc_order->get_meta( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCEPTS_MARKETING_NAME ) );
 
-			$result = $this->cofe_order_repository->upsert_order( $ecom_order->serialize_to_array() );
+			$result = $this->cofe_order_repository->create_bulk( array( $ecom_order->serialize_to_array() ) );
 			delete_transient( 'activecampaign_for_woocommerce_contact' . $wc_order->get_billing_email() );
 			// Change this to return the response from AC if we have a data response
 			return $result;

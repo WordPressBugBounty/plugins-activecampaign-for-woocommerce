@@ -86,48 +86,12 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 
 	/**
 	 * Execute process for finished order. If we don't know what will be passed this should be used.
+	 * Hook 'woocommerce_payment_complete', $this->get_id(), $transaction_id
 	 *
-	 * @param int|obj $args The passed arg.
+	 * @param int|string $order_id The order id.
+	 * @param int        $transaction_id The transaction id.
 	 */
-	public function execute( $args ) {
-		if ( is_object( $args ) ) {
-			$this->execute_with_order_obj( $args );
-		} elseif ( ( is_string( $args ) || is_integer( $args ) ) && ! empty( $args ) ) {
-			$this->execute_with_order_id( $args );
-		} else {
-			$this->logger->debug(
-				'New order sync cannot process this request...',
-				array( $args )
-			);
-		}
-	}
-
-	public function ac_woocommerce_payment_complete( $args ) {
-
-		$this->execute( $args );
-	}
-
-	public function ac_woocommerce_new_order( $args ) {
-
-		$this->execute( $args );
-	}
-
-	public function ac_woocommerce_checkout_update_order_meta( $order_id ) {
-
-		$this->execute_with_order_id( $order_id );
-	}
-
-	public function ac_woocommerce_checkout_order_created( $order ) {
-
-		$this->execute_with_order_obj( $order );
-	}
-	/**
-	 * Execute using the order ID.
-	 *
-	 * @param int $order_id The order ID.
-	 */
-	public function execute_with_order_id( $order_id ) {
-
+	public function ac_woocommerce_payment_complete( $order_id, $transaction_id ) {
 		if ( empty( $order_id ) ) {
 			return;
 		}
@@ -136,9 +100,10 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 
 		if ( isset( $wc_order ) && self::validate_object( $wc_order, 'get_id' ) ) {
 			$this->logger->debug(
-				'New order event triggered',
+				'New order payment complete triggered',
 				array(
-					$order_id,
+					'order_id'       => $order_id,
+					'transaction_id' => $transaction_id,
 				)
 			);
 
@@ -148,7 +113,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				'A new order was created but the record could not be processed or validated. Processing for this new order cannot be performed.',
 				array(
 					'suggested_action' => 'Check if the order has been created and properly triggered WooCommerce order hooks. If this is an API order or your store uses a third party payment process then this may not process through this method.',
-					'ac_code'          => 'NOCE_130',
+					'ac_code'          => 'NOCE_125',
 					'wc_order'         => $wc_order,
 					$order_id,
 				)
@@ -157,12 +122,51 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 	}
 
 	/**
+	 * Hook 'woocommerce_new_order', $order->get_id(), $order
+	 *
+	 * @param string|int $order_id Order id.
+	 * @param WC_Order   $wc_order Order object.
+	 *
+	 * @return void
+	 */
+	public function ac_woocommerce_new_order( $order_id, $wc_order ) {
+		if ( empty( $order_id ) || is_null( $wc_order ) ) {
+			return;
+		}
+
+		if ( ! self::validate_object( $wc_order, 'get_id' ) || empty( $wc_order->get_id() ) ) {
+			$wc_order = wc_get_order( $order_id );
+		}
+
+		if ( isset( $wc_order ) && self::validate_object( $wc_order, 'get_id' ) ) {
+			$this->logger->debug(
+				'New order created triggered',
+				array(
+					'order_id' => $order_id,
+				)
+			);
+
+			$this->checkout_completed( $order_id, $wc_order );
+		} else {
+			$this->logger->error(
+				'A new order was created but the record could not be processed or validated. Processing for this new order cannot be performed.',
+				array(
+					'suggested_action' => 'Check if the order has been created and properly triggered WooCommerce order hooks. If this is an API order or your store uses a third party payment process then this may not process through this method.',
+					'ac_code'          => 'NOCE_164',
+					'wc_order'         => $wc_order,
+					'order_id'         => $order_id,
+				)
+			);
+		}
+	}
+
+	/**
 	 * Execute using an order object.
+	 * Hook woocommerce_checkout_order_created', $order
 	 *
 	 * @param WC_Order $order The WC Order object.
 	 */
-	public function execute_with_order_obj( $order ) {
-
+	public function ac_woocommerce_checkout_order_created( $order ) {
 		if ( is_object( $order ) && self::validate_object( $order, 'get_id' ) ) {
 			$order_id = $order->get_id();
 			$this->checkout_completed( $order_id, $order );
@@ -177,6 +181,48 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 			);
 
 			return;
+		}
+	}
+
+	/**
+	 * This may not work as expected anymore due to WC changes.
+	 *
+	 * @param string|int $order_id The order ID.
+	 * @param WC_Order   $data The data.
+	 */
+	public function ac_woocommerce_checkout_update_order_meta( $order_id, $data ) {
+		$this->logger->dev(
+			'do meta',
+			[
+				$order_id, $data,
+			]
+		);
+		if ( empty( $order_id ) ) {
+			return;
+		}
+
+		$wc_order = wc_get_order( $order_id );
+
+		if ( isset( $wc_order ) && self::validate_object( $wc_order, 'get_id' ) ) {
+			$this->logger->debug(
+				'New order meta update event triggered',
+				array(
+					'order_id' => $order_id,
+					'data'     => $data,
+				)
+			);
+
+			$this->checkout_completed( $order_id, $wc_order );
+		} else {
+			$this->logger->error(
+				'A new order was created but the record could not be processed or validated. Processing for this new order cannot be performed.',
+				array(
+					'suggested_action' => 'Check if the order has been created and properly triggered WooCommerce order hooks. If this is an API order or your store uses a third party payment process then this may not process through this method.',
+					'ac_code'          => 'NOCE_226',
+					'wc_order'         => $wc_order,
+					$order_id,
+				)
+			);
 		}
 	}
 

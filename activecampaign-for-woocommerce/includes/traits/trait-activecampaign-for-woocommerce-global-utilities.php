@@ -177,7 +177,7 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 	 *
 	 * @return bool|int
 	 */
-	private function wpdb_update_in( $table, $data, $where, $format = null, $where_format = null ) {
+	private function wpdb_update_in( $table, $data, $where, $format = null, $where_format = null, $limit = null ) {
 
 		global $wpdb;
 		try {
@@ -225,6 +225,10 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 			}
 
 			$q .= implode( ', ', $escaped ) . ')';
+
+			if (isset( $limit ) && $limit > 0 ) {
+				$q .= ' LIMIT ' . $limit;
+			}
 		} catch ( Throwable $t ) {
 			$logger = new Logger();
 			$logger->debug( 'wpdb_update_in problem', array( $t->getMessage() ) );

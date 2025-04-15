@@ -1,5 +1,4 @@
 <?php
-
 	/**
 	 * Provide an abandoned cart plugin view.
 	 *
@@ -101,16 +100,20 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 	</div>
 	<section>
 		<div class="card">
-			<div>
 				<div class="columnbox">
 					<button id="activecampaign-run-abandoned-cart" class="button
 					<?php
 					if ( ! $activecampaign_for_woocommerce_total ) :
 						?>
-						disabled<?php endif; ?>">Sync Abandoned Carts</button>
+						disabled<?php endif; ?>">Sync Valid Abandoned Carts Now</button>
+					<button id="activecampaign-reset-failed-abandoned-carts" class="button
+				<?php
+				if ( ! $activecampaign_for_woocommerce_total ) :
+					?>
+					disabled<?php endif; ?>">Reset failed abandoned carts</button>
+					<br/><br/>
 					<div id="activecampaign-run-abandoned-cart-status"></div>
 				</div>
-			</div>
 			<div class="clear">
 				<h3>
 					Last sync time:
@@ -139,6 +142,7 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 				</p>
 			</div>
 		</div>
+
 	</section>
 	<section>
 		<div class="col-container">
@@ -232,6 +236,8 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										<?php if ( ! empty( $activecampaign_for_woocommerce_ab_cart->order_date ) && empty( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) ) : ?>
 											Ordered: <?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_ab_cart->order_date ) ); ?>
 										<?php endif; ?>
+										
+										<?php echo esc_html( $this->get_readable_sync_status_title( $activecampaign_for_woocommerce_ab_cart->synced_to_ac ) ); ?><br/>
 
 										<?php
 										if (
@@ -250,7 +256,8 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 												true
 											) ) :
 											?>
-											Synced<br/>Abandoned On: <?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) ); ?>
+
+											Abandoned On: <?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_ab_cart->abandoned_date ) ); ?>
 										<?php endif; ?>
 
 										<?php
@@ -266,21 +273,6 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 											<?php endif; ?>
 										<?php endif; ?>
 
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 25, '25' ), true ) ) : ?>
-											Timeout/Network failure (try again)
-										<?php endif; ?>
-
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 26, '26' ), true ) ) : ?>
-											Failed to sync 1 time (will try again)
-										<?php endif; ?>
-
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 27, '27' ), true ) ) : ?>
-											Failed to sync 2 times (will try again)
-										<?php endif; ?>
-
-										<?php if ( in_array( $activecampaign_for_woocommerce_ab_cart->synced_to_ac, array( 29, '29' ), true ) ) : ?>
-											Sync failed permanently
-										<?php endif; ?>
 									</td>
 									<td>
 										<?php
@@ -325,18 +317,33 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 										</div>
 										<div class="activecampaign-more-data">
 											<h2>
+												Abandoned Cart Data
+											</h2>
+											<div>
+												Status: <?php echo esc_html( $this->get_readable_sync_status_title( $activecampaign_for_woocommerce_ab_cart->synced_to_ac ) ); ?><br/>
+												Description: <?php echo esc_html( $this->get_readable_sync_status_help( $activecampaign_for_woocommerce_ab_cart->synced_to_ac ) ); ?><br/>
+												Last access time UTC: <?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->last_access_time ); ?> <br/>
+												Last access time Local: <?php echo esc_html( activecampaign_for_woocommerce_convert_date_to_local( $activecampaign_for_woocommerce_ab_cart->last_access_time ) ); ?><br/>
+											</div>
+											<h2>
 												<?php
 												echo esc_html_e( 'Customer details', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 												?>
 											</h2>
+											<div>
+											Customer ID:
 											<?php
 											echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_id );
 											?>
-											<div>
-												<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_first_name ); ?>
-												<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_last_name ); ?>
 											</div>
+											<?php if ( ! empty( $activecampaign_for_woocommerce_ab_cart->customer_first_name ) || ! empty( $activecampaign_for_woocommerce_ab_cart->customer_last_name ) ) : ?>
 											<div>
+												Customer first name: <?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_first_name ); ?><br/>
+												Customer last name: <?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_last_name ); ?>
+											</div>
+											<?php endif; ?>
+											<div>
+												Saved customer email:
 												<?php echo esc_html( $activecampaign_for_woocommerce_ab_cart->customer_email ); ?>
 											</div>
 											<?php

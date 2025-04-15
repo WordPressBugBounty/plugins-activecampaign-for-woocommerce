@@ -23,6 +23,29 @@ jQuery(document).ready(function($) {
         }
     });
 
+    $('#activecampaign-reset-failed-abandoned-carts').click(function (e) {
+        console.log("reset all abandoned carts that have failed");
+        if (!$(e.target).hasClass('disabled')) {
+            var data = {
+                'action': 'activecampaign_for_woocommerce_reset_failed_abandonment_sync',
+                'activecampaign_for_woocommerce_settings_nonce_field': $('#activecampaign_for_woocommerce_settings_nonce_field').val()
+            };
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: data
+                }).done(response => {
+                    $('#activecampaign-run-abandoned-cart-status').html(response.data);
+                    resolve(response.data);
+                }).fail(response => {
+                    $('#activecampaign-run-abandoned-cart-status').html(response.responseJSON.data);
+                    reject(response.responseJSON.data)
+                });
+            });
+        }
+    });
+
     $('.activecampaign-modal-abandoned-cart').click(function (e) {
         var data = $(e.target).parent().find('.activecampaign-more-data').html();
         $('#abcartmodal .abandoned-cart-details').html(data).show();

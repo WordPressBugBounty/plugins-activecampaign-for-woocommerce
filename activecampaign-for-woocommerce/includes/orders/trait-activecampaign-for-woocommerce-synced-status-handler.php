@@ -60,35 +60,39 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 
 		20 => array(
 			'title' => 'Abandoned cart unsynced',
-			'help'  => '',
+			'help'  => 'This abandoned cart has not attempted to sync or may not be ready to be synced.',
 		),
 		21 => array(
 			'title' => 'Abandoned cart synced',
-			'help'  => '',
+			'help'  => 'This abandoned cart has successfully been synced.',
 		),
 		22 => array(
 			'title' => 'Abandoned cart manually synced',
-			'help'  => '',
+			'help'  => 'This abandoned cart was synced manually.',
 		),
 		23 => array(
 			'title' => 'Abandoned cart recovered, not synced',
 			'help'  => 'This order was abandoned, recovered, but has not been synced.',
 		),
 		24 => array(
-			'title' => 'Abandoned cart failed sync',
-			'help'  => '',
+			'title' => 'Abandoned cart recovered, synced',
+			'help'  => 'This order was abandoned, recovered, and synced.',
 		),
-		25 => array(
+		26 => array(
+			'title' => 'Abandoned cart failed sync',
+			'help'  => 'This abandoned cart failed to sync. Please check your logs for explanation.',
+		),
+		27 => array(
 			'title' => 'Abandoned cart failed sync twice',
-			'help'  => '',
+			'help'  => 'This abandoned cart failed to sync twice. Please check your logs for explanation.',
 		),
 		28 => array(
 			'title' => 'Abandoned cart could not reach ActiveCampaign, retry',
-			'help'  => '',
+			'help'  => 'This abandoned cart failed to sync because ActiveCampaign was unreachable. There may be an issue reaching the API. Please check your logs for explanation.',
 		),
 		29 => array(
 			'title' => 'Abandoned cart could not reach ActiveCampaign permanently',
-			'help'  => '',
+			'help'  => 'This abandoned cart failed to sync multiple times and will not be synced again. Please check your logs for explanation.',
 		),
 		30 => array(
 			'title' => 'Subscription unsynced',
@@ -137,11 +141,13 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 
 	public function get_readable_sync_status_title( $status_ref ) {
 		$return = $this->get_readable_sync_status( $status_ref );
+
 		return $return['title'];
 	}
 
 	public function get_readable_sync_status_help( $status_ref ) {
 		$return = $this->get_readable_sync_status( $status_ref );
+
 		return $return['help'];
 	}
 

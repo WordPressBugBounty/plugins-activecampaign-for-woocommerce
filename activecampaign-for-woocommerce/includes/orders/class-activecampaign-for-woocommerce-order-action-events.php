@@ -131,6 +131,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 	/**
 	 * Order status updates are processed through this function.
+	 * Called via hook woocommerce_order_status_changed - Fires when order status is changed.
 	 *
 	 * @param int|string $order_id The order id.
 	 * @param string     $from_status The status the order changed from.
@@ -139,7 +140,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 	public function execute_order_status_changed( $order_id, $from_status, $to_status ) {
 		$logger = new Logger();
 
-		if ( isset( $order_id ) && ! empty( $order_id ) ) {
+		if ( isset( $order_id ) && ! empty( $order_id ) && $from_status !== $to_status ) {
 			$post_type = get_post_type( $order_id );
 
 			$logger->debug_excess(
@@ -173,7 +174,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			$wc_order = $this->get_wc_order( $order_id );
 
 			// Check if order is valid
-			if ( self::validate_object( $wc_order, 'get_data' ) ) {
+			if ( self::validate_object( $wc_order, 'get_data' ) && $this->check_update_validity( $wc_order ) ) {
 				set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
 				$event_array = array(
 					'wc_order_id' => $order_id,
@@ -187,7 +188,9 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			$logger->warning(
 				'The updated order does not appear to be valid for sync to AC.',
 				array(
-					'order_id' => $order_id,
+					'order_id'    => $order_id,
+					'from_status' => $from_status,
+					'to_status'   => $to_status,
 				)
 			);
 		}
@@ -204,7 +207,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 	public function execute_order_edit_status_event( $order_id, $new_status ) {
 		$wc_order = $this->get_wc_order( $order_id );
 
-		if ( self::validate_object( $wc_order, 'get_data' ) ) {
+		if ( self::validate_object( $wc_order, 'get_data' ) && $this->check_update_validity( $wc_order ) ) {
 			set_transient( 'acforwc_order_updated_hook', wp_date( DATE_ATOM ), 604800 );
 
 			$post_type = get_post_type( $order_id );
@@ -272,7 +275,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			if ( isset( $sripe_response ) && isset( $order ) ) {
 				$wc_order = $this->get_wc_order( $order ); // Be sure we have the WC Order
 				$order_id = $wc_order->get_id();
-				if ( isset( $order_id ) && ! empty( $order_id ) ) {
+				if ( isset( $order_id ) && ! empty( $order_id ) && $this->check_update_validity( $wc_order ) ) {
 					$logger->debug_excess(
 						'Stripe verified order update triggered',
 						array(
@@ -415,10 +418,14 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 
 		try {
 			if (
-				isset( $last_status ) &&
-				$last_status === $wc_order->get_status() &&
-				$last_synced_too_soon &&
-				$ac_datahash === $current_datahash
+				(
+					isset( $last_status ) &&
+					$last_status === $wc_order->get_status()
+				) || (
+					isset( $ac_datahash ) &&
+					$ac_datahash === $current_datahash
+				) ||
+				$last_synced_too_soon
 			) {
 				return false;
 			}
@@ -437,7 +444,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 	}
 
 	/**
-	 * Check if the order is a subscription and re route it through another procedure.
+	 * Check if the order is a subscription and re-route it through another procedure.
 	 *
 	 * @param string|int|object $order_id The order ID.
 	 * @param string            $post_type The post type.

@@ -55,25 +55,7 @@ class Activecampaign_For_Woocommerce_Api_Client_Graphql extends Activecampaign_F
 
 		$this->logger->debug_calls( 'Body objects sent to AC', array( 'trimmed' => trim( $body_objects, 250 ) ) );
 
-		if ( $body_objects ) {
-			$response = $this->post( '' )->with_body( $body_objects )->execute(
-				array(
-					'content-type'      => 'application/graphql',
-					'wc-plugin-version' => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION,
-				)
-			);
-		}
-
-		if ( ! isset( $response ) || empty( $response ) ) {
-			$this->logger->error(
-				'Failed Graphql call. No response.',
-				array(
-					'body' => $body_objects,
-				)
-			);
-
-			throw new RuntimeException( 'Failed Graphql call. No response.' );
-		}
+		$response = $this->send( $body_objects );
 
 		if (
 			is_array( $response ) &&
@@ -135,21 +117,7 @@ class Activecampaign_For_Woocommerce_Api_Client_Graphql extends Activecampaign_F
 
 		$this->logger->debug_calls( 'Browse Session Add to Cart Event: Body Objects', array( $body_objects ) );
 
-		$response = $this->post( '' )->with_body( $body_objects )->execute(
-			array(
-				'content-type'      => 'application/graphql',
-				'wc-plugin-version' => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION,
-			)
-		);
-		if ( ! isset( $response ) || empty( $response ) ) {
-			$this->logger->error(
-				'Failed Graphql call. No response.',
-				array(
-					'body' => $body_objects,
-				)
-			);
-			throw new RuntimeException( 'Failed Graphql call. No response.' );
-		}
+		$response = $this->send( $body_objects );
 
 		if (
 			is_array( $response ) &&
@@ -216,22 +184,7 @@ class Activecampaign_For_Woocommerce_Api_Client_Graphql extends Activecampaign_F
 
 		$this->logger->debug_calls( 'Body objects', array( $body_objects ) );
 
-		$response = $this->post( '' )->with_body( $body_objects )->execute(
-			array(
-				'content-type'      => 'application/graphql',
-				'wc-plugin-version' => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION,
-			)
-		);
-
-		if ( ! isset( $response ) || empty( $response ) ) {
-			$this->logger->error(
-				'Failed Graphql call. No response.',
-				array(
-					'body' => $body_objects,
-				)
-			);
-			throw new RuntimeException( 'Failed Graphql call. No response.' );
-		}
+		$response = $this->send( $body_objects );
 
 		if (
 			is_array( $response ) &&
@@ -288,5 +241,32 @@ class Activecampaign_For_Woocommerce_Api_Client_Graphql extends Activecampaign_F
 	public function operation( $operation, $body, $response_fields = array() ) {
 		$body = '{' . $operation . '(' . $body . ')}{' . explode( ' ', $response_fields ) . '}}';
 		$this->post( '' )->with_body( $body );
+	}
+
+	/**
+	 * @param ?string $body_objects
+	 * @return \AcVendor\Psr\Http\Message\ResponseInterface|array|bool|string|string[]
+	 */
+	public function send( ?string $body_objects ) {
+		if ( $body_objects ) {
+			$response = $this->post( '' )->with_body( wp_json_encode( array( 'query' => $body_objects ) ) )->execute(
+				array(
+					'content-type'      => 'application/json',
+					'wc-plugin-version' => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION,
+				)
+			);
+		}
+
+		if ( ! isset( $response ) || empty( $response ) ) {
+			$this->logger->error(
+				'Failed Graphql call. No response.',
+				array(
+					'body' => $body_objects,
+				)
+			);
+
+			throw new RuntimeException( 'Failed Graphql call. No response.' );
+		}
+		return $response;
 	}
 }

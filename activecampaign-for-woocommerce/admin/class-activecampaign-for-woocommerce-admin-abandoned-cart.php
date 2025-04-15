@@ -24,6 +24,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
  */
 trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 	use Activecampaign_For_Woocommerce_Admin_Utilities;
+	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
 
 	/**
 	 * Fetch the PHP template file that is used for the admin abandoned cart page.
@@ -158,6 +159,48 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 	 */
 	public function handle_abandon_cart_sync() {
 		do_action( 'activecampaign_for_woocommerce_run_manual_abandonment_sync' );
+	}
+
+	/**
+	 * Handles the reset abandoned cart sync.
+	 *
+	 * @return void|null Returns json response using wp json send.
+	 */
+	public function handle_reset_abandon_cart_sync() {
+		global $wpdb;
+
+		try {
+			$failed_statuses = array(
+				self::STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY,
+				self::STATUS_ABANDONED_CART_FAILED_WAIT,
+				self::STATUS_ABANDONED_CART_FAILED_2,
+				self::STATUS_ABANDONED_CART_NETWORK_FAIL_PERM,
+				self::STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY,
+			);
+
+			$result = $this->wpdb_update_in(
+				( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME ), // table
+				array( 'synced_to_ac' => self::STATUS_ABANDONED_CART_UNSYNCED ), // data
+				array( 'synced_to_ac' => $failed_statuses ), // where
+				array( '%s' ), // format
+				'%s', // where format
+				10000
+			);
+
+			return wp_send_json_success( 'Records reset: ' . $result );
+		} catch (Throwable $t ) {
+			$logger = new Logger();
+			$logger->error(
+				'There was an error performing abandoned cart status reset.',
+				[
+					'message'    => $t->getMessage(),
+					'last_query' => $wpdb->last_query,
+					'last_error' => $wpdb->last_error,
+				]
+			);
+			wp_send_json_error( 'There was an error resetting abandoned carts. ' . $t->getMessage() );
+		}
+
 	}
 
 	/**

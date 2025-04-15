@@ -266,7 +266,7 @@
 					} else {
 						$activecampaign_for_woocommerce_update_link = ' <a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . esc_html__( 'How to update your PHP version', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . '</a>';
 
-						$activecampaign_for_woocommerce_notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'ActiveCampaign will run under this version of PHP, however, some features are not compatible and may not be supported. We recommend using PHP version 7.4+ and below 8.1 due to compatibility.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . $activecampaign_for_woocommerce_update_link;
+						$activecampaign_for_woocommerce_notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'ActiveCampaign will run under this version of PHP, however, some features are not compatible and may not be supported. We recommend using PHP version 7.4 to 8.2 for the best compatibility.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . $activecampaign_for_woocommerce_update_link;
 
 						echo '<mark class="recommendation">' . esc_html( $activecampaign_for_woocommerce_status_data['php_version']['local_php'] ) . ' - ' . wp_kses_post( $activecampaign_for_woocommerce_notice ) . '</mark>';
 					}

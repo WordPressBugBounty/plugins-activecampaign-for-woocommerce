@@ -76,6 +76,8 @@ interface Activecampaign_For_Woocommerce_Synced_Status_Interface {
 	public const STATUS_ABANDONED_CART_AUTO_SYNCED        = 21;
 	public const STATUS_ABANDONED_CART_MANUAL_SYNCED      = 22;
 	public const STATUS_ABANDONED_CART_RECOVERED          = 23;
+	public const STATUS_ABANDONED_CART_RECOVERED_SYNCED   = 24;
+	public const STATUS_ABANDONED_CART_FAILED             = 25;
 	public const STATUS_ABANDONED_CART_FAILED_WAIT        = 26;
 	public const STATUS_ABANDONED_CART_FAILED_2           = 27;
 	public const STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY = 28;

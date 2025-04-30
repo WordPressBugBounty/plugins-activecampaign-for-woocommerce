@@ -50,6 +50,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 	private $group = 'activecampaign_for_woocommerce';
 	/**
 	 * Recurring order sync.
+	 * 'arg_count'   => 2,
 	 */
 	public const RECURRING_ORDER_SYNC = array( // recurring
 		'name'        => 'Recurring Order Sync',
@@ -61,6 +62,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Recurring historical sync that runs the historical process. Any prepared and ready items are synced with this.
+	 * 'arg_count'   => 2,
 	 */
 	public const RECURRING_HISTORICAL_SYNC = array( // recurring
 		'name'        => 'Historical Sync',
@@ -73,6 +75,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Runs through carts and syncs abandoned carts that meet criteria.
+	 * Arg count = 0
 	 */
 	public const RECURRING_ABANDONED_SYNC = array( // recurring
 		'name'        => 'Abandoned Cart Sync',
@@ -83,6 +86,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 	);
 	/**
 	 * Repeat event for background sync of orders that may have been missed.
+	 * Arg count = 2
 	 */
 	public const SYNC_ONE_ORDER_ACTIVE = array(
 		'name'        => 'Sync Order as New',
@@ -93,6 +97,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Syncs one order record as new.
+	 * Arg count = 2
 	 */
 	public const SYNC_ONE_NEW_ORDER = array(
 		'name'        => 'Sync New Order',
@@ -103,6 +108,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Run the product sync process.
+	 * Arg count = 2
 	 */
 	public const PRODUCT_SYNC = array(
 		'name'        => 'Product Sync',
@@ -114,6 +120,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Makes sure all records are accounted for in the table.
+	 * Arg count = 1
 	 */
 	public const PREP_HISTORICAL_SYNC = array(
 		'name'        => 'Prep Historical Sync',
@@ -124,6 +131,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Syncs a new subscription.
+	 * Arg count = 2
 	 */
 	public const SYNC_ONE_SUBSCRIPTION_ORDER = array(
 		'name'        => 'Subscription Created',
@@ -134,6 +142,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Syncs one subscription when the record is updated.
+	 * Arg count = 2
 	 */
 	public const SYNC_UPDATE_ONE_SUBSCRIPTION = array(
 		'name'        => 'Subscription Updated',
@@ -144,6 +153,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Runs for historical sync of contacts.
+	 * Arg count = 2
 	 */
 	public const HISTORICAL_SYNC_CONTACTS = array(
 		'name'        => 'Contact Historical Sync',
@@ -154,6 +164,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 	/**
 	 * Order action event
+	 * Arg count = 2
 	 */
 	public const ADMIN_SYNC_SINGLE_ORDER = array(
 		'name'        => 'Sync Updated Order',

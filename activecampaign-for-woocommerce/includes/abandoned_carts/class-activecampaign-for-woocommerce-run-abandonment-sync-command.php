@@ -193,7 +193,11 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 		$this->clean_old_synced_abandoned_carts();
 		$this->clean_all_old_abandoned_carts();
 
-		return $cart_count;
+		if ( ! empty( $cart_count ) ) {
+			return $cart_count;
+		} else {
+			return 0;
+		}
 	}
 	/**
 	 * The manual run of the hourly task.

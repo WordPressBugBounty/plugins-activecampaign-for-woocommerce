@@ -166,6 +166,41 @@ class Activecampaign_For_Woocommerce_Utilities {
 	}
 
 	/**
+	 * Permission concept
+	 * Anyone can view support
+	 * Anyone can view settings, but only some can save
+	 *
+	 * @param string $function The function that is being used.
+	 *
+	 * @return bool
+	 */
+	public static function valid_permission( $function ) {
+		if ( is_super_admin() ) {
+			// Super admin can do all
+			return true;
+		}
+
+		// Currently no conditions for this, simple permissions
+		switch ($function ) {
+			case 'admin':
+			case 'historical':
+			case 'abandon':
+			case 'product':
+			case 'sync_data':
+			default:
+				if (
+					current_user_can_for_site( get_current_network_id(), 'manage_woocommerce' ) ||
+					current_user_can_for_site( get_current_network_id(), 'install_plugins' )
+				) {
+					return true;
+				}
+				break;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Allows WPDB to do a bulk insert.
 	 *
 	 * @param     string $table     The table name.

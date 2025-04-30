@@ -25,7 +25,7 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 	 * @param WC_Subscription $order The WC subscription.
 	 */
 	public function subscription_edit_meta_box( $order ) {
-		if ( ! current_user_can( 'install_plugins' ) ) {
+		if ( ! Activecampaign_For_Woocommerce_Utilities::valid_permission( 'sync_data' ) ) {
 			// Current user doesn't have permission for this so just return.
 			return;
 		}

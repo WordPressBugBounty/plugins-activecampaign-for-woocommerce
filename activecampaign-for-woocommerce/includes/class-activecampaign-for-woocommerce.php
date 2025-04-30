@@ -587,7 +587,9 @@ class Activecampaign_For_Woocommerce {
 		$this->loader->add_action(
 			'activecampaign_for_woocommerce_ready_new_order',
 			$this->new_order_created_event,
-			'execute'
+			'ac_woocommerce_new_order',
+			20,
+			2
 		);
 
 		$this->loader->add_action(

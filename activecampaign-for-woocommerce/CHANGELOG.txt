@@ -2,6 +2,14 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.9.0 2025-03-06 =
+* Improvement - Order sync scheduling rebuilt
+* Improvement - Action Schedule will be preferred with fallback to cron
+* Bugfix - Order sync and abandon sync process bugs resolved
+
+= 2.8.7 2025-02-13 =
+* Improvement - Admin settings improvements
+
 = 2.8.6 2025-02-12 =
 * Bugfix - Fix cron event fatal error during order sync
 

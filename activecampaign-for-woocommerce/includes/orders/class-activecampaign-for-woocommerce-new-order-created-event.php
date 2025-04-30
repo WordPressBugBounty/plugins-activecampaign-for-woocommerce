@@ -475,7 +475,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		}
 
 		try {
-			if ( ! empty( $abandoned_cart_id ) ) {
+			if ( ! empty( $abandoned_cart_id ) && ! empty( $stored_row->abandoned_date ) ) {
 				// Abandoned cart item mark as recovered in synced_to_ac
 				$store_data['synced_to_ac'] = Synced_Status::STATUS_ABANDONED_CART_RECOVERED;
 				$wpdb->update(

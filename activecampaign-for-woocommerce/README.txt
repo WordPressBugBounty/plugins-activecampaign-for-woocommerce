@@ -2,8 +2,8 @@
 Contributors: acteamintegrations, bartboy011
 Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
 Requires at least: 6.0
-Tested up to: 6.7.1
-Stable tag: 2.9.1
+Tested up to: 6.8.0
+Stable tag: 2.9.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -67,12 +67,12 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 == Installation ==
 
 = WooCommerce Compatibility =
-* Tested up to version: 9.7.1
+* Tested up to version: 9.8.2
 * Minimal version requirement: 7.4.0
 * HPOS Compatible
 
 = Minimum Requirements =
-* Wordpress supported PHP version (PHP 7.4 or greater is recommended)
+* WordPress supported PHP version (PHP 7.4 or greater is recommended)
 * Latest release versions of WordPress and WooCommerce are recommended
 * MySQL version 5.6 or greater
 
@@ -93,6 +93,11 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.9.2 2025-04-29 =
+* Improvement - Multisite compatible permissions check
+* Fix - Orders not always synced to hosted
+* Fix - Count error on cron run fixed
 
 = 2.9.1 2025-04-14 =
 * Improvement - Abandoned carts that have failed to sync can be reset
@@ -137,61 +142,5 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 * Bugfix - Orders from WooCommerce sometimes synced to the wrong contact
 * Bugfix - Products missing from product sync with some plugin customizations
 * Bugfix - Edge case where some orders would convert to subscriptions and vanish from the store
-
-= 2.7.11 2024-11-13 =
-* Bugfix - URL correction for setup
-* Bugfix - Order created date fix
-* Bugfix - Abandoned cart int fix
-
-= 2.7.10 2024-10-28 =
-* Bugfix - Solving various issues with order update
-* Bugfix - Abandoned cart created date error resolved
-
-= 2.7.9 2024-10-16 =
-* Bugfix - Issue with our order action event has been resolved
-
-= 2.7.8 2024-10-15 =
-* Bugfix - WooCommerce hook for stripe added to the order sync
-* Bugfix - Order status changes should not get lost if done quickly
-* Bugfix - Added debug display items for product sync
-* Bugfix - Fixed product sync issue related to gathering records due to WC updates
-
-= 2.7.7 2024-09-11 =
-* Enhancement - WooCommerce checkout blocks supported for abandoned cart
-* Fix - Order pages no longer cause errors in the AC block
-* Fix - Various issues due to WooCommerce changes
-
-= 2.7.6 2024-07-30 =
-* Enhancement - Orders through Stripe will trigger the order updated hook
-* Fix - WooCommerce Order with Stripe payment not updating correct status
-* Fix - Product sync throws error on isVisible field
-
-= 2.7.5 2024-07-19 =
-* Fix - Grammar tokens issue resolved
-* Fix - Fetch parent category if variation has none set or is "uncategorized"
-
-= 2.7.4 2024-06-26 =
-* Enhancement - New product sync option in settings for product description selection between full or short description
-
-= 2.7.3 2024-06-17 =
-* Update - WooCommerce 9.0.0 compatibility updates
-* Tweak - Better error handling for bad records sent to ActiveCampaign
-* Fix - WCS not always returning all records in historical sync
-
-= 2.7.2 2024-06-10 =
-* Some small bug fixes
-* Resolved bug with historical sync subscriptions halting
-
-= 2.7.1 2024-06-03 =
-* Bug fixes for subscription statuses
-* Adding logging and minor fixes to abandoned carts
-
-= 2.7.0 2024-05-21 =
-* Compatible with WP 6.5.3 & WC 8.9.0
-* Adds AC account feature retrieval
-* Corrects bugs with some status types missing in historical sync
-* Fixing a null error in PHP 8.1
-* Corrects an error when subscriptions is not installed
-* Fix for subscription orders being synced incorrectly
 
 See CHANGELOG file for all changes

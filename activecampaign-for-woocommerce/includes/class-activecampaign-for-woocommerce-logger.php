@@ -377,7 +377,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		$error = false;
 		$c     = 0;
 		try {
-			if ( ! current_user_can( 'install_plugins' ) ) {
+			if ( ! Activecampaign_For_Woocommerce_Utilities::valid_permission( 'admin' ) ) {
 				throw new Error( 'Current user does not have permission to clear the ActiveCampaign log entries.', 403 );
 			}
 			$c += $this->clear( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_ERR_KEBAB );

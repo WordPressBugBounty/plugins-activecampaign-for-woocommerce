@@ -353,8 +353,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		// Verify we're on an admin section
 		if (
 		'activecampaign_for_woocommerce' !== $plugin_page &&
-		current_user_can( 'install_plugins' ) &&
-		(
+		Activecampaign_For_Woocommerce_Utilities::valid_permission( 'manage_woocommerce' ) &&
+		 (
 			'admin.php' === $pagenow
 			|| 'plugins.php' === $pagenow
 			|| get_current_screen()->in_admin()
@@ -1213,7 +1213,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function validate_rest_user() {
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error( 'Unauthorized', __( 'Unauthorized', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ), array( 'status' => 401 ) );
-		} elseif ( ! current_user_can( 'install_plugins' ) ) {
+		} elseif ( ! Activecampaign_For_Woocommerce_Utilities::valid_permission( 'manage_woocommerce' ) ) {
 			return new WP_Error( 'Forbidden', __( 'Forbidden', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ), array( 'status' => 403 ) );
 		} else {
 			return true;

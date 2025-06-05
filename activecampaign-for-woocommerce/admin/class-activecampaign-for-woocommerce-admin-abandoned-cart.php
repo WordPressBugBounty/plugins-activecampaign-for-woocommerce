@@ -44,7 +44,7 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 	 *
 	 * @return array|object|null
 	 */
-	public function get_abandoned_carts( $page = 0 ) {
+	public function get_abandoned_carts( $page = 0, $limit = 40 ) {
 		$logger = new Logger();
 		try {
 			global $wpdb;
@@ -52,7 +52,6 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 			do_action( 'activecampaign_for_woocommerce_verify_tables' );
 
 			$expire_time                             = 1;
-			$limit                                   = 40;
 			$offset                                  = $page * $limit;
 			$activecampaign_for_woocommerce_settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
 

@@ -11,14 +11,23 @@
 	 * @subpackage Activecampaign_For_Woocommerce/admin/partials
 	 */
 
-$activecampaign_for_woocommerce_limit   = 40;
+$activecampaign_for_woocommerce_limit     = 40;
+$activecampaign_for_woocommerce_abc_debug = false;
+$activecampaign_for_woocommerce_settings  = $this->get_local_settings();
+if (
+	( isset( $activecampaign_for_woocommerce_settings['ac_debug_abc'] ) && in_array( $activecampaign_for_woocommerce_settings['ac_debug_abc'], [1, '1'] ) ) ||
+	( defined( 'ACFWC_DEBUG' ) && null !== ACFWC_DEBUG && in_array( ACFWC_DEBUG, [true, 1, '1'], true ) )
+) {
+	$activecampaign_for_woocommerce_limit     = 500;
+	$activecampaign_for_woocommerce_abc_debug = true;
+}
 $activecampaign_for_woocommerce_request = wp_unslash( $_REQUEST );
 $activecampaign_for_woocommerce_get     = wp_unslash( $_GET );
 if (
 	isset( $activecampaign_for_woocommerce_request['activecampaign_for_woocommerce_abandoned_cart_nonce_field'], $activecampaign_for_woocommerce_get['offset'] ) &&
 	wp_verify_nonce( $activecampaign_for_woocommerce_request['activecampaign_for_woocommerce_abandoned_cart_nonce_field'], 'activecampaign_for_woocommerce_abandoned_form' )
 ) {
-	$activecampaign_for_woocommerce_offset = $activecampaign_for_woocommerce_get['offset'];
+		$activecampaign_for_woocommerce_offset = $activecampaign_for_woocommerce_get['offset'];
 } else {
 	$activecampaign_for_woocommerce_offset = 0;
 }
@@ -31,7 +40,12 @@ if ( isset( $activecampaign_for_woocommerce_settings['abcart_wait'] ) && ! empty
 $activecampaign_for_woocommerce_now_datetime    = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 $activecampaign_for_woocommerce_expire_datetime = new DateTime( 'now -' . $activecampaign_for_woocommerce_expire_time . ' hours', new DateTimeZone( 'UTC' ) );
 
-$activecampaign_for_woocommerce_abandoned_carts = $this->get_abandoned_carts( $activecampaign_for_woocommerce_offset );
+if ( in_array( $activecampaign_for_woocommerce_offset, ['-1', -1], true ) || true === $activecampaign_for_woocommerce_abc_debug ) {
+	$activecampaign_for_woocommerce_offset = 0;
+	$activecampaign_for_woocommerce_limit  = 500;
+}
+
+$activecampaign_for_woocommerce_abandoned_carts = $this->get_abandoned_carts( $activecampaign_for_woocommerce_offset, $activecampaign_for_woocommerce_limit );
 $activecampaign_for_woocommerce_total           = 0;
 
 $activecampaign_for_woocommerce_pages = 0;
@@ -39,6 +53,7 @@ if ( count( $activecampaign_for_woocommerce_abandoned_carts ) > 0 ) {
 	$activecampaign_for_woocommerce_total = $this->get_total_abandoned_carts();
 	$activecampaign_for_woocommerce_pages = ceil( $activecampaign_for_woocommerce_total / $activecampaign_for_woocommerce_limit );
 }
+
 $activecampaign_for_woocommerce_now      = date_create( 'NOW' );
 $activecampaign_for_woocommerce_last_run = get_option( 'activecampaign_for_woocommerce_abandoned_cart_last_run' );
 if ( $activecampaign_for_woocommerce_last_run ) {
@@ -146,7 +161,8 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 	</section>
 	<section>
 		<div class="col-container">
-			<?php if ( $activecampaign_for_woocommerce_total ) : ?>
+			<?php if ( $activecampaign_for_woocommerce_total && false === $activecampaign_for_woocommerce_abc_debug ) : ?>
+
 				<div class="pagination">
 					Page:
 					<?php for ( $activecampaign_for_woocommerce_c = 1; $activecampaign_for_woocommerce_c <= $activecampaign_for_woocommerce_pages; $activecampaign_for_woocommerce_c++ ) : ?>
@@ -169,6 +185,21 @@ function activecampaign_for_woocommerce_parse_array( $activecampaign_for_woocomm
 							"><?php echo esc_html( $activecampaign_for_woocommerce_c ); ?></a>
 						<?php endif; ?>
 					<?php endfor; ?>
+					<a href="
+							<?php
+							echo esc_html(
+								add_query_arg(
+									array(
+										'offset' => -1,
+										'limit'  => '500',
+										'activecampaign_for_woocommerce_abandoned_cart_nonce_field' => $activecampaign_for_woocommerce_page_nonce,
+									),
+									wc_get_current_admin_url()
+								)
+							);
+
+							?>
+							"><?php echo esc_html( 'Show All' ); ?></a>
 				</div>
 			<?php endif; ?>
 			<form method="POST" id="activecampaign-for-woocommerce-form">

@@ -449,6 +449,45 @@ trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
 	}
 
 	/**
+	 * Cleans all synced abandoned carts.
+	 */
+	private function clean_all_synced_abandoned_carts() {
+		global $wpdb;
+		$wipe_time            = 30;
+		$expire_datetime      = gmdate( 'Y-m-d H:i:s', strtotime( '-' . $wipe_time . ' minutes' ) );
+		$synced_to_ac_implode = implode(
+			',',
+			array(
+				self::STATUS_ABANDONED_CART_AUTO_SYNCED,
+				self::STATUS_ABANDONED_CART_MANUAL_SYNCED,
+				self::STATUS_ABANDONED_CART_FAILED_WAIT,
+				self::STATUS_ABANDONED_CART_FAILED_2,
+				self::STATUS_ABANDONED_CART_NETWORK_FAIL_RETRY,
+				self::STATUS_ABANDONED_CART_NETWORK_FAIL_PERM,
+			)
+		);
+
+		// phpcs:disable
+		$delete_count = $wpdb->query(
+			'DELETE FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME .
+			' WHERE (last_access_time < "' . $expire_datetime . '" AND synced_to_ac IN (' . $synced_to_ac_implode . ') ) OR (last_access_time < "' . $expire_datetime . '" AND synced_to_ac = 1 AND order_date IS NULL)'
+		);
+		// phpcs:enable
+		if ( ! empty( $delete_count ) ) {
+			$this->logger->debug( $delete_count . ' old abandoned cart records deleted.' );
+			if ( $wpdb->last_error ) {
+				$this->logger->error(
+					'A database error was encountered while attempting to delete old abandoned cart records.',
+					array(
+						'wpdb_last_error' => $wpdb->last_error,
+						'ac_code'         => 'RASC_952',
+					)
+				);
+			}
+		}
+	}
+
+	/**
 	 * Cleans up any synced records older than 2 weeks that are not orders. Send the number otherwise it will by default delete just synced records.
 	 */
 	private function clean_old_synced_abandoned_carts() {

@@ -51,6 +51,7 @@ $activecampaign_for_woocommerce_optin_checkbox_text           = esc_html__( 'Kee
 $activecampaign_for_woocommerce_optin_checkbox_display_option = 'visible_checked_by_default';
 $activecampaign_for_woocommerce_custom_email_field            = esc_html__( 'billing_email', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 $activecampaign_for_woocommerce_debug_excess                  = 0;
+$activecampaign_for_woocommerce_debug_abc                     = '0';
 $activecampaign_for_woocommerce_desc_select                   = '0';
 $activecampaign_for_woocommerce_browse_tracking               = '0';
 $activecampaign_for_woocommerce_debug_disable_meta_save       = '0';
@@ -140,7 +141,12 @@ if ( is_array( $activecampaign_for_woocommerce_storage ) ) {
 	if ( isset( $activecampaign_for_woocommerce_settings['ac_debug_excess'] ) ) {
 		$activecampaign_for_woocommerce_debug_excess = $activecampaign_for_woocommerce_settings['ac_debug_excess'];
 	}
-	$activecampaign_for_woocommerce_debug_excess = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_debug_excess ) );
+	$activecampaign_for_woocommerce_debug_abc = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_debug_abc ) );
+
+	if ( isset( $activecampaign_for_woocommerce_settings['ac_debug_abc'] ) ) {
+		$activecampaign_for_woocommerce_debug_abc = $activecampaign_for_woocommerce_settings['ac_debug_abc'];
+	}
+	$activecampaign_for_woocommerce_debug_abc = esc_html( sanitize_text_field( $activecampaign_for_woocommerce_debug_abc ) );
 
 	if ( isset( $activecampaign_for_woocommerce_settings['disable_meta_save'] ) ) {
 		$activecampaign_for_woocommerce_debug_disable_meta_save = $activecampaign_for_woocommerce_settings['disable_meta_save'];
@@ -356,6 +362,7 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 					<input type="hidden" id="ac_debug" name="ac_debug" value="0">
 					<input type="hidden" id="ac_debug_calls" name="ac_debug_calls" value="0">
 					<input type="hidden" id="ac_debug_excess" name="ac_debug_excess" value="0">
+					<input type="hidden" id="ac_debug_abc" name="ac_debug_abc" value="0">
 					<input type="hidden" id="disable_meta_save" name="disable_meta_save" value="0">
 					<input type="hidden" name="custom_email_field" id="custom_email_field" value="billing_email">
 					<input type="hidden" id="sync_batch_runs" name="sync_batch_runs" value="<?php echo esc_html( $activecampaign_for_woocommerce_sync_batch_runs ); ?>">
@@ -886,6 +893,29 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 								?>
 							> On
 						</label>
+						<div>
+							<label>
+								<?php esc_html_e( 'Abandoned Cart pagination:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+							</label>
+							<label class="radio">
+								<input type="radio" id="ac_debug_abc0" name="ac_debug_abc" value="0"
+									<?php
+									if ( '0' === $activecampaign_for_woocommerce_debug_abc ) {
+										echo 'checked';
+									}
+									?>
+								> Paginated
+							</label>
+							<label class="radio">
+								<input type="radio" id="ac_debug_abc1" name="ac_debug_abc" value="1"
+									<?php
+									if ( '1' === $activecampaign_for_woocommerce_debug_abc ) {
+										echo 'checked';
+									}
+									?>
+								> Show All
+							</label>
+						</div>
 						<div>
 							<label>
 								<?php esc_html_e( 'Deactivate meta save function:', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>

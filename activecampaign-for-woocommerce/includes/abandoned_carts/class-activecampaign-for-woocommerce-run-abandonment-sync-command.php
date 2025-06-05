@@ -190,6 +190,9 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 			$this->logger->debug_excess( 'Abandoned cart hourly task: No code based abandoned carts to process...' );
 		}
 
+		if (defined( 'ACFWC_DEBUG' ) && null !== ACFWC_DEBUG && in_array( ACFWC_DEBUG, [true, 1, '1'], true ) ) {
+			$this->clean_all_synced_abandoned_carts();
+		}
 		$this->clean_old_synced_abandoned_carts();
 		$this->clean_all_old_abandoned_carts();
 
@@ -199,6 +202,7 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 			return 0;
 		}
 	}
+
 	/**
 	 * The manual run of the hourly task.
 	 */

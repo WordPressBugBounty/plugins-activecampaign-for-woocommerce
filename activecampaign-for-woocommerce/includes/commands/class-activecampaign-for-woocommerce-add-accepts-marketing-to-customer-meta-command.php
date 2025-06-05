@@ -13,6 +13,8 @@
 use Activecampaign_For_Woocommerce_Executable_Interface as Executable;
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
 /**
  * The Add_Accepts_Marketing_To_Customer_Meta_Command Class.
@@ -87,7 +89,7 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 			);
 		}
 
-		$accepts_marketing = $this->extract_accepts_marketing_value();
+		$accepts_marketing = $this->extract_accepts_marketing_value( $order );
 
 		$id = $order->get_customer_id();
 
@@ -98,10 +100,10 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 
 			$this->update_order_accepts_marketing( $order, $accepts_marketing );
 
-			$this->logger->debug(
+			$this->logger->debug_excess(
 				'Updated order with accepts marketing meta data: ',
 				array(
-					'accepts_marketing' => $order->get_meta( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCEPTS_MARKETING_NAME ),
+					'accepts_marketing' => $accepts_marketing,
 				)
 			);
 		} else {
@@ -151,12 +153,35 @@ class Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Comm
 	 *
 	 * @return int
 	 */
-	private function extract_accepts_marketing_value() {
+	private function extract_accepts_marketing_value( $order = null ) {
+		// Get data from standard checkout
 		$accepts_marketing = self::get_request_data( 'activecampaign_for_woocommerce_accepts_marketing' );
+
 		if ( isset( $accepts_marketing ) && ( '1' === $accepts_marketing || 1 === $accepts_marketing ) ) {
 			return 1;
 		}
 
+		try {
+			// Attempt to get checkout block data
+			if ( CheckoutFields::get_group_key( 'other' ) !== null ) {
+				$key = CheckoutFields::get_group_key( 'other' ) . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '/accepts_marketing';
+
+				// Get the checkout data from direct order
+				if ( isset( $order ) && self::validate_object( $order, 'get_meta' ) ) {
+					$accepts_marketing = $order->get_meta( $key );
+				} else {
+					$accepts_marketing = self::get_request_data( $key );
+				}
+
+				if ( isset( $accepts_marketing ) && in_array( $accepts_marketing, ['1', 1], true ) ) {
+					return 1;
+				}
+			}
+		} catch (Throwable $t ) {
+			$this->logger->debug( 'Accepts Marketing: There was an issue collecting data from Checkout Fields using blocks. If blocks are not enabled disregard.' );
+		}
+
+		// If all else fails it's always zero
 		return 0;
 	}
 

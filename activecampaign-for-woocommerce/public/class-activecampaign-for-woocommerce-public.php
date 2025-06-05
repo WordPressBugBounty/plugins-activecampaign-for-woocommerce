@@ -12,6 +12,8 @@
 use Activecampaign_For_Woocommerce_Admin as Admin;
 use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
 use Activecampaign_For_Woocommerce_Logger as Logger;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 
 /**
  * The public-facing functionality of the plugin.
@@ -195,12 +197,77 @@ class Activecampaign_For_Woocommerce_Public {
 	}
 
 	/**
+	 * Handles the display of accepts marketing block for WooCommerce blocks.
+	 * When using the blocks method it will run the hook to trigger this and return woocommerce_register_additional_checkout_field.
+	 * handle_woocommerce_checkout_form is now legacy.
+	 *
+	 * @return CheckoutFields|void
+	 */
+	public function handle_woocommerce_blocks_checkout_form( $checkout ) {
+		$this->init();
+
+		try {
+			$options                                   = $this->admin->get_local_settings();
+			$activecampaign_for_woocommerce_is_checked = $this->accepts_marketing_checkbox_is_checked();
+			$activecampaign_for_woocommerce_accepts_marketing_label = esc_html( $this->label_for_accepts_marketing_checkbox() );
+			$location          = 'contact';
+			$hidden_validation = false;
+
+			if ( isset( $options['accepts_marketing_checkbox_location_option'] ) && ! empty( $options['accepts_marketing_checkbox_location_option'] ) ) {
+				// contact or address are only valid options
+				// TODO: Later iteration should allow admin to select which location and use it here.
+				$location = $options['accepts_marketing_checkbox_location_option'];
+			}
+
+			if ( isset( $options['checkbox_display_option'] ) && 'not_visible' === $options['checkbox_display_option'] ) {
+				$hidden_validation = [
+					'type'       => 'object',
+					'properties' => [
+						'cart' => [
+							'properties' => [
+								'accepts_marketing_show' => [
+									'const' => false,
+								],
+							],
+						],
+					],
+				];
+			}
+
+			$data_custom = 'unchecked';
+			if ( true === $activecampaign_for_woocommerce_is_checked ) {
+				$data_custom = 'checked';
+			}
+
+			return woocommerce_register_additional_checkout_field(
+				array(
+					'id'         => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '/accepts_marketing',
+					'label'      => $activecampaign_for_woocommerce_accepts_marketing_label,
+					'location'   => $location,
+					'priority'   => 99,
+					'required'   => false,
+					'hidden'     => $hidden_validation,
+					'type'       => 'checkbox',
+					'attributes' => array(
+						'data-custom' => $data_custom,
+					),
+				)
+			);
+		} catch (Throwable $t ) {
+			$this->logger->warning( 'Accepts marketing encountered an error while attempting to register the checkout field', [$t->getMessage()] );
+		}
+	}
+
+	/**
 	 * If a user is logged in, adds an accepts marketing checkbox to the checkout form.
+	 * This is now legacy checkout. handle_woocommerce_blocks_checkout_form handles blocks.
 	 *
 	 * Called as part of the WooCommerce action hooks when the checkout form is being built. The
 	 * owner of the site is able to customize on which hook this method should be called.
 	 */
 	public function handle_woocommerce_checkout_form() {
+		$this->init();
+
 		if ( ! $this->checkbox_populated ) {
 			if ( $this->admin->get_local_settings() ) {
 				$options = $this->admin->get_local_settings();
@@ -324,8 +391,6 @@ class Activecampaign_For_Woocommerce_Public {
 	 * @return bool
 	 */
 	private function better_is_checkout() {
-		$logger = new Logger();
-
 		try {
 			if ( function_exists( 'is_checkout' ) && is_checkout() ) {
 				return true;
@@ -353,7 +418,7 @@ class Activecampaign_For_Woocommerce_Public {
 			}
 		} catch ( Throwable $t ) {
 
-			$logger->warning(
+			$this->logger->warning(
 				'There may be an issue checking for the checkout page',
 				array(
 					'message' => $t->getMessage(),
@@ -372,6 +437,8 @@ class Activecampaign_For_Woocommerce_Public {
 	 * @action activecampaign_for_woocommerce_load_sitetracking
 	 */
 	public function activecampaign_load_sitetracking() {
+		$this->init();
+
 		try {
 			$options = $this->admin->get_local_settings();
 

@@ -179,6 +179,15 @@
 				bind_email_field(item);
 			});
 		});
+		waitForElm('.wc-block-components-address-form').then((elm) => {
+			if('checked' === $('#contact-activecampaign_for_woocommerce-accepts_marketing').attr('data-custom')){
+				console.log(window.wcSettings.checkoutData.additional_fields);
+				$('#contact-activecampaign_for_woocommerce-accepts_marketing').prop( "checked", true );
+				console.log($('#contact-activecampaign_for_woocommerce-accepts_marketing').attr('data-custom'));
+			}
+
+
+		});
 	});
 
 })( jQuery );

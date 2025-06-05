@@ -1365,6 +1365,14 @@ class Activecampaign_For_Woocommerce {
 					'handle_woocommerce_checkout_form',
 					5
 				);
+
+				$this->loader->add_action(
+					'woocommerce_init',
+					$this->public,
+					'handle_woocommerce_blocks_checkout_form',
+					5
+				);
+
 			}
 		} else {
 			$this->logger->debug( 'Checkbox actions cannot be run. checkbox_display_option and/or optin_checkbox_text are not defined or not available in your theme.' );

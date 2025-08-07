@@ -235,6 +235,10 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 		( new Activecampaign_For_Woocommerce_Scheduler_Handler() )->schedule_event( $event, $args, $recurring, $reschedule );
 	}
 
+	public static function remove_scheduled_ac_event( $event, $args = array() ) {
+		( new Activecampaign_For_Woocommerce_Scheduler_Handler() )->clear_single_event( $event, $args );
+	}
+
 	/**
 	 * Schedules all events in the recurring list.
 	 * If we add a new event put it here.

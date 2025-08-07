@@ -350,12 +350,12 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 		try {
 			if ( ! is_null( $order ) && self::validate_object( $order, 'get_customer_id' ) && ! empty( $order->get_customer_id() ) ) {
 
-				return $order->get_customer_id();
+				return Cofe_Ecom_Order::USER_ID . '-' . $order->get_customer_id();
 			}
 
 			if ( ! is_null( $order ) && self::validate_object( $order, 'get_user_id' ) && ! empty( $order->get_user_id() ) ) {
 
-				return $order->get_user_id();
+				return Cofe_Ecom_Order::USER_ID . '-' . $order->get_user_id();
 			}
 		} catch ( Throwable $t ) {
 			$logger->debug(
@@ -378,7 +378,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			);
 
 			if ( isset( $customer_row ) && ! empty( $customer_row->customer_id ) ) {
-				return $customer_row->customer_id;
+				return Cofe_Ecom_Order::CUSTOMER_ID . '-' . $customer_row->customer_id;
 			}
 		} catch ( Throwable $t ) {
 			$logger->warning(

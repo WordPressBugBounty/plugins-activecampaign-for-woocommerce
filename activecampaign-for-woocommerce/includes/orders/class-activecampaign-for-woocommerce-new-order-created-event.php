@@ -578,17 +578,27 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 	 */
 	private function schedule_sync_job( $order_id ) {
 		try {
-			if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ) ) {
-				AC_Scheduler::schedule_ac_event(
-					AC_Scheduler::SYNC_ONE_ORDER_ACTIVE,
+			if ( AC_Scheduler::is_scheduled( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ) ) {
+				AC_Scheduler::remove_scheduled_ac_event( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) );
+
+				$this->logger->debug(
+					'Removed finished order for immediate sync (duplicate job for single order).',
 					array(
 						'wc_order_id' => $order_id,
-						'event'       => 'onetime',
-					),
-					false,
-					false
+						'event' => 'onetime',
+					)
 				);
 			}
+
+			AC_Scheduler::schedule_ac_event(
+				AC_Scheduler::SYNC_ONE_ORDER_ACTIVE,
+				array(
+					'wc_order_id' => $order_id,
+					'event'       => 'onetime',
+				),
+				false,
+				false
+			);
 
 			$this->logger->debug(
 				'Schedule finished order for immediate sync.',
@@ -596,7 +606,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 					'wc_order_id'         => $order_id,
 					'current_time'        => time(),
 					'scheduled_time'      => time() + 40,
-					'schedule validation' => AC_Scheduler::get_schedule( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ),
+					'schedule_validation' => AC_Scheduler::get_schedule( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) ),
 				)
 			);
 		} catch ( Throwable $t ) {

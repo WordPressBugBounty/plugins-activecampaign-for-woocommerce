@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.8.1
-Stable tag: 2.10.0
+Stable tag: 2.10.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,10 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.10.1 2025-08-07 =
+* Fix - Distinction between user ID and customer ID when syncing order
+* Fix - Syncing order multiple times causing automations to run twice
 
 = 2.10.0 2025-05-15 =
 * Improvement - Accepts marketing support for WooCommerce Blocks added

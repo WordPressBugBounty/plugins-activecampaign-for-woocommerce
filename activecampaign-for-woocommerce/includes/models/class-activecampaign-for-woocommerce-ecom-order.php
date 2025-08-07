@@ -309,7 +309,7 @@ class Activecampaign_For_Woocommerce_Ecom_Order implements Ecom_Model, Has_Id, H
 	 * @param string $currency The currency.
 	 */
 	public function set_currency( $currency ) {
-		$this->currency = $currency;
+		$this->currency = strtolower( $currency );
 	}
 
 	/**

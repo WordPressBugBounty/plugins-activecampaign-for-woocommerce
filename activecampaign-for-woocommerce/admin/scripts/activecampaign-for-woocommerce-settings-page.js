@@ -126,9 +126,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = $('#activecampaign-for-woocommerce-options-form');
     
-    // https://my-woocommerce-store.shop/**/products/{{sku}}
+    // https://my-woocommerce-store.shop/**/products/{{variantSku}}
     function validProductUrlPattern(pattern) {
-        let validUrlPatternVariables = ['sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug'];
+        let validUrlPatternVariables = ['variantSku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug'];
         const regexp = /\{\{(.*?)}}/g;
         if('' === pattern) {
             return true;
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
         // Variable validations
-        // https://my-woocommerce-store.shop/**/products/{{sku}}/{{id}}
+        // https://my-woocommerce-store.shop/**/products/{{variantSku}}/{{id}}
         // https://my-woocommerce-store.shop/**/products/{{id}}
         const matches = [...pattern.matchAll(regexp)]
         if (1 !== matches.length) {
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         // Wildcard next To Variable Validation
-        // https://example.com/**{{sku}}
+        // https://example.com/**{{variantSku}}
         if(pattern.includes('**{{') || pattern.includes('}}**')) {
             return false;
         }

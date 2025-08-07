@@ -231,7 +231,7 @@ if ( ! isset( $activecampaign_for_woocommerce_ba_session_timeout_options[ $activ
 	$activecampaign_for_woocommerce_ba_session_timeout = esc_html( '180' );
 }
 
-$activecampaign_for_woocommerce_ba_product_url_valid_variables = array( 'sku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug' );
+$activecampaign_for_woocommerce_ba_product_url_valid_variables = array( 'variantSku', 'storePrimaryId', 'storeBaseProductId', 'upc', 'baseProductUrlSlug', 'variantProductUrlSlug' );
 
 $activecampaign_for_woocommerce_ac_debug_options = array(
 	// value  // label

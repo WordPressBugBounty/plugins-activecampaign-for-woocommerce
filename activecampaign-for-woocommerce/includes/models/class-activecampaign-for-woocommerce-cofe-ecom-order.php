@@ -34,6 +34,15 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	}
 
 	/**
+	 * CID - customer id
+	 * UID - registered user id
+	 * Related to DEFECT-30172 - Old order are syncing into new customer orders
+	 * We need to distinct customer and user ids, so we don't send duplicates
+	 */
+	public const CUSTOMER_ID = 'CID';
+	public const USER_ID = 'UID';
+
+	/**
 	 * The mappings for the Api_Serializable trait.
 	 *
 	 * @var array
@@ -408,7 +417,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 * @param string $currency The currency.
 	 */
 	public function set_currency( $currency ) {
-		$this->currency = $currency;
+		$this->currency = strtolower( $currency );
 	}
 
 	/**
@@ -997,8 +1006,12 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 			$this->set_total_price( $order_data['total'] );
 		}
 		if ( isset( $order_data['customer_id'] ) ) {
-			// this is ok
-			$this->set_wc_customer_id( $order_data['customer_id'] );
+			$customer_id = $order_data['customer_id'];
+			if ( ! in_array( $customer_id, array( 0, '0', null ), true ) ) {
+				$customer_id = self::USER_ID . '-' . $customer_id;
+			}
+
+			$this->set_wc_customer_id( $customer_id );
 		}
 
 		if ( isset( $order_data['billing']['email'] ) ) {

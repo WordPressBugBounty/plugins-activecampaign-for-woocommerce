@@ -808,7 +808,7 @@ class Activecampaign_For_Woocommerce_Subscription_Model implements Ecom_Model, H
 	 * @param string $currency The currency.
 	 */
 	public function set_currency( $currency ) {
-		$this->currency = $currency;
+		$this->currency = strtolower( $currency );
 	}
 
 	/**

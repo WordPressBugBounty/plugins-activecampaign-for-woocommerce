@@ -3,66 +3,55 @@ Contributors: acteamintegrations, bartboy011
 Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.8.1
-Stable tag: 2.10.1
+Stable tag: 2.10.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-
-The official ActiveCampaign for WooCommerce plugin connects to your store to acquire, convert, and retain customers with marketing automations.
 
 == Description ==
 
 https://youtu.be/wHPrLFXQTgQ
 
-[Setting up the WooCommerce integration in ActiveCampaign in 6 Minutes](https://youtu.be/wHPrLFXQTgQ)
+ActiveCampaign is the autonomous marketing platform built to transform how marketers, agencies, and business owners work. Use Active Intelligence to power goal-aware automations and orchestrate personalized experiences across email, SMS, and WhatsApp. Effortlessly integrate with 1000+ apps, uncover deep performance insights, and optimize your workflows so you win every day.
 
-Trusted by thousands of brands, ActiveCampaign is your all-in-one email and marketing automation solution to acquire, convert, and retain customers through email and SMS to drive engagement, increase AOV, and recover lost revenue–[start your free trial today.](https://www.activecampaign.com/pricing)
+== ActiveCampaign’s Capabilities ==
 
-You need WooCommerce 3.0 or greater and the ActiveCampaign for WooCommerce WordPress plugin 1.2.0 to configure this integration. [Learn more about how to connect your WooCommerce store with ActiveCampaign.](https://www.activecampaign.com/pricing)
+*  **Autonomous marketing**
+  Built on the foundation of marketing automation, fuel your marketing strategy and customer journeys with AI-driven execution, optimization, and insight at every step.
+* **AI agents**
+  Run entire marketing campaigns through simple prompts, backed by Active Intelligence.
+* **Cross-channel marketing**
+  Reach prospects and customers wherever they are, with email, SMS, WhatsApp, and more.
+* **On-brand, personalized content**
+  Creative tools that deliver professional, conversion-ready designs for email and landing pages.
+* **CRM**
+  Track, manage, and automate your sales process.
+* **1000+ apps & integrations**
+  Connect ActiveCampaign to your favorite tools.
 
-= Seamlessly sync WooCommerce store data =
-Integrating ActiveCampaign with WooCommerce takes only minutes and is pre-built right out of the box. This allows you to sync all your historical and real-time data, including custom objects like product catalogs and coupon codes, ensuring you stay on top of every interaction buyers have with your brand.
+== WooCommerce + ActiveCampaign ==
 
-*   Utilize custom objects such as Product Catalog, Recurring Payments, and Coupon codes.
-*   Build segments and campaigns, send automated flows, and generate reports without any coding.
-*   Trigger automations based on Order Status changes, such as driving completion of pending orders, expressing gratitude to completing shoppers, and identifying issues with failed, returned, canceled, or refunded orders.
-*   Manage customer relationships or wholesale business effectively with Marketing CRM.
+Send real-time store data directly to ActiveCampaign
+Engage customers with automated abandoned cart and post-purchase emails.
+Personalize email, SMS, and WhatsApp messages with purchase data.
+Showcase specific product catalogs in your marketing emails.
 
-= Leverage historical and real-time customer, order, and subscription data for advanced segmentation =
-Streamline your efforts and drive meaningful marketing automations using all your store data in a single place to optimize customer experiences.
+== Here’s what you’ll need to configure this integration: ==
 
-* Segment contacts using a combination of event data (e.g., abandoned cart) and behavior data (e.g., placed orders, refunded orders).
-* Build unlimited segment parameters using Customer, Order, and Subscription data (e.g. your loyal customers, last year’s BFCM shoppers, engaged subscribers in the last 90 days, purchased within category).
-* Connect WooCommerce with Facebook, Google, Linkedin and more for retargeting and lookalike segmentation.
+* WooCommerce 7.4 (or more recent version)
+* The ActiveCampaign for WooCommerce WordPress plugin 2.10.2 .
 
-= Manage and optimize your subscription business =
-For businesses with recurring payments, automate tasks, personalize communications, and proactively address customer needs to reduce churn risk:
-
-* Set up email marketing automations to engage customers at pivotal moments in their subscription journey, starting with a welcome email to nurture loyalty.
-* Use the Product Catalog feature to create strategic email campaigns that recommend complementary products or enticing upgrades for effective cross-selling and upselling.
-* Notify subscribers via email if their payment fails, offering assistance in updating payment information or resolving billing issues.
-
-= Omnichannel marketing with natives Integrations =
-Benefit from over 900+ native integrations to streamline your marketing efforts across multiple channels and platforms.
-
-* Targeted ads on Facebook, Google, and other social media platform to encourage customers to return and complete the purchase.
-* Sync your marketing message across email, SMS, and social media ads (via Facebook and Google integrations).
-* Trigger a series of post-purchase communications and surveys across email, SMS, and social media.
-
-
-= About ActiveCampaign =
-ActiveCampaign’s email and marketing automations platform is chosen by over 150,000 businesses in 170 countries to meaningfully engage with their customers. The platform gives businesses of all sizes access to AI-powered automations that suggest, personalize, and validate your marketing campaigns that combine transactional email, email marketing, marketing automations, and CRM for powerful segmentation and personalization across social, email, messaging, chat, and text. Over 70% of ActiveCampaign’s customers use its 900+ integrations including WordPress, Shopify, Square, Facebook, and Salesforce.
-
-ActiveCampaign scores higher in customer satisfaction than any other solution in Marketing Automation, CRM, and E-Commerce Personalization on G2.com and is the Top Rated Marketing Automation Software on TrustRadius. [Start your free trial today.](https://www.activecampaign.com/pricing)
+**Learn more: [Connect WooCommerce to ActiveCampaign](https://help.activecampaign.com/hc/en-us/articles/115000652490-Connect-WooCommerce-to-ActiveCampaign)**
 
 == Screenshots ==
 
-1. ActiveCampaign for WooCommerce
-2. Post-purchase thank you and product suggestion ActiveCampaign for WooCommerce automation workflow
-3. WooCommerce store purchase history on an ActiveCampaign contact
-4. Accessory upsell after purchase ActiveCampaign automation recipe for WooCommerce stores
-5. Ecommerce subscription and welcome ActiveCampaign automation recipe for WooCommerce stores
-6. Birthday and anniversary coupon email ActiveCampaign automation recipe for WooCommerce store
+1. Active Intelligence Workspace
+2. Email Marketing
+3. Abandoned Cart and Post-Purchase Automations
+4. Segments
+5. Active Intelligence
+6. AI Brand Kit
+7. Cross-channel Marketing
 
 == Installation ==
 
@@ -94,6 +83,11 @@ ActiveCampaign scores higher in customer satisfaction than any other solution in
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.10.2 2026-01-15 =
+* Fix - Syncing status changes into ActiveCampaign
+* Fix - Syncing `shop_order_placehold` type into ActiveCampaign
+* Fix - Getting correct count of records on historical sync page
 
 = 2.10.1 2025-08-07 =
 * Fix - Distinction between user ID and customer ID when syncing order

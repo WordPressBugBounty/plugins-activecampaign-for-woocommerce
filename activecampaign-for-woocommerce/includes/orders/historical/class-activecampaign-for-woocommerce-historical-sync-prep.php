@@ -261,6 +261,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 			'orderby' => 'id',
 			'order'   => 'ASC',
 			'return'  => 'ids',
+			'type'    => 'shop_order',
 		);
 
 		if ( $get_pagination ) {

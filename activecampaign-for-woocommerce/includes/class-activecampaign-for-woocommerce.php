@@ -684,10 +684,6 @@ class Activecampaign_For_Woocommerce {
 			2
 		);
 
-		if ( ! $this->is_configured() || ! $this->is_connected() ) {
-			return;
-		}
-
 		$this->loader->add_action(
 			ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME,
 			$this->new_order_sync,
@@ -704,7 +700,6 @@ class Activecampaign_For_Woocommerce {
 			2
 		);
 
-		// TODO: Potentially disable this or trace it
 		$this->loader->add_action(
 			'activecampaign_for_woocommerce_admin_sync_single_order_status',
 			$this->new_order_sync,

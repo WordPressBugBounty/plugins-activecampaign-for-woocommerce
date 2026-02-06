@@ -34,6 +34,7 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 	use Activecampaign_For_Woocommerce_Order_Data_Gathering;
 	use Activecampaign_For_Woocommerce_Contact_Data_Handler;
 	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -117,6 +118,15 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 	 * @param     mixed ...$args The passed args.
 	 */
 	public function execute_from_status( ...$args ) {
+		if ( ! $this->logger ) {
+			$this->logger = new Logger();
+		}
+
+		if ( ! $this->is_configured() || ! $this->is_connected() ) {
+			$this->logger->debug( 'Order status sync skipped: plugin not configured or connected.' );
+			return;
+		}
+
 		$wc_order_status = null;
 
 		try {
@@ -217,6 +227,12 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 	public function execute( ...$args ) {
 		if ( ! $this->logger ) {
 			$this->logger = new Logger();
+		}
+
+		if ( ! $this->is_configured() || ! $this->is_connected() ) {
+			$this->logger->debug( 'Order sync skipped: plugin not configured or connected.' );
+
+			return;
 		}
 
 		$unsynced_order_data = null;

@@ -1332,7 +1332,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 			$post_type = get_post_type( $order_id );
 
 			// If it's not an order just ignore it
-			if ( 'shop_order' !== $post_type ) {
+			if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
 				return;
 			}
 

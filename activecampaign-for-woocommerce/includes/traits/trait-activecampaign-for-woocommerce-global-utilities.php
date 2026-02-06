@@ -27,10 +27,12 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 	 * @return bool
 	 */
 	private function is_configured() {
-		$ops = $this->get_local_settings();
+		$ops = $this->get_ac_settings();
 		if ( ! $ops ||
-			! $ops['api_key'] ||
-			! $ops['api_url']
+			! isset( $ops['api_key'] ) ||
+			! isset( $ops['api_url'] ) ||
+			empty( $ops['api_key'] ) ||
+			empty( $ops['api_url'] )
 		) {
 			return false;
 		}
@@ -86,9 +88,11 @@ trait Activecampaign_For_Woocommerce_Global_Utilities {
 	 * @return bool
 	 */
 	private function is_connected() {
+		$storage = $this->get_storage();
 		if (
-			! isset( $this->get_connection_storage()['connection_id'] ) ||
-			empty( $this->get_connection_storage()['connection_id'] )
+			! $storage ||
+			! isset( $storage['connection_id'] ) ||
+			empty( $storage['connection_id'] )
 		) {
 			return false;
 		}

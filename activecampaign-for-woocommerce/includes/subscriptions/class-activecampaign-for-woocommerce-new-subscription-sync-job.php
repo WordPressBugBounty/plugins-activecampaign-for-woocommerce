@@ -33,6 +33,7 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 	use Activecampaign_For_Woocommerce_Subscription_Data_Gathering;
 	use Activecampaign_For_Woocommerce_Contact_Data_Handler;
 	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
+	use Activecampaign_For_Woocommerce_Global_Utilities;
 
 	/**
 	 * The custom ActiveCampaign logger
@@ -124,6 +125,12 @@ class Activecampaign_For_Woocommerce_New_Subscription_Sync_Job implements Execut
 	public function execute( ...$args ) {
 		if ( ! $this->logger ) {
 			$this->logger = new Logger();
+		}
+
+		if ( ! $this->is_configured() || ! $this->is_connected() ) {
+			$this->logger->debug( 'Subscription sync skipped: plugin not configured or connected.' );
+
+			return;
 		}
 
 		$unsynced_order_data = null;

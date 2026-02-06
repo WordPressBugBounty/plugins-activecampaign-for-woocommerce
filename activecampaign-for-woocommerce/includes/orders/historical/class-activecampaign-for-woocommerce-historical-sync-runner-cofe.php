@@ -411,6 +411,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 						)
 					);
 
+					$this->mark_order_as_historical_incompatible( $order_id );
 					unset( $order_ids[ $k ] );
 					continue;
 				}

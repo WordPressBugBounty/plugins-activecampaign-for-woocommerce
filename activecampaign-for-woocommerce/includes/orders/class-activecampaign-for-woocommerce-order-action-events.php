@@ -88,7 +88,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			$logger->debug_excess(
 				'Order update triggered',
 				array(
-					'order'     => $order_id,
+					'order_id'  => $order_id,
 					'post_type' => $post_type,
 				)
 			);
@@ -98,7 +98,14 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			}
 
 			// If it's not an order do nothing, this could be anything
-			if ( 'shop_order' !== $post_type ) {
+			if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
+				$logger->debug_excess(
+					'Order update was triggered but the post is not a shop order type.',
+					array(
+						'order_id'  => $order_id,
+						'post_type' => $post_type,
+					)
+				);
 				return;
 			}
 
@@ -158,7 +165,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			}
 
 			// If it's not an order do nothing, this could be anything
-			if ( 'shop_order' !== $post_type ) {
+			if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
 				$logger->debug_excess(
 					'Order status update was triggered but the post is not a shop order type.',
 					array(
@@ -180,6 +187,7 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 					'wc_order_id' => $order_id,
 					'status'      => $to_status,
 				);
+
 				if ( ! AC_Scheduler::is_scheduled( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $event_array ) ) {
 					AC_Scheduler::schedule_ac_event( AC_Scheduler::ADMIN_SYNC_SINGLE_ORDER, $event_array, false, false );
 				}
@@ -309,7 +317,15 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 				$post_type = get_post_type( $order_id );
 
 				// If it's not an order just ignore it, this could be anything
-				if ( 'shop_order' !== $post_type ) {
+				if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
+					$logger->debug_excess(
+						'Order deleted update was triggered but the post is not a shop order type.',
+						array(
+							'order_id'  => $order_id,
+							'post_type' => $post_type,
+						)
+					);
+
 					return;
 				}
 
@@ -359,6 +375,8 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 	 * @param     mixed ...$args The passed arguments.
 	 */
 	public function delete_order_from_local_table( ...$args ) {
+		$logger = new Logger();
+
 		if ( isset( $args[0] ) ) {
 			$order_id = $args[0];
 
@@ -366,7 +384,14 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			$post_type = get_post_type( $order_id );
 
 			// Make sure it's a shop order
-			if ( 'shop_order' !== $post_type ) {
+			if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
+				$logger->debug_excess(
+					'Order update was triggered but the post is not a shop order type.',
+					array(
+						'order_id'  => $order_id,
+						'post_type' => $post_type,
+					)
+				);
 				return;
 			}
 
@@ -397,22 +422,8 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 					'order_id' => $wc_order->get_id(),
 				)
 			);
-			// If this fails return true. Better to double sync than miss it entirely.
-		}
 
-		try {
-			if ( ! empty( $last_synced ) && time() - intval( $last_synced ) < 120 ) {
-				$last_synced_too_soon = true;
-			} else {
-				$last_synced_too_soon = false;
-			}
-		} catch ( Throwable $t ) {
-			$logger->warning(
-				'There was an issue attempting to validate the order update.',
-				array(
-					'order_id' => $wc_order->get_id(),
-				)
-			);
+			$current_datahash = '';
 			// If this fails return true. Better to double sync than miss it entirely.
 		}
 
@@ -424,9 +435,22 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 				) || (
 					isset( $ac_datahash ) &&
 					$ac_datahash === $current_datahash
-				) ||
-				$last_synced_too_soon
+				)
 			) {
+				$logger->debug(
+					'Order update skipped due to no changes detected since last sync.',
+					array(
+						'order_id'         => $wc_order->get_id(),
+						'last_synced'      => $last_synced,
+						'current_time'     => time(),
+						'time_since_sync'  => time() - intval( $last_synced ),
+						'last_status'      => $last_status,
+						'current_status'   => $wc_order->get_status(),
+						'ac_datahash'      => $ac_datahash,
+						'current_datahash' => $current_datahash,
+					)
+				);
+
 				return false;
 			}
 		} catch ( Throwable $t ) {

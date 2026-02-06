@@ -252,7 +252,7 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 			}
 			// If we don't have any options cache what? Set defaults?
 		} else {
-			$logger->dev( 'no connection options to update' );
+			$logger->warning( 'no connection options to update' );
 		}
 	}
 

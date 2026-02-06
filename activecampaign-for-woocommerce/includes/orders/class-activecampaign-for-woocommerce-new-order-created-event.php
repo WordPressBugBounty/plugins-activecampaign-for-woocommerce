@@ -191,12 +191,6 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 	 * @param WC_Order   $data The data.
 	 */
 	public function ac_woocommerce_checkout_update_order_meta( $order_id, $data ) {
-		$this->logger->dev(
-			'do meta',
-			[
-				$order_id, $data,
-			]
-		);
 		if ( empty( $order_id ) ) {
 			return;
 		}
@@ -582,7 +576,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				AC_Scheduler::remove_scheduled_ac_event( AC_Scheduler::SYNC_ONE_ORDER_ACTIVE, array( 'wc_order_id' => $order_id, 'event' => 'onetime' ) );
 
 				$this->logger->debug(
-					'Removed finished order for immediate sync (duplicate job for single order).',
+					'Removed scheduled job for order immediate sync (duplicate job for single order).',
 					array(
 						'wc_order_id' => $order_id,
 						'event' => 'onetime',

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The file that defines the main ActiveCampaign API Client.
  *
@@ -18,6 +17,7 @@ use AcVendor\GuzzleHttp\Exception\GuzzleException;
 use AcVendor\Psr\Http\Message\ResponseInterface;
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Request_Id_Service as RequestIdService;
+use Activecampaign_For_Woocommerce_Account_Status_Manager as Account_Status_Manager;
 
 /**
  * The main API Client class.
@@ -456,6 +456,11 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	 * @since      1.0.0
 	 */
 	public function execute( $headers = null ) {
+
+		if ( Account_Status_Manager::is_blocked() ) {
+			return null;
+		}
+
 		$endpoint = $this->construct_endpoint_with_filters();
 		$response = null;
 
@@ -606,6 +611,26 @@ class Activecampaign_For_Woocommerce_Api_Client {
 						);
 				} elseif ( in_array( $e->getCode(), array( 500, 503, 520, 521, 525, 526, 590 ), true ) ) {
 					$full_response = '';
+					if ( $e->getCode() === 503 ) {
+						// simulate that service in unavailable so we can disable account to prevent ongoing calls
+						Account_Status_Manager::block_account();
+						$this->logger->error(
+							Account_Status_Manager::get_debug_error_log_message( $this->endpoint ),
+							// The ActiveCampaign API returned an error code 503 indicating there may be an issue with the account status
+							// like: 'inactive account', 'account in archive process' etc.
+							array(
+								'suggested_action' => 'Please address the errors stated in the logs to the ActiveCampaign support. You can remove blockade manually in admin tab.',
+								'endpoint'         => $this->endpoint,
+								'origin_endpoint'  => $this->origin_endpoint,
+								'method'           => $this->method,
+								'response_code'    => $e->getCode(),
+								'message'          => $message,
+								'ac_code'          => 'API_632',
+								'response_body'    => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
+								'stack_trace'      => $stack_trace,
+							)
+						);
+					}
 					if (
 						self::validate_object( $e, 'getResponse' ) &&
 						self::validate_object( $e->getResponse(), 'getBody' ) &&

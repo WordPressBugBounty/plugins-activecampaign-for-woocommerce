@@ -1,12 +1,14 @@
 === ActiveCampaign for WooCommerce ===
 Contributors: acteamintegrations, bartboy011
-Tags: marketing, ecommerce, woocommerce, email, activecampaign, abandoned cart
+Tags: email marketing, ecommerce, woocommerce, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.8.1
-Stable tag: 2.10.2
+Stable tag: 2.10.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+Autonomous marketing to transform your store. Fuel your customer journeys with personalized experiences across email, SMS, and WhatsApp.
 
 == Description ==
 
@@ -83,6 +85,9 @@ Showcase specific product catalogs in your marketing emails.
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.10.3 2026-04-15 =
+* Improvement - prevent external API calls during maintenance mode/archivization process
 
 = 2.10.2 2026-01-15 =
 * Fix - Syncing status changes into ActiveCampaign

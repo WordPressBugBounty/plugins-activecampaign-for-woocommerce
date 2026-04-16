@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The file that defines the core plugin class
  *
@@ -42,6 +41,7 @@ use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Bat
 use Activecampaign_For_Woocommerce_Subscription_Events as Subscription_Events;
 use Activecampaign_For_Woocommerce_New_Subscription_Sync_Job as New_Subscription_Sync;
 use Activecampaign_For_Woocommerce_Admin_Subscription_Page as Admin_Subscription_Page;
+use Activecampaign_For_Woocommerce_Account_Status_Manager as Account_Status_Manager;
 /**
  * The core plugin class.
  *
@@ -271,6 +271,11 @@ class Activecampaign_For_Woocommerce {
 	private $contact_repository;
 
 	/**
+	 * @var Activecampaign_For_Woocommerce_Account_Status_Manager
+	 */
+	private $account_status_manager;
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -298,6 +303,13 @@ class Activecampaign_For_Woocommerce {
 	 * @param Customer_Utilities                                   $customer_utilities The customer utility functions.
 	 * @param Activecampaign_For_Woocommerce_Bulksync_Repository   $bulksync_repository The bulksync repository.
 	 * @param Activecampaign_For_Woocommerce_AC_Contact_Repository $contact_repository The AC contact repository.
+	 * @param Product_Repository                                   $product_repository The product repository.
+	 * @param Browse_Session_Repository                            $browse_session_repository The browse session repository.
+	 * @param Product_Sync                                         $product_sync The product sync job.
+	 * @param Admin_Order_Page                                     $admin_order_page The admin order page.
+	 * @param Subscription_Events                                  $subscription_events The subscription events.
+	 * @param New_Subscription_Sync                                $new_subscription_sync The subscription sync job.
+	 * @param Account_Status_Manager                               $account_status_manager The AC account status manager.
 	 *
 	 * @since    1.0.0
 	 */
@@ -330,7 +342,8 @@ class Activecampaign_For_Woocommerce {
 		Product_Sync $product_sync,
 		Admin_Order_Page $admin_order_page,
 		Subscription_Events $subscription_events,
-		New_Subscription_Sync $new_subscription_sync
+		New_Subscription_Sync $new_subscription_sync,
+		Account_Status_Manager $account_status_manager
 	) {
 		$this->version                                    = $version;
 		$this->plugin_name                                = $plugin_name;
@@ -362,6 +375,7 @@ class Activecampaign_For_Woocommerce {
 		$this->order_events                                   = new Order_Events();
 		$this->subscription_events                            = new Subscription_Events();
 		$this->new_subscription_sync                          = $new_subscription_sync;
+		$this->account_status_manager                         = $account_status_manager;
 	}
 
 	/**
@@ -530,7 +544,6 @@ class Activecampaign_For_Woocommerce {
 			$this->user_registered_event,
 			'trigger'
 		);
-
 	}
 
 	/**
@@ -1148,6 +1161,12 @@ class Activecampaign_For_Woocommerce {
 			'wp_ajax_api_test',
 			$this->admin,
 			'handle_api_test'
+		);
+
+		$this->loader->add_action(
+			'wp_ajax_account-status-blockade-remove',
+			$this->admin,
+			'handle_account_blockade_removal'
 		);
 
 		$this->loader->add_action(

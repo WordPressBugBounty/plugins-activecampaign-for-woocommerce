@@ -582,6 +582,33 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		wp_send_json_success( $this->get_response() );
 	}
 
+	/**
+	 * Handles the AJAX call used to unblock outgoing plugin requests.
+	 *
+	 * @see Activecampaign_For_Woocommerce_Account_Status_Manager For reference.
+	 * @return void
+	 */
+	public function handle_account_blockade_removal() {
+		try {
+			check_ajax_referer( 'ac_remove_blockade_nonce' );
+			Activecampaign_For_Woocommerce_Account_Status_Manager::unblock_account();
+
+			wp_send_json_success(
+				[
+					'message' => __( 'Integration unblocked.', 'activecampaign' ),
+				]
+			);
+		} catch ( Exception $e ) {
+			wp_send_json_error(
+				[
+					'message' => $e->getMessage(),
+				]
+			);
+		}
+
+		wp_die();
+	}
+
 	public function check_for_existing_connection() {
 		$logger  = new Logger();
 		$storage = $this->get_connection_storage();

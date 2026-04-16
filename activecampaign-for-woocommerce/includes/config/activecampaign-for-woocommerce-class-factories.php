@@ -1,5 +1,4 @@
 <?php
-
 /**
  * The file that contains definitions for the Dependencies Container.
  *
@@ -50,6 +49,7 @@ use Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository as Browse_Sess
 use Activecampaign_For_Woocommerce_Admin_WC_Order_Page as Admin_Order_Page;
 use Activecampaign_For_Woocommerce_New_Subscription_Sync_Job as New_Subscription_Sync;
 use Activecampaign_For_Woocommerce_Subscription_Events as Subscription_Events;
+use Activecampaign_For_Woocommerce_Account_Status_Manager as Account_Status_Manager;
 
 return array(
 	Activecampaign_For_Woocommerce::class             => function (
@@ -79,7 +79,8 @@ return array(
 		Product_Sync $product_sync_job,
 		Admin_Order_Page $admin_order_page,
 		Subscription_Events $subscription_events,
-		New_Subscription_Sync $new_subscription_sync
+		New_Subscription_Sync $new_subscription_sync,
+		Account_Status_Manager $account_status_manager
 	) {
 		$version = defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION' ) ?
 			ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION :
@@ -118,7 +119,8 @@ return array(
 			$product_sync_job,
 			$admin_order_page,
 			$subscription_events,
-			$new_subscription_sync
+			$new_subscription_sync,
+			$account_status_manager
 		);
 	},
 
@@ -253,5 +255,8 @@ return array(
 		Browse_Session_Repository $browse_session_repository
 	) {
 		return new Cart_Events( $logger, $browse_session_repository );
+	},
+	Account_Status_Manager::class                     => static function () {
+		return new Activecampaign_For_Woocommerce_Account_Status_Manager();
 	},
 );

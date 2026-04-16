@@ -2,6 +2,32 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.10.3 2026-04-15 =
+* Improvement - prevent external API calls during maintenance mode/archivization process
+
+= 2.10.2 2026-01-15 =
+* Fix - Syncing status changes into ActiveCampaign
+* Fix - Syncing `shop_order_placehold` type into ActiveCampaign
+* Fix - Getting correct count of records on historical sync page
+
+= 2.10.1 2025-08-07 =
+* Fix - Distinction between user ID and customer ID when syncing order
+* Fix - Syncing order multiple times causing automations to run twice
+
+= 2.10.0 2025-05-15 =
+* Improvement - Accepts marketing support for WooCommerce Blocks added
+* Improvement - Abandoned cart now has debug option for show all in admin (limited to 500)
+
+= 2.9.2 2025-04-29 =
+* Improvement - Multisite compatible permissions check
+* Fix - Orders not always synced to hosted
+* Fix - Count error on cron run fixed
+
+= 2.9.1 2025-04-14 =
+* Improvement - Abandoned carts that have failed to sync can be reset
+* Upkeep - Support page corrections
+* Fix - Order sync improvements
+
 = 2.9.0 2025-03-06 =
 * Improvement - Order sync scheduling rebuilt
 * Improvement - Action Schedule will be preferred with fallback to cron

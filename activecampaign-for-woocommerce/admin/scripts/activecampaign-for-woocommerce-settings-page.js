@@ -60,6 +60,34 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    $( "#activecampaign-account-status-blockade-remove-button" ).click(function(e) {
+        e.preventDefault();
+
+        const $btn = $(this);
+        const url = $btn.data("value");
+        const nonce = $btn.data("nonce");
+
+        const data = {
+            action: 'account-status-blockade-remove',
+            _ajax_nonce: nonce
+        };
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: data
+        }).done(response => {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert(response.data.message || 'Error occurred');
+            }
+        }).fail(err => {
+            console.error(err);
+            alert('Request failed');
+        });
+    });
+
     $("#activecampaign-run-fix-connection").click(function(e) {
         if (confirm("Please confirm that you would like to reset your connection ID.")) {
             const nonceVal = jQuery('#activecampaign_for_woocommerce_settings_nonce_field');

@@ -293,6 +293,7 @@ return array(
     'Activecampaign_For_Woocommerce_Ac_Features_Repository' => $baseDir . '/includes/repositories/class-activecampaign-for-woocommerce-ac-features-repository.php',
     'Activecampaign_For_Woocommerce_Ac_Tracking_Code_Repository' => $baseDir . '/includes/repositories/class-activecampaign-for-woocommerce-ac-tracking-code-repository.php',
     'Activecampaign_For_Woocommerce_Ac_Tracking_Repository' => $baseDir . '/includes/repositories/class-activecampaign-for-woocommerce-ac-tracking-repository.php',
+    'Activecampaign_For_Woocommerce_Account_Status_Manager' => $baseDir . '/admin/class-activecampaign-for-woocommerce-account-status-manager.php',
     'Activecampaign_For_Woocommerce_Activator' => $baseDir . '/includes/class-activecampaign-for-woocommerce-activator.php',
     'Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Command' => $baseDir . '/includes/commands/class-activecampaign-for-woocommerce-add-accepts-marketing-to-customer-meta-command.php',
     'Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command' => $baseDir . '/includes/commands/class-activecampaign-for-woocommerce-add-cart-id-to-order-command.php',

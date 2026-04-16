@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A file containing all global constants for the plugin.
  *
@@ -25,7 +24,7 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PARENT_MENU_NAME' ) ) {
  * @since 1.0.0
  */
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION' ) ) {
-	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION', '2.10.2' );
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION', '2.10.3' );
 }
 
 /**
@@ -276,6 +275,7 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME' ) ) {
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ORDER_SYNC_DESTINATION' ) ) {
 	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ORDER_SYNC_DESTINATION', 'activecampaign_for_woocommerce_order_sync_destination' );
 }
+
 /**
  * The product sync last status common name.
  *
@@ -284,4 +284,14 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ORDER_SYNC_DESTINATION' ) ) {
  */
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_LAST_STATUS_NAME' ) ) {
 	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_LAST_STATUS_NAME', 'activecampaign_for_woocommerce_product_sync_last_status' );
+}
+
+/**
+ * The main flag for account status (active/inactive)
+ *
+ * @var string The main flag for account status (active/inactive)
+ * @since 2.1.1
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_ACTIVE_STATUS' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_ACTIVE_STATUS', 'activecampaign_for_woocommerce_account_active_status' );
 }

@@ -103,18 +103,18 @@ $activecampaign_for_woocommerce_page_url     = wc_get_current_admin_url();
 	<?php if ( Activecampaign_For_Woocommerce_Account_Status_Manager::is_blocked() ) : ?>
 		<div id="activecampaign-for-woocommerce-app-subheader">
 			<div class="activecampaign-for-woocommerce-account-status-check p-300">
-				<p class="activecampaign-for-woocommerce-account-status-check__title bg-strawberry-300 rounded-100 font-bold tooltip"><?php esc_html_e( 'Integration Paused', 'activecampaign' ); ?></p>
+				<p class="activecampaign-for-woocommerce-account-status-check__title bg-strawberry-300 rounded-100 font-bold tooltip"><?php esc_html_e( 'Integration Paused', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></p>
 				<div class="activecampaign-for-woocommerce-account-status-check__description tooltiptext">
 					<ul>
-						<li><?php echo esc_html( Activecampaign_For_Woocommerce_Account_Status_Manager::get_error_user_friendly_message() ); ?></li>
-						<li><?php echo esc_html__( 'If you are sure your account is available click here to test status and unblock integration', 'activecampaign' ); ?></li>
+						<li><?php echo wp_kses_post( Activecampaign_For_Woocommerce_Account_Status_Manager::get_error_user_friendly_message() ); ?></li>
+						<li><?php echo esc_html__( 'If you are sure your account is available click here to test status and unblock integration.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></li>
 					</ul>
 				</div>
 				<div class="activecampaign-for-woocommerce-account-status-check__footer">
 					<a href="#" id="activecampaign-account-status-blockade-remove-button"
 						data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 						data-nonce="<?php echo esc_attr( wp_create_nonce( 'ac_remove_blockade_nonce' ) ); ?>"
-						class="activecampaign-for-woocommerce button secondary"><span><?php esc_html_e( 'Remove blockade', 'activecampaign' ); ?></span></a>
+						class="activecampaign-for-woocommerce button secondary"><span><?php esc_html_e( 'Remove blockade', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span></a>
 				</div>
 			</div>
 		</div>

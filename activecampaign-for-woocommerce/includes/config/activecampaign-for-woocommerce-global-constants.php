@@ -24,7 +24,7 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PARENT_MENU_NAME' ) ) {
  * @since 1.0.0
  */
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION' ) ) {
-	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION', '2.10.3' );
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION', '2.10.4' );
 }
 
 /**
@@ -290,8 +290,28 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_LAST_STATUS_NAME' )
  * The main flag for account status (active/inactive)
  *
  * @var string The main flag for account status (active/inactive)
- * @since 2.1.1
+ * @since 2.10.3
  */
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_ACTIVE_STATUS' ) ) {
 	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_ACTIVE_STATUS', 'activecampaign_for_woocommerce_account_active_status' );
+}
+
+/**
+ * Flag indicates timestamp when integration has been blocked
+ *
+ * @var string
+ * @since 2.10.4
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_INACTIVE_TIME_DELAY' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_INACTIVE_TIME_DELAY', 'activecampaign_for_woocommerce_account_inactive_time_delay' );
+}
+
+/**
+ * Flag indicates timestamp when integration has been blocked
+ *
+ * @var string
+ * @since 2.10.4
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_BLOCKED_TIMESTAMP' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_BLOCKED_TIMESTAMP', 'activecampaign_for_woocommerce_account_blocked_timestamp' );
 }

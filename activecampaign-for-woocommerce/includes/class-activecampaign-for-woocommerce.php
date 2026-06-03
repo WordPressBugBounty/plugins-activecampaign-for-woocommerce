@@ -42,6 +42,9 @@ use Activecampaign_For_Woocommerce_Subscription_Events as Subscription_Events;
 use Activecampaign_For_Woocommerce_New_Subscription_Sync_Job as New_Subscription_Sync;
 use Activecampaign_For_Woocommerce_Admin_Subscription_Page as Admin_Subscription_Page;
 use Activecampaign_For_Woocommerce_Account_Status_Manager as Account_Status_Manager;
+use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 /**
  * The core plugin class.
  *
@@ -720,6 +723,14 @@ class Activecampaign_For_Woocommerce {
 			1,
 			2
 		);
+
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_auto_unblock_account',
+			$this->admin,
+			'clear_blocked_account',
+			3,
+			2
+		);
 	}
 
 	private function define_product_sync() {
@@ -1364,33 +1375,47 @@ class Activecampaign_For_Woocommerce {
 					'execute'
 				);
 
-				// Add the checkbox to the billing form
-				$this->loader->add_action(
-					'woocommerce_after_checkout_billing_form',
-					$this->public,
-					'handle_woocommerce_checkout_form',
-					5
-				);
+				if ( class_exists( CartCheckoutUtils::class ) && CartCheckoutUtils::is_checkout_block_default() ) {
+					$this->loader->add_action(
+						'woocommerce_init',
+						$this->public,
+						'handle_woocommerce_blocks_checkout_form',
+						5
+					);
+				} else {
+					$this->loader->add_action(
+						'woocommerce_after_checkout_billing_form',
+						$this->public,
+						'handle_woocommerce_checkout_form',
+						5
+					);
 
-				// this hook is a fallback method in case we can't find the billing form hook
-				$this->loader->add_action(
-					'woocommerce_after_checkout_form',
-					$this->public,
-					'handle_woocommerce_checkout_form',
-					5
-				);
-
-				$this->loader->add_action(
-					'woocommerce_init',
-					$this->public,
-					'handle_woocommerce_blocks_checkout_form',
-					5
-				);
-
+					// this hook is a fallback method in case we can't find the billing form hook
+					$this->loader->add_action(
+						'woocommerce_after_checkout_form',
+						$this->public,
+						'handle_woocommerce_checkout_form',
+						5
+					);
+				}
 			}
 		} else {
 			$this->logger->debug( 'Checkbox actions cannot be run. checkbox_display_option and/or optin_checkbox_text are not defined or not available in your theme.' );
 		}
+	}
+
+	public static function is_checkout_block_default() {
+		if ( wp_is_block_theme() ) {
+			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
+			foreach ( $templates_from_db as $template ) {
+				if ( has_block( 'woocommerce/checkout', $template->content ) ) {
+					return true;
+				}
+			}
+		}
+		$checkout_page_id = wc_get_page_id( 'checkout' );
+
+		return $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id );
 	}
 
 	/**

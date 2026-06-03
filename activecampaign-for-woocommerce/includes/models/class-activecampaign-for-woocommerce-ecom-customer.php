@@ -220,7 +220,7 @@ class Activecampaign_For_Woocommerce_Ecom_Customer implements Ecom_Model, Has_Id
 	 * @param string $accepts_marketing The accepts marketing checkbox value.
 	 */
 	public function set_accepts_marketing( $accepts_marketing ) {
-		$this->accepts_marketing = $accepts_marketing;
+		$this->accepts_marketing = $accepts_marketing ? (bool) $accepts_marketing : false;
 	}
 
 	/**

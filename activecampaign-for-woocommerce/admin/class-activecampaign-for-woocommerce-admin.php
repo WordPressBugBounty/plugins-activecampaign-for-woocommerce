@@ -591,7 +591,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function handle_account_blockade_removal() {
 		try {
 			check_ajax_referer( 'ac_remove_blockade_nonce' );
-			Activecampaign_For_Woocommerce_Account_Status_Manager::unblock_account();
+			Activecampaign_For_Woocommerce_Account_Status_Manager::clean();
 
 			wp_send_json_success(
 				[
@@ -1513,5 +1513,11 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		// Enable site tracking.
 		$ac_tracking = new AC_Tracking( $this->api_client );
 		$ac_tracking->enable_sitetracking();
+	}
+
+	public function clear_blocked_account() {
+		Activecampaign_For_Woocommerce_Account_Status_Manager::clean();
+		$logger = new Logger();
+		$logger->info( 'Account has been successfully unblocked. External requests should work fine if not contact with Customer Success.' );
 	}
 }

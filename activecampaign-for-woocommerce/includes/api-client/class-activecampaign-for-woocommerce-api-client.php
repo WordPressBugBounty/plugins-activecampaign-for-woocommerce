@@ -38,6 +38,8 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	use Activecampaign_For_Woocommerce_Global_Utilities;
 	use Activecampaign_For_Woocommerce_Data_Validation;
 
+	public const RETRY_AFTER_HEADER = 'Retry-After';
+
 	/**
 	 * The API Uri to make requests against.
 	 *
@@ -613,23 +615,33 @@ class Activecampaign_For_Woocommerce_Api_Client {
 					$full_response = '';
 					if ( $e->getCode() === 503 ) {
 						// simulate that service in unavailable so we can disable account to prevent ongoing calls
-						Account_Status_Manager::block_account();
-						$this->logger->error(
-							Account_Status_Manager::get_debug_error_log_message( $this->endpoint ),
-							// The ActiveCampaign API returned an error code 503 indicating there may be an issue with the account status
-							// like: 'inactive account', 'account in archive process' etc.
-							array(
-								'suggested_action' => 'Please address the errors stated in the logs to the ActiveCampaign support. You can remove blockade manually in admin tab.',
-								'endpoint'         => $this->endpoint,
-								'origin_endpoint'  => $this->origin_endpoint,
-								'method'           => $this->method,
-								'response_code'    => $e->getCode(),
-								'message'          => $message,
-								'ac_code'          => 'API_632',
-								'response_body'    => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
-								'stack_trace'      => $stack_trace,
-							)
-						);
+						$condition        = self::validate_object( $e, 'getResponse' ) && self::validate_object( $e->getResponse(), 'getHeaders' );
+						$response_headers  = $condition ? $e->getResponse()->getHeaders() : null;
+						$retry_after_header = $this->is_header_available( $response_headers, self::RETRY_AFTER_HEADER );
+
+						if ( $retry_after_header ) {
+							Account_Status_Manager::block_account_until( $retry_after_header );
+							Account_Status_Manager::setup_scheduler_task_for_unblock_account();
+
+							$this->logger->error(
+								Account_Status_Manager::get_debug_error_log_message( $this->endpoint ),
+								// The ActiveCampaign API returned an error code 503 indicating there may be an issue with the account status
+								// like: 'inactive account', 'account in archive process' etc.
+								// If account is in mantainence mode API should return Retry-After header
+								// we take it and set delay for any external calls
+								array(
+									'suggested_action' => 'Please address the errors stated in the logs to the ActiveCampaign support. You can remove blockade manually in admin tab.',
+									'endpoint'         => $this->endpoint,
+									'origin_endpoint'  => $this->origin_endpoint,
+									'method'           => $this->method,
+									'response_code'    => $e->getCode(),
+									'message'          => $message,
+									'ac_code'          => 'API_639',
+									'response_body'    => self::validate_object( $response, 'getBody' ) ? $response->getBody() : null,
+									'stack_trace'      => $stack_trace,
+								)
+							);
+						}
 					}
 					if (
 						self::validate_object( $e, 'getResponse' ) &&
@@ -848,5 +860,53 @@ class Activecampaign_For_Woocommerce_Api_Client {
 		}
 
 		return $endpoint;
+	}
+
+	/**
+	 * @param array  $headers
+	 * @param string $requested_header
+	 *
+	 * @return false|int
+	 */
+	private function is_header_available( array $headers, string $requested_header ) {
+		$headers         = array_change_key_case( $headers, CASE_LOWER );
+		$requested_header = strtolower( $requested_header );
+
+		if ( isset( $headers[ $requested_header ] ) ) {
+			$value = $headers[ $requested_header ];
+
+			$header_value = is_array( $value ) ? $value[0] : $value;
+
+			return $this->get_seconds_offset( $header_value );
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param int|string $input
+	 *
+	 * @return int
+	 */
+	private function get_seconds_offset( $input ) {
+		if ( is_numeric( $input ) ) {
+			return (int) $input;
+		}
+
+		try {
+			$now    = new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
+			$target = new DateTimeImmutable( $input );
+
+			$offset = $target->getTimestamp() - $now->getTimestamp();
+
+			return $offset > 0 ? $offset : 0;
+
+		} catch ( Exception $e ) {
+			if ( class_exists( 'Logger' ) ) {
+				( new Logger() )->error( 'Invalid date format provided: ' . $input );
+			}
+
+			return 0;
+		}
 	}
 }

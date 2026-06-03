@@ -210,7 +210,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 	 * @return bool
 	 */
 	public static function is_scheduled( $event, $args = array() ) {
-		if (function_exists( 'as_has_scheduled_action' ) ) {
+		if ( function_exists( 'as_has_scheduled_action' ) ) {
 			return as_has_scheduled_action( $event['hook'], $args );
 		}
 
@@ -230,9 +230,11 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 	 * @param array $args Any args to be passed.
 	 * @param bool  $recurring Is this event recurring.
 	 * @param bool  $reschedule Should we reschedule the event.
+	 *
+	 * @return bool|int|WP_Error|null
 	 */
 	public static function schedule_ac_event( $event, $args = array(), $recurring = false, $reschedule = false ) {
-		( new Activecampaign_For_Woocommerce_Scheduler_Handler() )->schedule_event( $event, $args, $recurring, $reschedule );
+		return ( new Activecampaign_For_Woocommerce_Scheduler_Handler() )->schedule_event( $event, $args, $recurring, $reschedule );
 	}
 
 	public static function remove_scheduled_ac_event( $event, $args = array() ) {

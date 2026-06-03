@@ -2,6 +2,10 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.10.4 2026-06-02 =
+* Improvement - added a self-triggering retry mechanism for API requests after a specific date.
+* Improvement - added a checkout version check to dynamically render the correct marketing opt-in checkbox (Gutenberg Blocks vs. Legacy).
+
 = 2.10.3 2026-04-15 =
 * Improvement - prevent external API calls during maintenance mode/archivization process
 

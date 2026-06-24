@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: email marketing, ecommerce, woocommerce, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.8.1
-Stable tag: 2.10.4
+Stable tag: 2.10.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -85,6 +85,9 @@ Showcase specific product catalogs in your marketing emails.
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.10.5 2026-06-24 =
+* Improvement: Prevent checkboxes from being double-rendered on the checkout page
 
 = 2.10.4 2026-06-02 =
 * Improvement - added a self-triggering retry mechanism for API requests after a specific date.

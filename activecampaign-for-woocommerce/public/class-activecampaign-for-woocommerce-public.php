@@ -268,6 +268,19 @@ class Activecampaign_For_Woocommerce_Public {
 	public function handle_woocommerce_checkout_form() {
 		$this->init();
 
+		/**
+		 * Request-global guard. This method is bound to two fallback hooks
+		 * ( woocommerce_after_checkout_billing_form and woocommerce_after_checkout_form )
+		 * and some themes (e.g. Divi) fire both and/or re-render the checkout form,
+		 * which can output the checkbox more than once. A static survives across every
+		 * hook fire in the request even when the instance flag does not, guaranteeing
+		 * the field is rendered at most once.
+		 */
+		static $rendered = false;
+		if ( $rendered ) {
+			return;
+		}
+
 		if ( ! $this->checkbox_populated ) {
 			if ( $this->admin->get_local_settings() ) {
 				$options = $this->admin->get_local_settings();
@@ -314,6 +327,7 @@ class Activecampaign_For_Woocommerce_Public {
 			);
 
 			$this->checkbox_populated = true;
+			$rendered                 = true;
 		}
 	}
 

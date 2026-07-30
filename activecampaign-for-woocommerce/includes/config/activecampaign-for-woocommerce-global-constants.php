@@ -24,7 +24,7 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PARENT_MENU_NAME' ) ) {
  * @since 1.0.0
  */
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION' ) ) {
-	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION', '2.10.5' );
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_VERSION', '2.11.0' );
 }
 
 /**
@@ -284,6 +284,41 @@ if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ORDER_SYNC_DESTINATION' ) ) {
  */
 if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_LAST_STATUS_NAME' ) ) {
 	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_SYNC_LAST_STATUS_NAME', 'activecampaign_for_woocommerce_product_sync_last_status' );
+}
+
+/**
+ * The product cleanup running status common name.
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_RUNNING_STATUS_NAME' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_RUNNING_STATUS_NAME', 'activecampaign_for_woocommerce_product_cleanup_running_status' );
+}
+
+/**
+ * The product cleanup scheduled status common name.
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_SCHEDULED_STATUS_NAME' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_SCHEDULED_STATUS_NAME', 'activecampaign_for_woocommerce_product_cleanup_scheduled_status' );
+}
+
+/**
+ * The product cleanup last status common name.
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_LAST_STATUS_NAME' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_LAST_STATUS_NAME', 'activecampaign_for_woocommerce_product_cleanup_last_status' );
+}
+
+/**
+ * The product cleanup stop check common name.
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_STOP_CHECK_NAME' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PRODUCT_CLEANUP_STOP_CHECK_NAME', 'activecampaign_for_woocommerce_product_cleanup_stop' );
+}
+
+/**
+ * The run product cleanup common name.
+ */
+if ( ! defined( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_CLEANUP_NAME' ) ) {
+	define( 'ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_CLEANUP_NAME', 'activecampaign_for_woocommerce_run_product_cleanup' );
 }
 
 /**

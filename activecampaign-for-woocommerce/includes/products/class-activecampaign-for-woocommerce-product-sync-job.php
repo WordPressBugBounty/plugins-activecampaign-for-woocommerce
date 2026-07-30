@@ -16,7 +16,6 @@ use Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer as Ecom_Cofe_Pro
 use Activecampaign_For_Woocommerce_Executable_Interface as Executable;
 use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Sync_Status as Sync_Status;
-use AcVendor\Brick\Math\BigDecimal;
 
 /**
  * The Product_Sync Event Class.
@@ -360,6 +359,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 
 		return $status;
 	}
+
 	/**
 	 * Schedules a bulk product sync to run as a background job.
 	 *
@@ -422,7 +422,6 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 * @param string|int $product_id The product ID.
 	 */
 	public function single_product_cofe_sync( $product_id ) {
-		$logger = new Logger();
 		if ( ! isset( $product_id ) ) {
 			$this->logger->notice(
 				'Product ID is empty, return.'
@@ -438,7 +437,38 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				$this->product_cofe_sync( $this->add_args_to_status( false ), array( $product ) );
 			}
 		} catch ( Throwable $t ) {
-			$logger->debug(
+			$this->logger->debug(
+				'There was an issue syncing single product data',
+				array(
+					'message'    => $t->getMessage(),
+					'product_id' => $product_id,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Soft deletes single product from ID
+	 *
+	 * @param string|int $product_id
+	 */
+	public function single_product_cofe_soft_delete( $product_id ) {
+		if ( ! isset( $product_id ) ) {
+			$this->logger->notice(
+				'Product ID is empty, return.'
+			);
+
+			return;
+		}
+
+		$product = wc_get_product( $product_id );
+
+		try {
+			if ( isset( $product ) ) {
+				$this->product_cofe_sync( $this->add_args_to_status( false ), array( $product ), true );
+			}
+		} catch ( Throwable $t ) {
+			$this->logger->debug(
 				'There was an issue syncing single product data',
 				array(
 					'message'    => $t->getMessage(),
@@ -454,7 +484,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 * @param Activecampaign_For_Woocommerce_Sync_Status $status Status.
 	 * @return int
 	 */
-	public function product_cofe_sync( Sync_Status $status, $products_list = null ) {
+	public function product_cofe_sync( Sync_Status $status, $products_list = null, $delete = false ) {
 		/**
 		 * We are grabbing offset and limit from $this because $this gets populated by the job scheduler, which is
 		 * more accurate than $status (which is populated from the db).
@@ -492,8 +522,16 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 				continue;
 			}
 
+			$parent = null;
+			if ( method_exists( $product, 'get_parent_id' ) ) {
+				$parent_id = $product->get_parent_id();
+				if ( ! empty( $parent_id ) ) {
+					$parent = wc_get_product( $parent_id );
+				}
+			}
+
 			try {
-				$this->add_product_data( $status, $product, $connection_id, $cofe_data );
+				$this->add_product_data( $status, $product, $connection_id, $cofe_data, $parent, $delete );
 			} catch ( Throwable $t ) {
 				$this->logger->debug(
 					'There was an issue adding product data',
@@ -512,7 +550,7 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 					if ( ! empty( $children ) ) {
 						foreach ( $children as $child_id ) {
 							$child = wc_get_product( $child_id );
-							$this->add_product_data( $status, $child, $connection_id, $cofe_data, $product );
+							$this->add_product_data( $status, $child, $connection_id, $cofe_data, $product, $delete );
 						}
 					}
 				} catch ( Throwable $t ) {
@@ -598,12 +636,13 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 	 * Add Product Data.
 	 *
 	 * @param Activecampaign_For_Woocommerce_Sync_Status $status status.
-	 * @param WC_Product | WC_Product_Variation          $product Product.
+	 * @param WC_Product                                 $product Product.
 	 * @param int                                        $connection_id connection ID.
-	 * @param array                                      $product_data Produt Data.
+	 * @param array                                      $product_data Product Data.
 	 * @param null                                       $parent Parent.
+	 * @param bool                                       $delete
 	 */
-	public function add_product_data( Sync_Status $status, WC_Product $product, $connection_id, array &$product_data, $parent = null ) {
+	public function add_product_data( Sync_Status $status, WC_Product $product, $connection_id, array &$product_data, $parent = null, $delete = false ) {
 		global $activecampaign_for_woocommerce_product_sync_status;
 		try {
 			if ( $product->is_type( 'grouped' ) || $product->is_type( 'draft' ) ) {
@@ -611,6 +650,9 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 			} else {
 				$p_data = Ecom_Cofe_Product::product_array_for_cofe( $product, $connection_id, $parent );
 				if ( ! is_null( $p_data ) ) {
+					if ( $delete ) {
+						$p_data['isDeleted'] = true;
+					}
 					$product_data[ $p_data['storePrimaryId'] ] = $p_data;
 				}
 			}
@@ -772,48 +814,5 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_PRODUCT_SYNC_NAME );
 		Sync_Status::reset( $status );
 		wp_send_json_success( 'Product sync data reset.' );
-	}
-
-	public function execute_product_deleted( $product_id ) {
-		$logger = new Logger();
-
-		try {
-			if ( isset( $product_id ) && ! empty( $product_id ) ) {
-				$post_type = get_post_type( $product_id );
-
-				// If it's not an order just ignore it, this could be anything
-				if ( 'product' !== $post_type ) {
-					return;
-				}
-
-				$logger->debug(
-					'Product delete triggered',
-					array(
-						'product' => $product_id,
-					)
-				);
-
-				// Try to find the order in AC
-				$ac_order = $this->cofe_product_repository->find_by_externalid( $product_id );
-
-				if ( isset( $ac_order ) && self::validate_object( $ac_order, 'get_id' ) ) {
-					$ac_order_id = $ac_order->get_id();
-
-					// If the order exists delete it from AC
-					$this->cofe_product_repository->delete( $ac_order_id );
-
-					// Delete a local order for COFE
-					$this->delete_order_from_local_table( $product_id );
-				}
-			}
-		} catch ( Throwable $t ) {
-			$logger->warning(
-				'There was an issue deleting the order from AC.',
-				array(
-					'order_id' => $product_id,
-					'message'  => $t->getMessage(),
-				)
-			);
-		}
 	}
 }

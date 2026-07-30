@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0
+class ComposerStaticInite966178cca1a06575ba9526aa1f489ce
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -384,6 +384,7 @@ class ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0
         'Activecampaign_For_Woocommerce_Admin_Abandoned_Cart' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin-abandoned-cart.php',
         'Activecampaign_For_Woocommerce_Admin_Connections' => __DIR__ . '/../..' . '/admin/trait-activecampaign-for-woocommerce-admin-connections.php',
         'Activecampaign_For_Woocommerce_Admin_Historical_Sync' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin-historical-sync.php',
+        'Activecampaign_For_Woocommerce_Admin_Product_Cleanup' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin-product-cleanup.php',
         'Activecampaign_For_Woocommerce_Admin_Product_Sync' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin-product-sync.php',
         'Activecampaign_For_Woocommerce_Admin_Settings_Updated_Event' => __DIR__ . '/../..' . '/includes/events/class-activecampaign-for-woocommerce-admin-settings-updated-event.php',
         'Activecampaign_For_Woocommerce_Admin_Settings_Validator' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin-settings-validator.php',
@@ -401,6 +402,7 @@ class ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0
         'Activecampaign_For_Woocommerce_Cart_Updated_Event' => __DIR__ . '/../..' . '/includes/events/class-activecampaign-for-woocommerce-cart-updated-event.php',
         'Activecampaign_For_Woocommerce_Clear_User_Meta_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-clear-user-meta-command.php',
         'Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-cofe-browse-session-repository.php',
+        'Activecampaign_For_Woocommerce_Cofe_Connection_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-cofe-connection-repository.php',
         'Activecampaign_For_Woocommerce_Cofe_Ecom_Order' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-cofe-ecom-order.php',
         'Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-cofe-ecom-order-line-item.php',
         'Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Status' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-cofe-ecom-order-status.php',
@@ -456,6 +458,7 @@ class ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0
         'Activecampaign_For_Woocommerce_Order_Data_Gathering' => __DIR__ . '/../..' . '/includes/orders/trait-activecampaign-for-woocommerce-order-data-gathering.php',
         'Activecampaign_For_Woocommerce_Order_Line_Item_Gathering' => __DIR__ . '/../..' . '/includes/orders/trait-activecampaign-for-woocommerce-order-line-item-gathering.php',
         'Activecampaign_For_Woocommerce_Plugin_Upgrade' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce-plugin-upgrade.php',
+        'Activecampaign_For_Woocommerce_Product_Cleanup_Job' => __DIR__ . '/../..' . '/includes/products/class-activecampaign-for-woocommerce-product-cleanup-job.php',
         'Activecampaign_For_Woocommerce_Product_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-product-repository.php',
         'Activecampaign_For_Woocommerce_Product_Sync_Job' => __DIR__ . '/../..' . '/includes/products/class-activecampaign-for-woocommerce-product-sync-job.php',
         'Activecampaign_For_Woocommerce_Public' => __DIR__ . '/../..' . '/public/class-activecampaign-for-woocommerce-public.php',
@@ -494,9 +497,9 @@ class ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit630cf02395ce28b5acdd3fd5814f68a0::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite966178cca1a06575ba9526aa1f489ce::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite966178cca1a06575ba9526aa1f489ce::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite966178cca1a06575ba9526aa1f489ce::$classMap;
 
         }, null, ClassLoader::class);
     }

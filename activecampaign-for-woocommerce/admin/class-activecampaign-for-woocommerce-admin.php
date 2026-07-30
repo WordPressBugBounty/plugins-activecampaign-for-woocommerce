@@ -38,6 +38,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	use Activecampaign_For_Woocommerce_Admin_Historical_Sync;
 	use Activecampaign_For_Woocommerce_Admin_Status;
 	use Activecampaign_For_Woocommerce_Admin_Product_Sync;
+	use Activecampaign_For_Woocommerce_Admin_Product_Cleanup;
 	use Activecampaign_For_Woocommerce_Admin_Connections;
 	use Activecampaign_For_Woocommerce_Admin_Utilities;
 	use Activecampaign_For_Woocommerce_Synced_Status_Handler;
@@ -219,6 +220,14 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 			$this->version,
 			true
 		);
+
+		wp_register_script(
+			$this->plugin_name . 'product-cleanup',
+			plugin_dir_url( __FILE__ ) . 'scripts/activecampaign-for-woocommerce-product-cleanup.js',
+			array( 'jquery' ),
+			$this->version,
+			true
+		);
 	}
 
 	/**
@@ -295,6 +304,14 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '_product_sync',
 					array( $this, 'fetch_product_sync_page' )
 				);
+				add_submenu_page(
+					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE,
+					'ActiveCampaign for WooCommerce Product Cleanup',
+					'Product Cleanup',
+					'manage_options',
+					ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '_product_cleanup',
+					array( $this, 'fetch_product_cleanup_page' )
+				);
 			}
 		}
 	}
@@ -302,14 +319,14 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	public function load_connection_block() {
 		if ( $this->get_connection_storage() && $this->is_configured() ) {
 			require_once plugin_dir_path( __FILE__ )
-						. 'partials/activecampaign-for-woocommerce-connections.php';
+				. 'partials/activecampaign-for-woocommerce-connections.php';
 		}
 	}
 
 	public function load_status_mapping_block() {
 		if ( $this->get_connection_storage() && $this->is_configured() ) {
 			require_once plugin_dir_path( __FILE__ )
-						. 'partials/activecampaign-for-woocommerce-status-mapping.php';
+				. 'partials/activecampaign-for-woocommerce-status-mapping.php';
 		}
 	}
 
@@ -352,13 +369,13 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		// Verify we're on an admin section
 		if (
-		'activecampaign_for_woocommerce' !== $plugin_page &&
-		Activecampaign_For_Woocommerce_Utilities::valid_permission( 'manage_woocommerce' ) &&
-		 (
-			'admin.php' === $pagenow
-			|| 'plugins.php' === $pagenow
-			|| get_current_screen()->in_admin()
-		)
+			'activecampaign_for_woocommerce' !== $plugin_page &&
+			Activecampaign_For_Woocommerce_Utilities::valid_permission( 'manage_woocommerce' ) &&
+			(
+				'admin.php' === $pagenow
+				|| 'plugins.php' === $pagenow
+				|| get_current_screen()->in_admin()
+			)
 		) {
 			require_once plugin_dir_path( __FILE__ ) . 'views/activecampaign-for-woocommerce-please-configure-plugin-notice.php';
 		}
@@ -398,19 +415,19 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				}
 
 				echo '<div id="activecampaign-for-woocommerce-notice-error" class="notice notice-error is-dismissible activecampaign-for-woocommerce-error"><p>' .
-				esc_html(
-					'The ActiveCampaign for WooCommerce plugin has recorded ' . $err_count . ' ' .
-					translate_nooped_plural(
-						array(
-							'singular' => 'error',
-							'plural'   => 'errors',
-							'domain'   => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN,
-							'context'  => null,
-						),
-						$err_count
+					esc_html(
+						'The ActiveCampaign for WooCommerce plugin has recorded ' . $err_count . ' ' .
+						translate_nooped_plural(
+							array(
+								'singular' => 'error',
+								'plural'   => 'errors',
+								'domain'   => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN,
+								'context'  => null,
+							),
+							$err_count
+						) .
+						'.'
 					) .
-					'.'
-				) .
 					'<br/><a href="' . esc_url( $admin_log_url ) . '">' . esc_html( 'Please check the ActiveCampaign logs for issues.' ) .
 					'</a></p></div>
 						<script type="text/javascript">
@@ -509,7 +526,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		wp_enqueue_script( $this->plugin_name . 'settings-page-status-mapping' );
 
 		require_once plugin_dir_path( __FILE__ )
-				. 'views/activecampaign-for-woocommerce-admin-display.php';
+			. 'views/activecampaign-for-woocommerce-admin-display.php';
 	}
 
 
@@ -667,7 +684,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 		if ( isset( $connection ) &&
 			( in_array( $connection->get_externalid(), $valid_site_urls, false ) ||
-			$storage['external_id'] === $connection->get_externalid() )
+				$storage['external_id'] === $connection->get_externalid() )
 		) {
 			set_transient( 'activecampaign_for_woocommerce_connection', $connection, 3600 );
 			return $connection;
@@ -1367,6 +1384,29 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 			// phpcs:disable
 			$wpdb->delete( $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME, [ 'wc_order_id' => $order_id ] );
 			// phpcs:enable
+		}
+	}
+
+	/**
+	 * Catches trashing of a product and sets it to sync to COFE.
+	 *
+	 * @param array ...$args
+	 * @return void
+	 */
+	public function remove_deleted_product( ...$args ) {
+		$logger = new Logger();
+
+		if ( isset( $args[0] ) ) {
+			$product_id = $args[0];
+			$post_type = get_post_type( $product_id );
+
+			// If it's not a product just ignore it
+			if ( 'product' !== $post_type && 'product_variation' !== $post_type ) {
+				return;
+			}
+
+			$logger->debug( 'Product ID has been trashed, soft deleting product in AC', array( 'product_id' => $product_id ) );
+			do_action( 'activecampaign_for_woocommerce_run_single_product_soft_delete', $product_id );
 		}
 	}
 

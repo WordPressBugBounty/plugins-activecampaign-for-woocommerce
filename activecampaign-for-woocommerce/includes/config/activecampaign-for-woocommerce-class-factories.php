@@ -40,12 +40,14 @@ use Activecampaign_For_Woocommerce_New_Order_Created_Event as Order_Finished;
 use Activecampaign_For_Woocommerce_User_Registered_Event as User_Registered;
 use Activecampaign_For_Woocommerce_Historical_Sync_Handler as Historical_Sync;
 use Activecampaign_For_Woocommerce_Product_Sync_Job as Product_Sync;
+use Activecampaign_For_Woocommerce_Product_Cleanup_Job as Product_Cleanup;
 use Activecampaign_For_Woocommerce_New_Order_Sync_Job as New_Order_Sync;
 use Activecampaign_For_Woocommerce_Bulksync_Repository as Bulksync_Repository;
 use Activecampaign_For_Woocommerce_AC_Contact_Batch_Repository as AC_Contact_Batch_Repository;
 use Activecampaign_For_Woocommerce_Api_Client_Graphql as Graphql_Api_Client;
 use Activecampaign_For_Woocommerce_Product_Repository as Cofe_Product_Repository;
 use Activecampaign_For_Woocommerce_Cofe_Browse_Session_Repository as Browse_Session_Repository;
+use Activecampaign_For_Woocommerce_Cofe_Connection_Repository as Cofe_Connection_Repository;
 use Activecampaign_For_Woocommerce_Admin_WC_Order_Page as Admin_Order_Page;
 use Activecampaign_For_Woocommerce_New_Subscription_Sync_Job as New_Subscription_Sync;
 use Activecampaign_For_Woocommerce_Subscription_Events as Subscription_Events;
@@ -77,6 +79,7 @@ return array(
 		Cofe_Product_Repository $cofe_product_repository,
 		Browse_Session_Repository $browse_session_repository,
 		Product_Sync $product_sync_job,
+		Product_Cleanup $product_cleanup_job,
 		Admin_Order_Page $admin_order_page,
 		Subscription_Events $subscription_events,
 		New_Subscription_Sync $new_subscription_sync,
@@ -117,6 +120,7 @@ return array(
 			$cofe_product_repository,
 			$browse_session_repository,
 			$product_sync_job,
+			$product_cleanup_job,
 			$admin_order_page,
 			$subscription_events,
 			$new_subscription_sync,
@@ -220,6 +224,20 @@ return array(
 		Cofe_Product_Repository $cofe_product_repository
 	) {
 		return new Product_Sync( $logger, $cofe_product_repository );
+	},
+
+	Product_Cleanup::class                            => static function (
+		Logger $logger,
+		Cofe_Product_Repository $cofe_product_repository,
+		Cofe_Connection_Repository $cofe_connection_repository
+	) {
+		return new Product_Cleanup( $logger, $cofe_product_repository, $cofe_connection_repository );
+	},
+
+	Cofe_Connection_Repository::class                 => static function (
+		Graphql_Api_Client $client
+	) {
+		return new Cofe_Connection_Repository( $client );
 	},
 
 	Cofe_Product_Repository::class                    => static function (

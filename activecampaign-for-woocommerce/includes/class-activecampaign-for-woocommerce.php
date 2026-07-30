@@ -29,6 +29,7 @@ use Activecampaign_For_Woocommerce_Logger as Logger;
 use Activecampaign_For_Woocommerce_Plugin_Upgrade as Plugin_Upgrade_Command;
 use Activecampaign_For_Woocommerce_Historical_Sync_Handler as Historical_Sync;
 use Activecampaign_For_Woocommerce_Product_Sync_Job as Product_Sync;
+use Activecampaign_For_Woocommerce_Product_Cleanup_Job as Product_Cleanup;
 use Activecampaign_For_Woocommerce_New_Order_Sync_Job as New_Order_Sync;
 use Activecampaign_For_Woocommerce_Customer_Utilities as Customer_Utilities;
 use Activecampaign_For_Woocommerce_Bulksync_Repository as Bulksync_Repository;
@@ -208,6 +209,13 @@ class Activecampaign_For_Woocommerce {
 	private $product_sync;
 
 	/**
+	 * Handles product cleanup.
+	 *
+	 * @var Product_Cleanup The product cleanup class.
+	 */
+	private $product_cleanup;
+
+	/**
 	 * Handles new order sync.
 	 *
 	 * @since 1.8.0
@@ -309,6 +317,7 @@ class Activecampaign_For_Woocommerce {
 	 * @param Product_Repository                                   $product_repository The product repository.
 	 * @param Browse_Session_Repository                            $browse_session_repository The browse session repository.
 	 * @param Product_Sync                                         $product_sync The product sync job.
+	 * @param Product_Cleanup                                      $product_cleanup The product cleanup job.
 	 * @param Admin_Order_Page                                     $admin_order_page The admin order page.
 	 * @param Subscription_Events                                  $subscription_events The subscription events.
 	 * @param New_Subscription_Sync                                $new_subscription_sync The subscription sync job.
@@ -343,6 +352,7 @@ class Activecampaign_For_Woocommerce {
 		Product_Repository $product_repository,
 		Browse_Session_Repository $browse_session_repository,
 		Product_Sync $product_sync,
+		Product_Cleanup $product_cleanup,
 		Admin_Order_Page $admin_order_page,
 		Subscription_Events $subscription_events,
 		New_Subscription_Sync $new_subscription_sync,
@@ -372,6 +382,7 @@ class Activecampaign_For_Woocommerce {
 		$this->bulksync_repository                            = $bulksync_repository;
 		$this->contact_repository                             = $contact_repository;
 		$this->product_sync                                   = $product_sync;
+		$this->product_cleanup                                = $product_cleanup;
 		$this->product_repository                             = $product_repository;
 		$this->browse_session_repository                      = $browse_session_repository;
 		$this->admin_order_page                               = $admin_order_page;
@@ -563,6 +574,7 @@ class Activecampaign_For_Woocommerce {
 
 		if ( $this->is_configured() && $this->is_connected() && $this->verify_ac_features( 'product' ) ) {
 			$this->define_product_sync();
+			$this->define_product_cleanup();
 		}
 
 		/**
@@ -639,9 +651,39 @@ class Activecampaign_For_Woocommerce {
 			1
 		);
 
+		// This is called on trashing an order or a product
+		$this->loader->add_action(
+			'wp_trash_post',
+			$this->admin,
+			'remove_deleted_product',
+			2
+		);
+
+		// This is called after trashing an order or a product
+		$this->loader->add_action(
+			'trashed_post',
+			$this->admin,
+			'remove_deleted_product',
+			2
+		);
+
+		$this->loader->add_action(
+			'woocommerce_before_delete_product_variation',
+			$this->admin,
+			'remove_deleted_product',
+			1
+		);
+
+		$this->loader->add_action(
+			'before_delete_post',
+			$this->admin,
+			'remove_deleted_product',
+			2
+		);
+
 		// When a product is restored
 		$this->loader->add_action(
-			'untrash_post',
+			'untrashed_post',
 			$this->admin,
 			'restore_product',
 			1
@@ -758,6 +800,14 @@ class Activecampaign_For_Woocommerce {
 		);
 
 		$this->loader->add_action(
+			'activecampaign_for_woocommerce_run_single_product_soft_delete',
+			$this->product_sync,
+			'single_product_cofe_soft_delete',
+			1,
+			1
+		);
+
+		$this->loader->add_action(
 			'activecampaign_for_woocommerce_run_sync_connection',
 			$this->product_sync,
 			'run_sync_connection',
@@ -779,6 +829,28 @@ class Activecampaign_For_Woocommerce {
 			'save_or_update_product_status',
 			12,
 			3
+		);
+	}
+
+	private function define_product_cleanup() {
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_run_product_cleanup',
+			$this->product_cleanup,
+			'execute',
+			1,
+			2
+		);
+
+		if ( ! $this->is_configured() || ! $this->is_connected() ) {
+			return;
+		}
+
+		$this->loader->add_action(
+			'activecampaign_for_woocommerce_build_product_cleanup_schedules',
+			$this->product_cleanup,
+			'build_product_cleanup_schedules',
+			1,
+			2
 		);
 	}
 
@@ -1286,6 +1358,34 @@ class Activecampaign_For_Woocommerce {
 			'wp_ajax_activecampaign_for_woocommerce_check_product_sync_status',
 			$this->admin,
 			'check_product_sync_status'
+		);
+
+		$this->loader->add_action(
+			'wp_ajax_activecampaign_for_woocommerce_schedule_product_cleanup',
+			$this->admin,
+			'run_product_cleanup'
+		);
+
+		$this->loader->add_action(
+			'wp_ajax_activecampaign_for_woocommerce_check_product_cleanup_status',
+			$this->admin,
+			'check_product_cleanup_status'
+		);
+
+		$this->loader->add_action(
+			'wp_ajax_activecampaign_for_woocommerce_cancel_product_cleanup',
+			$this->product_cleanup,
+			'handle_cancel_cleanup',
+			1,
+			1
+		);
+
+		$this->loader->add_action(
+			'wp_ajax_activecampaign_for_woocommerce_reset_product_cleanup',
+			$this->product_cleanup,
+			'handle_reset_cleanup_status',
+			1,
+			1
 		);
 
 		$this->loader->add_action(

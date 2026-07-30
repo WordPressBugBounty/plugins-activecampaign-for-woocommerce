@@ -29,7 +29,7 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 	/**
 	 * @param WC_Product | WC_Product_Variation $product
 	 * @param ?int                              $connection_id
-	 * @param WC_Product?                       $parent
+	 * @param ?WC_Product                       $parent
 	 * @return array
 	 */
 	public static function product_array_for_cofe( $product, ?int $connection_id, $parent = null ): ?array {
@@ -104,6 +104,7 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 				$cofe_product['isDownloadable']      = $product->get_downloadable();
 				$cofe_product['isVisible']           = self::convert_to_bool( $product->is_visible() );
 				$cofe_product['isOnSale']            = $product->is_on_sale();
+				$cofe_product['isDeleted']           = 'trash' === strtolower( $product->get_status() );
 				$cofe_product['isBackordersAllowed'] = $product->backorders_allowed();
 				if ( $product->is_in_stock() !== null ) {
 					if ( $product->is_in_stock() ) {

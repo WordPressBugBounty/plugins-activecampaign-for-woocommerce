@@ -2,6 +2,9 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.11.1 2026-09-21 =
+* Fix: Prevent site errors caused by conflicts with other plugins
+
 = 2.11.0 2026-07-30 =
 * Improvement: Products and product variations are getting deleted from product catalogue
 * Improvement: New Product Cleanup job was added to delete old products from product catalogue

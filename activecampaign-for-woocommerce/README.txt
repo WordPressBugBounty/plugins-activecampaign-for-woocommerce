@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: email marketing, ecommerce, woocommerce, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.8.1
-Stable tag: 2.11.0
+Stable tag: 2.11.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -85,6 +85,9 @@ Showcase specific product catalogs in your marketing emails.
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.11.1 2026-09-21 =
+* Fix: Prevent site errors caused by conflicts with other plugins
 
 = 2.11.0 2026-07-30 =
 * Improvement: Products and product variations are getting deleted from product catalogue

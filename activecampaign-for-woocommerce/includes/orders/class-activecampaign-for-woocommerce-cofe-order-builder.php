@@ -252,10 +252,9 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 		$cofe_line_item = new Line_Item();
 		$logger         = new Logger();
 
-		if (
-			isset( $item_data['variation_id'] ) &&
-			! empty( $item_data['variation_id'] )
-		) {
+		$is_variation_item = isset( $item_data['variation_id'] ) && ! empty( $item_data['variation_id'] );
+
+		if ( $is_variation_item ) {
 			$child_product = wc_get_product( $item_data['variation_id'] );
 			if ( self::validate_object( $child_product, 'get_data' ) ) {
 				$child_data = $child_product->get_data();
@@ -285,6 +284,14 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 				$cofe_line_item->set_product_url( $this->get_product_url_from_wc( $child_product ) );
 				$cofe_line_item->set_sku( $this->get_product_sku_from_wc( $child_product ) );
 				$cofe_line_item->set_tags( $this->get_wc_tag_names( $child_data['variation_id'] ) );
+			}
+
+			// The sale state belongs to the purchased variation. Never ask the variable parent:
+			// WC_Product_Variable::is_on_sale() loads every child variation and exhausts memory
+			// on products with very large variation counts. If the variation can't be loaded,
+			// isOnSale keeps its default of false.
+			if ( self::validate_object( $child_product, 'is_on_sale' ) ) {
+				$cofe_line_item->set_is_on_sale( $child_product->is_on_sale() );
 			}
 		} else {
 			$cofe_line_item->set_properties_from_product_data( $item_data );
@@ -318,7 +325,7 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			$cofe_line_item->set_average_rating( $wc_product->get_average_rating() );
 		}
 
-		if ( self::validate_object( $wc_product, 'is_on_sale' ) && empty( $cofe_line_item->get_is_on_sale() ) ) {
+		if ( ! $is_variation_item && self::validate_object( $wc_product, 'is_on_sale' ) && empty( $cofe_line_item->get_is_on_sale() ) ) {
 			$cofe_line_item->set_is_on_sale( $wc_product->is_on_sale() );
 		}
 

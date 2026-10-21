@@ -5,7 +5,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb833003c9956db622ce9e6cd253ccfd8
+class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
 {
     public static $files = array (
         '4d6de7bbf0d2d08e5e1054b8e1fd07ba' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -337,6 +337,7 @@ class ComposerStaticInitb833003c9956db622ce9e6cd253ccfd8
         'ActivecampaignForWoocommerceCartUpdatedEventTest' => __DIR__ . '/../..' . '/tests/includes/events/test-class-activecampaign-for-woocommerce-cart-updated-event.php',
         'ActivecampaignForWoocommerceClearUserMetaCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-clear-user-meta-command.php',
         'ActivecampaignForWoocommerceClientIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/api-client/test-class-activecampaign-for-woocommerce-api-client-integration.php',
+        'ActivecampaignForWoocommerceCofeEcomOrderLineItemTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-cofe-ecom-order-line-item.php',
         'ActivecampaignForWoocommerceCofeOrderBuilderTest' => __DIR__ . '/../..' . '/tests/includes/orders/test-class-activecampaign-for-woocommerce-cofe-order-builder.php',
         'ActivecampaignForWoocommerceConnectionOptionRepositoryIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-connection-option-repository-integration.php',
         'ActivecampaignForWoocommerceConnectionOptionTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-connection-option.php',
@@ -499,9 +500,9 @@ class ComposerStaticInitb833003c9956db622ce9e6cd253ccfd8
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb833003c9956db622ce9e6cd253ccfd8::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb833003c9956db622ce9e6cd253ccfd8::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitb833003c9956db622ce9e6cd253ccfd8::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21::$classMap;
 
         }, null, ClassLoader::class);
     }

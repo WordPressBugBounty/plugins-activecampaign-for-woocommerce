@@ -446,7 +446,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 				// This should be the total per 1 item, not the total overall
 
 				if ( $data['subtotal'] > 0 && $data['quantity'] > 1 ) {
-					$price = BigDecimal::of( $data['subtotal'] )->dividedBy( $data['quantity'], 0, RoundingMode::UP );
+					$price = BigDecimal::of( $data['subtotal'] )->dividedBy( $data['quantity'], 2, RoundingMode::HALF_UP );
 				} else {
 					$price = BigDecimal::of( $data['subtotal'] );
 				}
@@ -455,7 +455,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order_Line_Item {
 				// This should be the total per 1 item, not the total overall
 
 				if ( $data['total'] > 0 && $data['quantity'] > 1 ) {
-					$price = BigDecimal::of( $data['total'] )->dividedBy( $data['quantity'], 0, RoundingMode::UP );
+					$price = BigDecimal::of( $data['total'] )->dividedBy( $data['quantity'], 2, RoundingMode::HALF_UP );
 				} else {
 					$price = BigDecimal::of( $data['total'] );
 				}

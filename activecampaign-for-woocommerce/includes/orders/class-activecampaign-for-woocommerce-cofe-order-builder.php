@@ -329,17 +329,18 @@ class Activecampaign_For_Woocommerce_Cofe_Order_Builder {
 			$cofe_line_item->set_is_on_sale( $wc_product->is_on_sale() );
 		}
 
-		if ( isset( $refund['subtotal'] ) && $refund['refund_line_item_id'] == $id ) {
-			// Refunds are negative quantities so add the totals
-			$cofe_line_item->set_price( (int) $cofe_line_item->get_price() + (int) $refund['subtotal'] );
-		} elseif ( isset( $refund['total'] ) && $refund['refund_line_item_id'] == $id ) {
-			// Refunds are negative quantities so add the totals
-			$cofe_line_item->set_price( (int) $cofe_line_item->get_price() + (int) $refund['total'] );
-		}
+		if ( isset( $refund['refund_line_item_id'] ) && $refund['refund_line_item_id'] == $id ) {
+			// Refund quantities and amounts are negative. The price is per item, so it is what is left of the
+			// line amount divided by what is left of the quantity - never integer-rounded (ECMM-2991).
+			$remaining_quantity = (int) $cofe_line_item->get_quantity() + (int) ( $refund['quantity'] ?? 0 );
+			$remaining_amount   = BigDecimal::of( $item_data['subtotal'] ?? $item_data['total'] ?? 0 )
+				->plus( $refund['subtotal'] ?? $refund['total'] ?? 0 );
 
-		if ( isset( $refund['quantity'] ) && $refund['refund_line_item_id'] == $id ) {
-			// Refunds are negative quantities so add the totals
-			$cofe_line_item->set_quantity( (int) $cofe_line_item->get_quantity() + (int) $refund['quantity'] );
+			$cofe_line_item->set_quantity( max( $remaining_quantity, 0 ) );
+			// A fully discounted line (price 0) stays 0.
+			if ( $remaining_quantity > 0 && $remaining_amount->isPositive() && $cofe_line_item->get_price() ) {
+				$cofe_line_item->set_price( $remaining_amount->dividedBy( $remaining_quantity, 2, RoundingMode::HALF_UP ) );
+			}
 		}
 
 		return $cofe_line_item;

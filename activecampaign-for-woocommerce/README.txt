@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: email marketing, ecommerce, woocommerce, activecampaign, abandoned cart
 Requires at least: 6.0
 Tested up to: 6.8.1
-Stable tag: 2.11.2
+Stable tag: 2.11.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -85,6 +85,9 @@ Showcase specific product catalogs in your marketing emails.
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 2.11.3 2026-10-20 =
+* Fix: Order line item prices are no longer rounded to whole currency units; refunded items are synced with the correct unit price
 
 = 2.11.2 2026-10-09 =
 * Fix: Prevent out-of-memory crash when syncing orders containing variations from products with very large variation counts

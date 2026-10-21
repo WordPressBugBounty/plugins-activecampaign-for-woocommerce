@@ -253,6 +253,7 @@ return array(
     'ActivecampaignForWoocommerceCartUpdatedEventTest' => $baseDir . '/tests/includes/events/test-class-activecampaign-for-woocommerce-cart-updated-event.php',
     'ActivecampaignForWoocommerceClearUserMetaCommandTest' => $baseDir . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-clear-user-meta-command.php',
     'ActivecampaignForWoocommerceClientIntegrationTest' => $baseDir . '/tests/includes/api-client/test-class-activecampaign-for-woocommerce-api-client-integration.php',
+    'ActivecampaignForWoocommerceCofeEcomOrderLineItemTest' => $baseDir . '/tests/includes/models/test-class-activecampaign-for-woocommerce-cofe-ecom-order-line-item.php',
     'ActivecampaignForWoocommerceCofeOrderBuilderTest' => $baseDir . '/tests/includes/orders/test-class-activecampaign-for-woocommerce-cofe-order-builder.php',
     'ActivecampaignForWoocommerceConnectionOptionRepositoryIntegrationTest' => $baseDir . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-connection-option-repository-integration.php',
     'ActivecampaignForWoocommerceConnectionOptionTest' => $baseDir . '/tests/includes/models/test-class-activecampaign-for-woocommerce-connection-option.php',

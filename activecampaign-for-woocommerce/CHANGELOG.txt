@@ -2,6 +2,9 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 2.11.3 2026-10-20 =
+* Fix: Order line item prices are no longer rounded to whole currency units; refunded items are synced with the correct unit price
+
 = 2.11.2 2026-10-09 =
 * Fix: Prevent out-of-memory crash when syncing orders containing variations from products with very large variation counts
 

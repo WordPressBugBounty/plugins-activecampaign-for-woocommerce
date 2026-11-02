@@ -13,6 +13,7 @@
 use Activecampaign_For_Woocommerce_Executable_Interface as Executable;
 use Activecampaign_For_Woocommerce_User_Meta_Service as User_Meta_Service;
 use Activecampaign_For_Woocommerce_Logger as Logger;
+use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
 
 /**
  * The Uninstall_Plugin_Command Class.
@@ -39,18 +40,22 @@ class Activecampaign_For_Woocommerce_Uninstall_Plugin_Command implements Executa
 		$logger = new Logger();
 		global $wpdb;
 
-		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
-		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_CONNECTION_STORAGE_NAME );
-		delete_option( 'activecampaign_for_woocommerce_dismiss_error_notice' );
-		delete_option( 'activecampaign_for_woocommerce_dismiss_plugin_notice' );
-		delete_option( 'activecampaign_for_woocommerce_abandoned_cart_last_run' );
-		delete_option( 'activecampaign_for_woocommerce_connection_health_check_last_run' );
-		delete_option( 'activecampaign_for_woocommerce_dismiss_error_notice' );
-		delete_option( 'activecampaign_for_woocommerce_historical_sync_running_status' );
-		delete_option( 'activecampaign_for_woocommerce_historical_sync_scheduled_status' );
-		delete_option( 'activecampaign_for_woocommerce_historical_sync_stop' );
-		delete_option( 'activecampaign_for_woocommerce_last_order_sync' );
-		delete_option( 'activecampaign_for_woocommerce_product_sync_last_status' );
+		// Every option and transient of the plugin (settings, storage, sync statuses, account status, caches).
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options}
+			WHERE option_name LIKE 'activecampaign\_for\_woocommerce\_%'
+			OR option_name LIKE '\_transient\_%activecampaign\_for\_woocommerce\_%'
+			OR option_name LIKE '\_transient\_%acforwc\_%'"
+		);
+		// phpcs:enable
+		wp_cache_flush();
+
+		try {
+			AC_Scheduler::remove_all_events();
+		} catch ( Throwable $t ) {
+			$logger->warning( 'There was an issue removing the scheduled ActiveCampaign events.', array( 'message' => $t->getMessage() ) );
+		}
 
 		try {
 			User_Meta_Service::delete_all_user_meta();
@@ -66,7 +71,6 @@ class Activecampaign_For_Woocommerce_Uninstall_Plugin_Command implements Executa
 
 		try {
 			// Remove the DB version for our plugin because we're removing our table
-			add_option( 'activecampaign_for_woocommerce_db_version', null );
 			delete_option( 'activecampaign_for_woocommerce_db_version' );
 		} catch ( Throwable $t ) {
 			$logger->warning(

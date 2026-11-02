@@ -37,7 +37,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 
 			add_meta_box(
 				'woocommerce-order-activecampaign',
-				__( 'ActiveCampaign Data', 'activecampaign' ),
+				__( 'ActiveCampaign Data', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 				'Activecampaign_For_Woocommerce_Admin_WC_Order_Page::order_meta_box_display',
 				$screen,
 				'normal',
@@ -123,7 +123,7 @@ class Activecampaign_For_Woocommerce_Admin_WC_Order_Page implements Synced_Statu
 					set_transient( 'activecampaign_for_woocommerce_contact' . $wc_order->get_billing_email(), $ac_contact, 300 );
 				}
 
-				if ( isset( $table_data ) && is_null( $table_data->customer_email ) || ! isset( $table_data->ac_order_id ) ) {
+				if ( ( isset( $table_data ) && is_null( $table_data->customer_email ) ) || ! isset( $table_data->ac_order_id ) ) {
 					self::save_table_data( $wc_order, $table_data );
 
 					$table_data = self::get_table_data( $wc_order_id );

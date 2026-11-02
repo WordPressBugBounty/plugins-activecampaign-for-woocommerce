@@ -106,6 +106,11 @@ class Activecampaign_For_Woocommerce_Admin_Settings_Validator {
 					'ac_code'          => 'ASV_99',
 				)
 			);
+
+			// Never report "no errors" when the validation itself failed, otherwise the settings get saved unverified.
+			$this->errors[] = 'Something went wrong while validating the API settings, please try again.';
+
+			return $this->errors;
 		}
 	}
 
@@ -241,19 +246,19 @@ class Activecampaign_For_Woocommerce_Admin_Settings_Validator {
 				// Get existing connections
 				$this->connection_repository->find_current();
 			} catch ( Resource_Not_Found $e ) {
-				$this->log->error( (string) $e );
+				$this->logger->error( (string) $e );
 				$this->errors[] = 'ACTION NEEDED: Please connect your WooCommerce store in your ActiveCampaign account first.';
 			} catch ( ClientException $e ) {
-				$this->log->error( (string) $e );
+				$this->logger->error( (string) $e );
 				$this->errors[] = 'Either the API Url or API Key is invalid.';
 			} catch ( GuzzleException $e ) {
-				$this->log->error( (string) $e );
+				$this->logger->error( (string) $e );
 				$this->errors[] = 'Something went wrong while authenticating, please try again.';
 			} catch ( Exception $e ) {
-				$this->log->error( (string) $e );
+				$this->logger->error( (string) $e );
 				$this->errors[] = 'Something went wrong while authenticating, please try again.';
 			} catch ( Throwable $t ) {
-				$this->log->error( (string) $t );
+				$this->logger->error( (string) $t );
 				$this->errors[] = 'Something went wrong while authenticating, please try again.';
 			} finally {
 				// Restore old credentials

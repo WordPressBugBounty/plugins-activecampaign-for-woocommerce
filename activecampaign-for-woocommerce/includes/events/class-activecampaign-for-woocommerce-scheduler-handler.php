@@ -297,9 +297,6 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 
 			try {
 				$logger->debug( 'Clearing repeat scheduled event ' . $event['name'] );
-				if ( function_exists( 'wp_unschedule_event' ) ) {
-					wp_unschedule_event( time() + $handler->timestamp_offset, $event['frequency'], $event['hook'] );
-				}
 				if ( function_exists( 'wp_next_scheduled' ) && ! wp_next_scheduled( $event['hook'] ) ) {
 					$logger->debug( 'Removed scheduled event ' . $event['hook'] );
 				}
@@ -344,6 +341,13 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 		// Use action scheduler if we can
 
 		if ( $recurring ) {
+			if ( $reschedule && function_exists( 'wp_unschedule_hook' ) ) {
+				// Drop every WP-Cron entry of this hook whatever its args signature. An entry stored with
+				// args => null is invisible to wp_next_scheduled() / wp_clear_scheduled_hook(), which only
+				// match the array() signature, and is fatal in WP_Hook::apply_filters() on PHP 8 (DEFECT-35618).
+				wp_unschedule_hook( $event['hook'] );
+			}
+
 			// Try Action Scheduler
 			if (function_exists( 'as_schedule_recurring_action' ) ) { // Working!
 				// TODO: If reschedule true do we need to remove old? Does this replace?
@@ -355,11 +359,7 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 			}
 			if (empty( $scheduled_event ) ) {
 				// use WP Cron
-				if ( $reschedule ) {
-					$scheduled_event = wp_reschedule_event( $start_time, $event['frequency'], $event['hook'], $args, true );
-				} else {
-					$scheduled_event = wp_schedule_event( $start_time, $event['frequency'], $event['hook'], $args, true );
-				}
+				$scheduled_event = wp_schedule_event( $start_time, $event['frequency'], $event['hook'], $args, true );
 			}
 		} else {
 			// Try Action Scheduler single action
@@ -525,10 +525,8 @@ class Activecampaign_For_Woocommerce_Scheduler_Handler {
 			if (function_exists( 'wp_clear_scheduled_hook' ) ) {
 				wp_clear_scheduled_hook( $event['hook'], $args );
 			}
-		} else {
-			if (function_exists( 'wp_clear_scheduled_hook' ) ) {
+		} elseif (function_exists( 'wp_clear_scheduled_hook' ) ) {
 				wp_clear_scheduled_hook( $event['hook'] );
-			}
 		}
 
 		if ( ! $this->get_event_or_timestamp( $event, $args ) ) {

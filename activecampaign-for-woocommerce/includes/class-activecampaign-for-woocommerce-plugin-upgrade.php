@@ -56,7 +56,7 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 	 * @param     Activecampaign_For_Woocommerce_Ecom_Order_Repository $order_repository The ecom order repository.
 	 */
 	public function __construct(
-		Logger $logger = null,
+		?Logger $logger,
 		Order_Repository $order_repository
 	) {
 		if ( ! $logger ) {
@@ -171,14 +171,17 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 	/**
 	 * Adds our table to the WordPress install.
 	 */
-	private function install_table() {
-		$this->logger->info( 'Plugin Upgrade Install Table: Install the activecampaign_for_woocommerce_abandoned_cart table...' );
-		global $wpdb;
-		try {
-			$table_name      = $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME;
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (
+	/**
+	 * The full CREATE TABLE statement. dbDelta() diffs it against the existing table, so it also serves as the upgrade path
+	 * (dbDelta silently ignores ALTER TABLE statements).
+	 *
+	 * @param string $table_name      The prefixed table name.
+	 * @param string $charset_collate The charset/collation clause.
+	 *
+	 * @return string
+	 */
+	private function get_create_table_sql( $table_name, $charset_collate ) {
+		return "CREATE TABLE $table_name (
 			`id` INT NOT NULL AUTO_INCREMENT,
 			`synced_to_ac` TINYINT NOT NULL DEFAULT 0,
 			`customer_id` VARCHAR(45) NULL,
@@ -204,6 +207,16 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 			UNIQUE INDEX `ac_externalcheckoutid_UNIQUE` (`ac_externalcheckoutid` ASC),
 			INDEX `synced_to_ac` (`synced_to_ac` ASC),
 			INDEX `wc_order_id_ac_externalcheckoutid` (`wc_order_id` ASC, `ac_externalcheckoutid` ASC)) $charset_collate;";
+	}
+
+	private function install_table() {
+		$this->logger->info( 'Plugin Upgrade Install Table: Install the activecampaign_for_woocommerce_abandoned_cart table...' );
+		global $wpdb;
+		try {
+			$table_name      = $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME;
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = $this->get_create_table_sql( $table_name, $charset_collate );
 
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 			dbDelta( $sql );
@@ -302,9 +315,9 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 			$this->check_for_error( $wpdb );
 		}
 
-		// v1.1.2 //
+		// v1.1.2 + v1.1.3 (indexes; the full schema makes dbDelta add whatever is missing) //
 		try {
-			$sql = "ALTER TABLE $table_name ADD UNIQUE INDEX `wc_order_id_UNIQUE` (`wc_order_id` ASC)";
+			$sql = $this->get_create_table_sql( $table_name, $wpdb->get_charset_collate() );
 
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 			dbDelta( $sql );
@@ -312,30 +325,6 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		} catch ( Throwable $t ) {
 			$this->logger->error(
 				'There was an error upgrading the table for v1.1.2.',
-				array(
-					'message' => $t->getMessage(),
-					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
-				)
-			);
-			$this->check_for_error( $wpdb );
-		}
-
-		// v1.1.3 //
-		try {
-			$sql = "ALTER TABLE $table_name ADD INDEX `synced_to_ac` (`synced_to_ac` ASC)";
-
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-			dbDelta( $sql );
-			$this->check_for_error( $wpdb );
-
-			$sql = "ALTER TABLE $table_name ADD INDEX `wc_order_id_ac_externalcheckoutid` (`wc_order_id` ASC, `ac_externalcheckoutid` ASC)";
-
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-			dbDelta( $sql );
-			$this->check_for_error( $wpdb );
-		} catch ( Throwable $t ) {
-			$this->logger->error(
-				'There was an error upgrading the table for v1.1.3.',
 				array(
 					'message' => $t->getMessage(),
 					'trace'   => $this->logger->clean_trace( $t->getTrace() ),
@@ -363,10 +352,10 @@ class Activecampaign_For_Woocommerce_Plugin_Upgrade implements Executable {
 		$this->logger->info( 'Plugin Upgrade Command: Table upgrade finished!' );
 		$this->disable_old_webhooks();
 
-		// v1.1.6 //
-		// Clear the scheduled hooks and build new ten minute ones.
-		wp_clear_scheduled_hook( 'activecampaign_for_woocommerce_cart_updated_recurring_event' );
-		wp_clear_scheduled_hook( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_NEW_ORDER_SYNC_NAME );
+		// v1.1.7 / ECMM-3018 //
+		// A forced reschedule drops every WP-Cron signature of the recurring hooks (wp_clear_scheduled_hook()
+		// left args => null entries behind, DEFECT-35618) and rebuilds them, Action Scheduler first.
+		Activecampaign_For_Woocommerce_Scheduler_Handler::schedule_all_recurring_events( true );
 	}
 
 	/**

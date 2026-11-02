@@ -43,8 +43,6 @@ use Activecampaign_For_Woocommerce_Subscription_Events as Subscription_Events;
 use Activecampaign_For_Woocommerce_New_Subscription_Sync_Job as New_Subscription_Sync;
 use Activecampaign_For_Woocommerce_Admin_Subscription_Page as Admin_Subscription_Page;
 use Activecampaign_For_Woocommerce_Account_Status_Manager as Account_Status_Manager;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
  * The core plugin class.
@@ -403,7 +401,8 @@ class Activecampaign_For_Woocommerce {
 	 * @access   private
 	 */
 	private function set_locale() {
-		$this->loader->add_action( 'plugins_loaded', $this->i18n, 'load_plugin_textdomain' );
+		// We are already inside plugins_loaded here, so a plugins_loaded hook would never fire.
+		$this->loader->add_action( 'init', $this->i18n, 'load_plugin_textdomain' );
 	}
 
 	/**
@@ -445,8 +444,9 @@ class Activecampaign_For_Woocommerce {
 			1
 		);
 
+		// We are already inside plugins_loaded here; init is the next hook that runs on every request.
 		$this->loader->add_action(
-			'plugins_loaded',
+			'init',
 			$this->plugin_upgrade_command,
 			'execute',
 			1
@@ -489,6 +489,16 @@ class Activecampaign_For_Woocommerce {
 			'woocommerce_cart_item_removed',
 			$this->cart_events,
 			'cart_updated'
+		);
+
+		// Quantity changes outside the classic cart form (Blocks cart / Store API, AJAX side carts) only fire this
+		// hook; the handler skips the classic form submit, which is covered by the filter above.
+		$this->loader->add_action(
+			'woocommerce_after_cart_item_quantity_update',
+			$this->cart_events,
+			'cart_quantity_updated',
+			10,
+			3
 		);
 
 		$this->loader->add_action(
@@ -646,6 +656,25 @@ class Activecampaign_For_Woocommerce {
 		// This is called on trashing an order or a product
 		$this->loader->add_action(
 			'wp_trash_post',
+			$this->order_events,
+			'execute_order_deleted',
+			1
+		);
+		// With HPOS orders are not posts; WooCommerce fires its own hooks when an order is trashed or deleted.
+		$this->loader->add_action(
+			'woocommerce_before_trash_order',
+			$this->admin,
+			'remove_deleted_order',
+			1
+		);
+		$this->loader->add_action(
+			'woocommerce_before_delete_order',
+			$this->admin,
+			'remove_deleted_order',
+			1
+		);
+		$this->loader->add_action(
+			'woocommerce_before_trash_order',
 			$this->order_events,
 			'execute_order_deleted',
 			1
@@ -917,14 +946,6 @@ class Activecampaign_For_Woocommerce {
 			ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_SYNC_NAME,
 			$this->historical_sync,
 			'run_sync',
-			1,
-			2
-		);
-
-		$this->loader->add_action(
-			ACTIVECAMPAIGN_FOR_WOOCOMMERCE_RUN_HISTORICAL_SYNC_NAME,
-			$this->historical_sync,
-			'run_validation',
 			1,
 			2
 		);
@@ -1237,9 +1258,38 @@ class Activecampaign_For_Woocommerce {
 	}
 
 	/**
+	 * Rejects the plugin's admin-ajax.php / admin-post.php requests from users who cannot manage WooCommerce.
+	 *
+	 * Runs on admin_init, i.e. before the wp_ajax_* / admin_post_* hook of the individual handler.
+	 */
+	public function require_capability_for_admin_ajax() {
+		if ( ! wp_doing_ajax() && ( ! isset( $GLOBALS['pagenow'] ) || 'admin-post.php' !== $GLOBALS['pagenow'] ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only the action name is read, to decide whether this request is ours.
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+
+		$is_plugin_action = 0 === strpos( $action, 'activecampaign_for_woocommerce_' )
+			|| in_array( $action, array( 'api_test', 'account-status-blockade-remove' ), true );
+
+		// The guest abandoned-cart sync is a storefront call (wp_ajax_nopriv) protected by its own nonce.
+		if ( ! $is_plugin_action || 'activecampaign_for_woocommerce_cart_sync_guest' === $action ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'Forbidden', 403 );
+		}
+	}
+
+	/**
 	 * Defines the admin ajax calls
 	 */
 	public function define_admin_ajax_hooks() {
+		// Every admin AJAX / admin-post action of the plugin is for store managers only; checked once, before any handler runs.
+		$this->loader->add_action( 'admin_init', $this, 'require_capability_for_admin_ajax' );
+
 		$this->loader->add_action(
 			'wp_ajax_api_test',
 			$this->admin,
@@ -1455,67 +1505,25 @@ class Activecampaign_For_Woocommerce {
 		);
 
 		// Verify the checkbox should display
-		if (
-			$ops['checkbox_display_option']
-			&& $ops['optin_checkbox_text']
-			&& ! empty( $ops['checkbox_display_option'] )
-			&& ! empty( $ops['optin_checkbox_text'] )
-		) {
-			if ( 'not_visible' !== $ops['checkbox_display_option'] ) {
-				$this->loader->add_action(
-					'woocommerce_checkout_create_order',
-					$this->add_accepts_marketing_to_customer_meta_command,
-					'execute',
-					90
-				);
+		if ( empty( $ops['checkbox_display_option'] ) || empty( $ops['optin_checkbox_text'] ) || 'not_visible' === $ops['checkbox_display_option'] ) {
+			$this->logger->debug( 'Checkbox actions cannot be run. checkbox_display_option and/or optin_checkbox_text are not defined, or the checkbox is set to not_visible.' );
 
-				$this->loader->add_action(
-					'woocommerce_store_api_checkout_order_processed',
-					$this->add_accepts_marketing_to_customer_meta_command,
-					'execute'
-				);
-
-				if ( class_exists( CartCheckoutUtils::class ) && CartCheckoutUtils::is_checkout_block_default() ) {
-					$this->loader->add_action(
-						'woocommerce_init',
-						$this->public,
-						'handle_woocommerce_blocks_checkout_form',
-						5
-					);
-				} else {
-					$this->loader->add_action(
-						'woocommerce_after_checkout_billing_form',
-						$this->public,
-						'handle_woocommerce_checkout_form',
-						5
-					);
-
-					// this hook is a fallback method in case we can't find the billing form hook
-					$this->loader->add_action(
-						'woocommerce_after_checkout_form',
-						$this->public,
-						'handle_woocommerce_checkout_form',
-						5
-					);
-				}
-			}
-		} else {
-			$this->logger->debug( 'Checkbox actions cannot be run. checkbox_display_option and/or optin_checkbox_text are not defined or not available in your theme.' );
+			return;
 		}
-	}
 
-	public static function is_checkout_block_default() {
-		if ( wp_is_block_theme() ) {
-			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
-			foreach ( $templates_from_db as $template ) {
-				if ( has_block( 'woocommerce/checkout', $template->content ) ) {
-					return true;
-				}
-			}
+		$this->loader->add_action( 'woocommerce_checkout_create_order', $this->add_accepts_marketing_to_customer_meta_command, 'execute', 90 );
+		$this->loader->add_action( 'woocommerce_store_api_checkout_order_processed', $this->add_accepts_marketing_to_customer_meta_command, 'execute' );
+
+		// Both checkout flavours are always wired up: the additional field only exists in the Checkout block and the
+		// template hooks only fire in the classic (shortcode) checkout, so whichever one the theme or a page builder
+		// renders gets the checkbox - nothing is guessed from the checkout page content at bootstrap.
+		$this->loader->add_action( 'woocommerce_init', $this->public, 'handle_woocommerce_blocks_checkout_form', 5 );
+
+		// Classic checkout: the first hook that fires wins (the handler renders once per request). Nothing from
+		// review-order.php / payment.php - that fragment is re-rendered on every address change and would reset the box.
+		foreach ( array( 'woocommerce_after_checkout_billing_form', 'woocommerce_checkout_after_customer_details', 'woocommerce_after_checkout_form' ) as $hook ) {
+			$this->loader->add_action( $hook, $this->public, 'handle_woocommerce_checkout_form', 5 );
 		}
-		$checkout_page_id = wc_get_page_id( 'checkout' );
-
-		return $checkout_page_id && has_block( 'woocommerce/checkout', $checkout_page_id );
 	}
 
 	/**

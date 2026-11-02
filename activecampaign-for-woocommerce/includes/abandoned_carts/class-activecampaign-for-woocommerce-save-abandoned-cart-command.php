@@ -46,7 +46,7 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 	 * @param     Logger $logger     The logger interface.
 	 */
 	public function __construct(
-		Logger $logger = null
+		?Logger $logger = null
 	) {
 		if ( ! $logger ) {
 			$this->logger = new Logger();
@@ -312,7 +312,7 @@ class Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command implements Sync
 					'customer_email'                 => $customer_data['email'],
 					'customer_first_name'            => $customer_data['first_name'],
 					'customer_last_name'             => $customer_data['last_name'],
-					'last_access_time'               => $dt->format( 'Y-m-d H:i:s e' ),
+					'last_access_time'               => $dt->format( 'Y-m-d H:i:s' ), // DATETIME column, always UTC
 					'customer_ref_json'              => wp_json_encode( $customer_data, JSON_UNESCAPED_UNICODE ),
 					'user_ref_json'                  => wp_json_encode( $current_user, JSON_UNESCAPED_UNICODE ),
 					'cart_ref_json'                  => wp_json_encode( $cart, JSON_UNESCAPED_UNICODE ),

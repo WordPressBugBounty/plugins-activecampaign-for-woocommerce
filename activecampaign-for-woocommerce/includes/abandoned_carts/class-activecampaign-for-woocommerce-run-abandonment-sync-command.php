@@ -86,14 +86,6 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 	private $abandoned_date;
 
 	/**
-	 * The time set in settings for expiration..
-	 *
-	 * @since 2.4.5
-	 * @var String|int The expiration time.
-	 */
-	private $expire_time;
-
-	/**
 	 * Activecampaign_For_Woocommerce_Update_Cart_Command constructor.
 	 *
 	 * @param     Activecampaign_For_Woocommerce_Admin|null         $admin     The admin object.
@@ -139,8 +131,8 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 		$interval_minutes = 0;
 
 		if ( false !== $last_run ) {
-			$interval         = date_diff( $now, $last_run );
-			$interval_minutes = $interval->format( '%i' );
+			// Whole minutes since the last run (DateInterval::format('%i') is only the 0-59 minutes component).
+			$interval_minutes = intdiv( abs( $now->getTimestamp() - $last_run->getTimestamp() ), 60 );
 		}
 
 		if ( false === $last_run || 5 <= $interval_minutes ) {
@@ -1104,7 +1096,7 @@ class Activecampaign_For_Woocommerce_Run_Abandonment_Sync_Command implements Syn
 				if ( ! empty( $cart->calc_abandoned_date ) && empty( $cart->abandoned_date ) ) {
 					$c_ab_date = new DateTime( $cart->calc_abandoned_date, new DateTimeZone( 'UTC' ) );
 
-					return $c_ab_date->format( 'Y-m-d H:i:s e' );
+					return $c_ab_date->format( 'Y-m-d H:i:s' ); // DATETIME column, always UTC
 				} elseif ( empty( $cart->calc_abandoned_date ) && empty( $cart->abandoned_date ) ) {
 					// If the DB somehow fails to calculate the date
 					if ( $i >= $this->expire_time || $hourdiff >= $this->expire_time ) {

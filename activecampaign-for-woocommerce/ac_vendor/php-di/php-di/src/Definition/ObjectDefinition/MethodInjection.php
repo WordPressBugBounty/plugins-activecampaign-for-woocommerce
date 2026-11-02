@@ -12,62 +12,52 @@ use AcVendor\DI\Definition\Definition;
 class MethodInjection implements Definition
 {
     /**
-     * @var string
+     * @param mixed[] $parameters
      */
-    private $methodName;
-    /**
-     * @var mixed[]
-     */
-    private $parameters = [];
-    public function __construct(string $methodName, array $parameters = [])
+    public function __construct(private string $methodName, private array $parameters = [])
     {
-        $this->methodName = $methodName;
-        $this->parameters = $parameters;
     }
-    public static function constructor(array $parameters = []) : self
+    public static function constructor(array $parameters = []): self
     {
         return new self('__construct', $parameters);
     }
-    public function getMethodName() : string
+    public function getMethodName(): string
     {
         return $this->methodName;
     }
     /**
      * @return mixed[]
      */
-    public function getParameters() : array
+    public function getParameters(): array
     {
         return $this->parameters;
     }
     /**
      * Replace the parameters of the definition by a new array of parameters.
      */
-    public function replaceParameters(array $parameters)
+    public function replaceParameters(array $parameters): void
     {
         $this->parameters = $parameters;
     }
-    public function merge(self $definition)
+    public function merge(self $definition): void
     {
         // In case of conflicts, the current definition prevails.
-        $this->parameters = $this->parameters + $definition->parameters;
+        $this->parameters += $definition->parameters;
     }
-    public function getName() : string
+    public function getName(): string
     {
         return '';
     }
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         // The name does not matter for method injections
     }
-    public function replaceNestedDefinitions(callable $replacer)
+    public function replaceNestedDefinitions(callable $replacer): void
     {
-        $this->parameters = \array_map($replacer, $this->parameters);
+        $this->parameters = array_map($replacer, $this->parameters);
     }
-    /**
-     * {@inheritdoc}
-     */
-    public function __toString()
+    public function __toString(): string
     {
-        return \sprintf('method(%s)', $this->methodName);
+        return sprintf('method(%s)', $this->methodName);
     }
 }

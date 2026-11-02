@@ -189,8 +189,8 @@ class Activecampaign_For_Woocommerce_Utilities {
 			case 'sync_data':
 			default:
 				if (
-					current_user_can_for_site( get_current_network_id(), 'manage_woocommerce' ) ||
-					current_user_can_for_site( get_current_network_id(), 'install_plugins' )
+					current_user_can( 'manage_woocommerce' ) ||
+					current_user_can( 'install_plugins' )
 				) {
 					return true;
 				}

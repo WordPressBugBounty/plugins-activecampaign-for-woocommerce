@@ -5,23 +5,24 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
+class ComposerStaticInit733de5386031ec2a237fee58e09e767d
 {
     public static $files = array (
-        '4d6de7bbf0d2d08e5e1054b8e1fd07ba' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '7bb495cfa90c06088920c6d29d41b792' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        '184a779d3f658600e0010e85ce6da202' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        '4d6de7bbf0d2d08e5e1054b8e1fd07ba' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         '3ac1a16c8f202e2e2fa54b453bab8684' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '47bab381cd75597a205592cc7f28361e' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
-        'A' => 
+        'A' =>
         array (
+            'AcVendor\\Symfony\\Polyfill\\Php80\\' => 32,
             'AcVendor\\Psr\\Log\\' => 17,
             'AcVendor\\Psr\\Http\\Message\\' => 26,
             'AcVendor\\Psr\\Http\\Client\\' => 25,
             'AcVendor\\Psr\\Container\\' => 23,
-            'AcVendor\\PhpDocReader\\' => 22,
             'AcVendor\\Laravel\\SerializableClosure\\' => 37,
             'AcVendor\\Invoker\\' => 17,
             'AcVendor\\GuzzleHttp\\Psr7\\' => 25,
@@ -34,62 +35,63 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
     );
 
     public static $prefixDirsPsr4 = array (
-        'AcVendor\\Psr\\Log\\' => 
+        'AcVendor\\Symfony\\Polyfill\\Php80\\' =>
         array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
-        'AcVendor\\Psr\\Http\\Message\\' => 
+        'AcVendor\\Psr\\Log\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/src',
+        ),
+        'AcVendor\\Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
             1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
-        'AcVendor\\Psr\\Http\\Client\\' => 
+        'AcVendor\\Psr\\Http\\Client\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
         ),
-        'AcVendor\\Psr\\Container\\' => 
+        'AcVendor\\Psr\\Container\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'AcVendor\\PhpDocReader\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader',
-        ),
-        'AcVendor\\Laravel\\SerializableClosure\\' => 
+        'AcVendor\\Laravel\\SerializableClosure\\' =>
         array (
             0 => __DIR__ . '/..' . '/laravel/serializable-closure/src',
         ),
-        'AcVendor\\Invoker\\' => 
+        'AcVendor\\Invoker\\' =>
         array (
             0 => __DIR__ . '/..' . '/php-di/invoker/src',
         ),
-        'AcVendor\\GuzzleHttp\\Psr7\\' => 
+        'AcVendor\\GuzzleHttp\\Psr7\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'AcVendor\\GuzzleHttp\\Promise\\' => 
+        'AcVendor\\GuzzleHttp\\Promise\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'AcVendor\\GuzzleHttp\\' => 
+        'AcVendor\\GuzzleHttp\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'AcVendor\\DI\\' => 
+        'AcVendor\\DI\\' =>
         array (
             0 => __DIR__ . '/..' . '/php-di/php-di/src',
         ),
-        'AcVendor\\Brick\\Money\\' => 
+        'AcVendor\\Brick\\Money\\' =>
         array (
             0 => __DIR__ . '/..' . '/brick/money/src',
         ),
-        'AcVendor\\Brick\\Math\\' => 
+        'AcVendor\\Brick\\Math\\' =>
         array (
             0 => __DIR__ . '/..' . '/brick/math/src',
         ),
     );
 
     public static $classMap = array (
+        'AcVendor\\Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'AcVendor\\Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',
         'AcVendor\\Brick\\Math\\BigInteger' => __DIR__ . '/..' . '/brick/math/src/BigInteger.php',
         'AcVendor\\Brick\\Math\\BigNumber' => __DIR__ . '/..' . '/brick/math/src/BigNumber.php',
@@ -130,8 +132,8 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\Brick\\Money\\MoneyComparator' => __DIR__ . '/..' . '/brick/money/src/MoneyComparator.php',
         'AcVendor\\Brick\\Money\\MoneyContainer' => __DIR__ . '/..' . '/brick/money/src/MoneyContainer.php',
         'AcVendor\\Brick\\Money\\RationalMoney' => __DIR__ . '/..' . '/brick/money/src/RationalMoney.php',
-        'AcVendor\\DI\\Annotation\\Inject' => __DIR__ . '/..' . '/php-di/php-di/src/Annotation/Inject.php',
-        'AcVendor\\DI\\Annotation\\Injectable' => __DIR__ . '/..' . '/php-di/php-di/src/Annotation/Injectable.php',
+        'AcVendor\\DI\\Attribute\\Inject' => __DIR__ . '/..' . '/php-di/php-di/src/Attribute/Inject.php',
+        'AcVendor\\DI\\Attribute\\Injectable' => __DIR__ . '/..' . '/php-di/php-di/src/Attribute/Injectable.php',
         'AcVendor\\DI\\CompiledContainer' => __DIR__ . '/..' . '/php-di/php-di/src/CompiledContainer.php',
         'AcVendor\\DI\\Compiler\\Compiler' => __DIR__ . '/..' . '/php-di/php-di/src/Compiler/Compiler.php',
         'AcVendor\\DI\\Compiler\\ObjectCreationCompiler' => __DIR__ . '/..' . '/php-di/php-di/src/Compiler/ObjectCreationCompiler.php',
@@ -145,7 +147,7 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\DI\\Definition\\Definition' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Definition.php',
         'AcVendor\\DI\\Definition\\Dumper\\ObjectDefinitionDumper' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Dumper/ObjectDefinitionDumper.php',
         'AcVendor\\DI\\Definition\\EnvironmentVariableDefinition' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/EnvironmentVariableDefinition.php',
-        'AcVendor\\DI\\Definition\\Exception\\InvalidAnnotation' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Exception/InvalidAnnotation.php',
+        'AcVendor\\DI\\Definition\\Exception\\InvalidAttribute' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Exception/InvalidAttribute.php',
         'AcVendor\\DI\\Definition\\Exception\\InvalidDefinition' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Exception/InvalidDefinition.php',
         'AcVendor\\DI\\Definition\\ExtendsPreviousDefinition' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/ExtendsPreviousDefinition.php',
         'AcVendor\\DI\\Definition\\FactoryDefinition' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/FactoryDefinition.php',
@@ -168,7 +170,7 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\DI\\Definition\\Resolver\\ParameterResolver' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Resolver/ParameterResolver.php',
         'AcVendor\\DI\\Definition\\Resolver\\ResolverDispatcher' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Resolver/ResolverDispatcher.php',
         'AcVendor\\DI\\Definition\\SelfResolvingDefinition' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/SelfResolvingDefinition.php',
-        'AcVendor\\DI\\Definition\\Source\\AnnotationBasedAutowiring' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Source/AnnotationBasedAutowiring.php',
+        'AcVendor\\DI\\Definition\\Source\\AttributeBasedAutowiring' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Source/AttributeBasedAutowiring.php',
         'AcVendor\\DI\\Definition\\Source\\Autowiring' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Source/Autowiring.php',
         'AcVendor\\DI\\Definition\\Source\\DefinitionArray' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Source/DefinitionArray.php',
         'AcVendor\\DI\\Definition\\Source\\DefinitionFile' => __DIR__ . '/..' . '/php-di/php-di/src/Definition/Source/DefinitionFile.php',
@@ -187,7 +189,9 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\DI\\Invoker\\DefinitionParameterResolver' => __DIR__ . '/..' . '/php-di/php-di/src/Invoker/DefinitionParameterResolver.php',
         'AcVendor\\DI\\Invoker\\FactoryParameterResolver' => __DIR__ . '/..' . '/php-di/php-di/src/Invoker/FactoryParameterResolver.php',
         'AcVendor\\DI\\NotFoundException' => __DIR__ . '/..' . '/php-di/php-di/src/NotFoundException.php',
+        'AcVendor\\DI\\Proxy\\NativeProxyFactory' => __DIR__ . '/..' . '/php-di/php-di/src/Proxy/NativeProxyFactory.php',
         'AcVendor\\DI\\Proxy\\ProxyFactory' => __DIR__ . '/..' . '/php-di/php-di/src/Proxy/ProxyFactory.php',
+        'AcVendor\\DI\\Proxy\\ProxyFactoryInterface' => __DIR__ . '/..' . '/php-di/php-di/src/Proxy/ProxyFactoryInterface.php',
         'AcVendor\\GuzzleHttp\\BodySummarizer' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizer.php',
         'AcVendor\\GuzzleHttp\\BodySummarizerInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizerInterface.php',
         'AcVendor\\GuzzleHttp\\Client' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Client.php',
@@ -212,14 +216,20 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\GuzzleHttp\\Handler\\CurlFactoryInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlFactoryInterface.php',
         'AcVendor\\GuzzleHttp\\Handler\\CurlHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlHandler.php',
         'AcVendor\\GuzzleHttp\\Handler\\CurlMultiHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php',
+        'AcVendor\\GuzzleHttp\\Handler\\CurlShareHandleState' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlShareHandleState.php',
+        'AcVendor\\GuzzleHttp\\Handler\\CurlVersion' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlVersion.php',
         'AcVendor\\GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
         'AcVendor\\GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
+        'AcVendor\\GuzzleHttp\\Handler\\HostValidator' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HostValidator.php',
         'AcVendor\\GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/MockHandler.php',
         'AcVendor\\GuzzleHttp\\Handler\\Proxy' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/Proxy.php',
+        'AcVendor\\GuzzleHttp\\Handler\\ProxyEnvironment' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/ProxyEnvironment.php',
         'AcVendor\\GuzzleHttp\\Handler\\StreamHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/StreamHandler.php',
+        'AcVendor\\GuzzleHttp\\Handler\\TlsVersion' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/TlsVersion.php',
         'AcVendor\\GuzzleHttp\\MessageFormatter' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/MessageFormatter.php',
         'AcVendor\\GuzzleHttp\\MessageFormatterInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/MessageFormatterInterface.php',
         'AcVendor\\GuzzleHttp\\Middleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Middleware.php',
+        'AcVendor\\GuzzleHttp\\Multiplexing' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Multiplexing.php',
         'AcVendor\\GuzzleHttp\\Pool' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Pool.php',
         'AcVendor\\GuzzleHttp\\PrepareBodyMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/PrepareBodyMiddleware.php',
         'AcVendor\\GuzzleHttp\\Promise\\AggregateException' => __DIR__ . '/..' . '/guzzlehttp/promises/src/AggregateException.php',
@@ -258,6 +268,7 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\GuzzleHttp\\Psr7\\Query' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Query.php',
         'AcVendor\\GuzzleHttp\\Psr7\\Request' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Request.php',
         'AcVendor\\GuzzleHttp\\Psr7\\Response' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Response.php',
+        'AcVendor\\GuzzleHttp\\Psr7\\Rfc3986' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Rfc3986.php',
         'AcVendor\\GuzzleHttp\\Psr7\\Rfc7230' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Rfc7230.php',
         'AcVendor\\GuzzleHttp\\Psr7\\ServerRequest' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/ServerRequest.php',
         'AcVendor\\GuzzleHttp\\Psr7\\Stream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Stream.php',
@@ -273,6 +284,7 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\GuzzleHttp\\RequestOptions' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/RequestOptions.php',
         'AcVendor\\GuzzleHttp\\RetryMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/RetryMiddleware.php',
         'AcVendor\\GuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransferStats.php',
+        'AcVendor\\GuzzleHttp\\TransportSharing' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransportSharing.php',
         'AcVendor\\GuzzleHttp\\Utils' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Utils.php',
         'AcVendor\\Invoker\\CallableResolver' => __DIR__ . '/..' . '/php-di/invoker/src/CallableResolver.php',
         'AcVendor\\Invoker\\Exception\\InvocationException' => __DIR__ . '/..' . '/php-di/invoker/src/Exception/InvocationException.php',
@@ -289,10 +301,7 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\Invoker\\ParameterResolver\\ResolverChain' => __DIR__ . '/..' . '/php-di/invoker/src/ParameterResolver/ResolverChain.php',
         'AcVendor\\Invoker\\ParameterResolver\\TypeHintResolver' => __DIR__ . '/..' . '/php-di/invoker/src/ParameterResolver/TypeHintResolver.php',
         'AcVendor\\Invoker\\Reflection\\CallableReflection' => __DIR__ . '/..' . '/php-di/invoker/src/Reflection/CallableReflection.php',
-        'AcVendor\\PhpDocReader\\AnnotationException' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/AnnotationException.php',
-        'AcVendor\\PhpDocReader\\PhpDocReader' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/PhpDocReader.php',
-        'AcVendor\\PhpDocReader\\PhpParser\\TokenParser' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/PhpParser/TokenParser.php',
-        'AcVendor\\PhpDocReader\\PhpParser\\UseStatementParser' => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader/PhpParser/UseStatementParser.php',
+        'AcVendor\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'AcVendor\\Psr\\Container\\ContainerExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerExceptionInterface.php',
         'AcVendor\\Psr\\Container\\ContainerInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerInterface.php',
         'AcVendor\\Psr\\Container\\NotFoundExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/NotFoundExceptionInterface.php',
@@ -313,61 +322,18 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'AcVendor\\Psr\\Http\\Message\\UploadedFileInterface' => __DIR__ . '/..' . '/psr/http-message/src/UploadedFileInterface.php',
         'AcVendor\\Psr\\Http\\Message\\UriFactoryInterface' => __DIR__ . '/..' . '/psr/http-factory/src/UriFactoryInterface.php',
         'AcVendor\\Psr\\Http\\Message\\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php',
-        'AcVendor\\Psr\\Log\\AbstractLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/AbstractLogger.php',
-        'AcVendor\\Psr\\Log\\InvalidArgumentException' => __DIR__ . '/..' . '/psr/log/Psr/Log/InvalidArgumentException.php',
-        'AcVendor\\Psr\\Log\\LogLevel' => __DIR__ . '/..' . '/psr/log/Psr/Log/LogLevel.php',
-        'AcVendor\\Psr\\Log\\LoggerAwareInterface' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerAwareInterface.php',
-        'AcVendor\\Psr\\Log\\LoggerAwareTrait' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerAwareTrait.php',
-        'AcVendor\\Psr\\Log\\LoggerInterface' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerInterface.php',
-        'AcVendor\\Psr\\Log\\LoggerTrait' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerTrait.php',
-        'AcVendor\\Psr\\Log\\NullLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/NullLogger.php',
-        'AcVendor\\Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/DummyTest.php',
-        'AcVendor\\Psr\\Log\\Test\\LoggerInterfaceTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
-        'AcVendor\\Psr\\Log\\Test\\TestLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/TestLogger.php',
-        'ActivatorTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce-activator.php',
+        'AcVendor\\Psr\\Log\\AbstractLogger' => __DIR__ . '/..' . '/psr/log/src/AbstractLogger.php',
+        'AcVendor\\Psr\\Log\\InvalidArgumentException' => __DIR__ . '/..' . '/psr/log/src/InvalidArgumentException.php',
+        'AcVendor\\Psr\\Log\\LogLevel' => __DIR__ . '/..' . '/psr/log/src/LogLevel.php',
+        'AcVendor\\Psr\\Log\\LoggerAwareInterface' => __DIR__ . '/..' . '/psr/log/src/LoggerAwareInterface.php',
+        'AcVendor\\Psr\\Log\\LoggerAwareTrait' => __DIR__ . '/..' . '/psr/log/src/LoggerAwareTrait.php',
+        'AcVendor\\Psr\\Log\\LoggerInterface' => __DIR__ . '/..' . '/psr/log/src/LoggerInterface.php',
+        'AcVendor\\Psr\\Log\\LoggerTrait' => __DIR__ . '/..' . '/psr/log/src/LoggerTrait.php',
+        'AcVendor\\Psr\\Log\\NullLogger' => __DIR__ . '/..' . '/psr/log/src/NullLogger.php',
+        'AcVendor\\Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'AcVendor\\UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'AcVendor\\ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'ActiveCampaign_For_WooCommerce_Runtime_Exception' => __DIR__ . '/../..' . '/includes/exceptions/class-activecampaign-for-woocommerce-runtime-exception.php',
-        'ActivecampaignForWoocommerceAddAcceptsMarketingToCustomerMetaCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-add-accepts-marketing-to-customer-meta-command.php',
-        'ActivecampaignForWoocommerceAddCartIdToOrderCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-add-cart-id-to-order-command.php',
-        'ActivecampaignForWoocommerceAdminSettingsUpdatedEventTest' => __DIR__ . '/../..' . '/tests/includes/events/test-class-activecampaign-for-woocommerce-admin-settings-updated-event.php',
-        'ActivecampaignForWoocommerceAdminSettingsValidatorTest' => __DIR__ . '/../..' . '/tests/admin/test-class-activecampaign-for-woocommerce-admin-settings-validator.php',
-        'ActivecampaignForWoocommerceAdminTest' => __DIR__ . '/../..' . '/tests/admin/test-class-activecampaign-for-woocommerce-admin.php',
-        'ActivecampaignForWoocommerceApiClientTest' => __DIR__ . '/../..' . '/tests/includes/api-client/test-class-activecampaign-for-woocommerce-api-client.php',
-        'ActivecampaignForWoocommerceApiSerializableTest' => __DIR__ . '/../..' . '/tests/includes/traits/test-class-activecampaign-for-woocommerce-api-serializable.php',
-        'ActivecampaignForWoocommerceCartEmptiedEventTest' => __DIR__ . '/../..' . '/tests/includes/events/test-class-activecampaign-for-woocommerce-cart-emptied-event.php',
-        'ActivecampaignForWoocommerceCartUpdatedEventTest' => __DIR__ . '/../..' . '/tests/includes/events/test-class-activecampaign-for-woocommerce-cart-updated-event.php',
-        'ActivecampaignForWoocommerceClearUserMetaCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-clear-user-meta-command.php',
-        'ActivecampaignForWoocommerceClientIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/api-client/test-class-activecampaign-for-woocommerce-api-client-integration.php',
-        'ActivecampaignForWoocommerceCofeEcomOrderLineItemTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-cofe-ecom-order-line-item.php',
-        'ActivecampaignForWoocommerceCofeOrderBuilderTest' => __DIR__ . '/../..' . '/tests/includes/orders/test-class-activecampaign-for-woocommerce-cofe-order-builder.php',
-        'ActivecampaignForWoocommerceConnectionOptionRepositoryIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-connection-option-repository-integration.php',
-        'ActivecampaignForWoocommerceConnectionOptionTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-connection-option.php',
-        'ActivecampaignForWoocommerceConnectionRepositoryTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-connection-repository.php',
-        'ActivecampaignForWoocommerceConnectionTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-connection.php',
-        'ActivecampaignForWoocommerceConnection_OptionRepositoryTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-connection-option-repository.php',
-        'ActivecampaignForWoocommerceCreateAndSaveCartIdCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-create-and-save-cart-id-command.php',
-        'ActivecampaignForWoocommerceCreateOrUpdateConnectionOptionCommandIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-create-or-update-connection-option-command-integration.php',
-        'ActivecampaignForWoocommerceCreateOrUpdateConnectionOptionCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-create-or-update-connection-option-command.php',
-        'ActivecampaignForWoocommerceDeleteConnectionIdCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-delete-cart-id-command.php',
-        'ActivecampaignForWoocommerceEcomCustomerRepositoryIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-ecom-customer-repository-integration.php',
-        'ActivecampaignForWoocommerceEcomCustomerRepositoryTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-ecom-customer-repository.php',
-        'ActivecampaignForWoocommerceEcomCustomerTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-ecom-customer.php',
-        'ActivecampaignForWoocommerceEcomOrderRepositoryIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-ecom-order-repository-integration.php',
-        'ActivecampaignForWoocommerceEcomOrderRepositoryTest' => __DIR__ . '/../..' . '/tests/includes/repositories/test-class-activecampaign-for-woocommerce-ecom-order-repository.php',
-        'ActivecampaignForWoocommerceEcomOrderTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-ecom-order.php',
-        'ActivecampaignForWoocommerceEcomProductTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-ecom-product.php',
-        'ActivecampaignForWoocommerceLoaderTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce-loader.php',
-        'ActivecampaignForWoocommerceLoggerTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce-logger.php',
-        'ActivecampaignForWoocommerceMainFileTest' => __DIR__ . '/../..' . '/tests/test-activecampaign-for-woocommerce.php',
-        'ActivecampaignForWoocommercePublicTest' => __DIR__ . '/../..' . '/tests/public/test-class-activecampaign-for-woocommerce-public.php',
-        'ActivecampaignForWoocommerceSetConnectionIdCacheIntegrationTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-set-connection-id-cache-command-integration.php',
-        'ActivecampaignForWoocommerceSetConnectionIdCacheTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-set-connection-id-cache-command.php',
-        'ActivecampaignForWoocommerceSimpleGraphqlSerializerTest' => __DIR__ . '/../..' . '/tests/includes/models/test-class-activecampaign-for-woocommerce-simple-graphql-serializer.php',
-        'ActivecampaignForWoocommerceSyncGuestAbandonedCartCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-sync-guest-abandoned-cart-command.php',
-        'ActivecampaignForWoocommerceTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce.php',
-        'ActivecampaignForWoocommerceUninstallPluginCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-uninstall-plugin-command.php',
-        'ActivecampaignForWoocommerceUninstallTest' => __DIR__ . '/../..' . '/tests/test-uninstall.php',
-        'ActivecampaignForWoocommerceUpdateCartCommandTest' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-update-cart-command.php',
-        'ActivecampaignForWoocommerceUserMetaServiceTest' => __DIR__ . '/../..' . '/tests/includes/services/test-class-activecampaign-for-woocommerce-user-meta-service.php',
         'Activecampaign_For_Woocommerce' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce.php',
         'Activecampaign_For_Woocommerce_AC_Contact' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-ac-contact.php',
         'Activecampaign_For_Woocommerce_AC_Contact_Batch' => __DIR__ . '/../..' . '/includes/models/class-activecampaign-for-woocommerce-ac-contact-batch.php',
@@ -382,7 +348,6 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'Activecampaign_For_Woocommerce_Account_Status_Manager' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-account-status-manager.php',
         'Activecampaign_For_Woocommerce_Activator' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce-activator.php',
         'Activecampaign_For_Woocommerce_Add_Accepts_Marketing_To_Customer_Meta_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-add-accepts-marketing-to-customer-meta-command.php',
-        'Activecampaign_For_Woocommerce_Add_Cart_Id_To_Order_Command' => __DIR__ . '/../..' . '/includes/commands/class-activecampaign-for-woocommerce-add-cart-id-to-order-command.php',
         'Activecampaign_For_Woocommerce_Admin' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin.php',
         'Activecampaign_For_Woocommerce_Admin_Abandoned_Cart' => __DIR__ . '/../..' . '/admin/class-activecampaign-for-woocommerce-admin-abandoned-cart.php',
         'Activecampaign_For_Woocommerce_Admin_Connections' => __DIR__ . '/../..' . '/admin/trait-activecampaign-for-woocommerce-admin-connections.php',
@@ -490,19 +455,14 @@ class ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21
         'Activecampaign_For_Woocommerce_Utilities' => __DIR__ . '/../..' . '/includes/class-activecampaign-for-woocommerce-utilities.php',
         'Activecampaign_For_Woocommerce_Whitelist_Repository' => __DIR__ . '/../..' . '/includes/repositories/class-activecampaign-for-woocommerce-whitelist-repository.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'DeactivatorTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce-deactivator.php',
-        'FileLoader' => __DIR__ . '/../..' . '/tests/helpers/FileLoader.php',
-        'I18nTest' => __DIR__ . '/../..' . '/tests/includes/test-class-activecampaign-for-woocommerce-i18n.php',
-        'WC_Session_Stub' => __DIR__ . '/../..' . '/tests/includes/commands/test-class-activecampaign-for-woocommerce-sync-guest-abandoned-cart-command.php',
-        'WireMockConfiguration' => __DIR__ . '/../..' . '/tests/helpers/WireMockConfiguration.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInite32b51f31dea7c87b3c4de8669f5bd21::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit733de5386031ec2a237fee58e09e767d::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit733de5386031ec2a237fee58e09e767d::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit733de5386031ec2a237fee58e09e767d::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -35,6 +35,36 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 	private $browse_session_repository;
 
 	/**
+	 * woocommerce_after_cart_item_quantity_update fires once per changed line item. When the classic cart form is
+	 * submitted, WooCommerce then runs the woocommerce_update_cart_action_cart_updated filter, which is already
+	 * hooked to cart_updated(), so syncing here as well would cost N+1 identical runs per "Update cart" click.
+	 * Every other caller (Blocks cart through the Store API, AJAX side carts, custom code) has no such follow-up
+	 * hook and is synced here, as long as the quantity really changed.
+	 *
+	 * @param string    $cart_item_key The cart item key.
+	 * @param int|float $quantity      The new quantity.
+	 * @param int|float $old_quantity  The previous quantity.
+	 */
+	public function cart_quantity_updated( $cart_item_key, $quantity, $old_quantity ) {
+		if ( $this->is_classic_cart_form_submit() || (float) $quantity === (float) $old_quantity ) {
+			return;
+		}
+
+		$this->cart_updated( $cart_item_key );
+	}
+
+	/**
+	 * WC_Form_Handler::update_cart_action() handles the classic cart form when one of these fields is posted
+	 * (the nonce is verified there, this only decides whether that handler will run).
+	 *
+	 * @return bool
+	 */
+	protected function is_classic_cart_form_submit() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- read-only check, WooCommerce verifies the nonce.
+		return ! empty( $_POST['update_cart'] ) || ! empty( $_POST['proceed'] );
+	}
+
+	/**
 	 * Activecampaign_For_Woocommerce_Product_Sync_Job constructor.
 	 *
 	 * @param Logger|null               $logger The logger object.
@@ -59,7 +89,10 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 	}
 
 	public function cart_updated( ...$args ) {
-		$logger = new Logger();
+		// woocommerce_update_cart_action_cart_updated is a filter: WooCommerce only recalculates the totals when the
+		// returned value stays truthy, so whatever came in goes back out (actions ignore the return value).
+		$passthrough = $args[0] ?? null;
+		$logger      = new Logger();
 		$this->create_and_save_cart_id();
 
 		$wc_customer = wc()->customer;
@@ -78,7 +111,7 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 					)
 				);
 
-				return false;
+				return $passthrough;
 			}
 
 			// An update cart event should update the browse session to keep it active.
@@ -112,8 +145,9 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 				)
 			);
 
-			return false;
 		}
+
+		return $passthrough;
 	}
 
 	/**
@@ -134,7 +168,7 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 		 * @var WC_Order $order
 		 */
 		$logger = new Logger();
-		if ( ! is_admin() && ! WC()->session->has_session() ) {
+		if ( ! is_admin() && WC()->session && ! WC()->session->has_session() ) {
 			WC()->session->set_customer_session_cookie( true );
 		}
 
@@ -198,9 +232,8 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 						 * The first item is used to generate the externalcheckoutid so
 						 * Hosted knows to convert the pending order to completed.
 						 */
-						$woocommerce_session_cookie = wc()->session->get_session_cookie();
-
-						$woocommerce_session_hash = $woocommerce_session_cookie[0];
+						// Same value as the first element of the session cookie, but also available when the cookie is not set yet.
+						$woocommerce_session_hash = wc()->session->get_customer_id();
 
 						$persistant_cart_id = $this->generate_externalcheckoutid(
 							$woocommerce_session_hash,
@@ -215,6 +248,8 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 					$persistant_cart_id,
 					true
 				);
+				// On the Store API path the order is already persisted when this runs, so the meta has to be saved explicitly.
+				$order->save_meta_data();
 
 				return $order;
 			} else {
@@ -238,7 +273,7 @@ class Activecampaign_For_Woocommerce_Cart_Events {
 		}
 	}
 
-	private function create_and_save_cart_id() {
+	protected function create_and_save_cart_id() {
 		$logger = new Logger();
 		try {
 			$user_id = get_current_user_id();

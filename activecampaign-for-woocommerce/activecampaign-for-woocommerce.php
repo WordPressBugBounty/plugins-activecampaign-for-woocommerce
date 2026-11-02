@@ -16,11 +16,11 @@
  * Plugin Name:          ActiveCampaign for WooCommerce
  * Plugin URI:           https://www.activecampaign.com/
  * Description:          Add Abandoned Cart functionality to your WooCommerce store, synchronize order & customer information using ActiveCampaign.
- * Version:              2.11.3
- * WC requires at least: 7.4.0
- * WC tested up to:      9.8.5
- * Requires at least:    6.0
- * Requires PHP:         7.4
+ * Version:              3.0.1
+ * WC requires at least: 10.0
+ * WC tested up to:      11.2.1
+ * Requires at least:    7.0
+ * Requires PHP:         8.1
  * Author:               ActiveCampaign
  * Author URI:           https://www.activecampaign.com/
  * License:              GPL-2.0+
@@ -60,7 +60,7 @@ add_action(
 
 add_action(
 	'before_woocommerce_init',
-	function() {
+	function () {
 		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
 		}
@@ -189,7 +189,7 @@ function activecampaign_for_woocommerce_plugin_row_meta( $links, $file ) {
 	}
 
 	$row_meta = array(
-		'support' => '<a href="' . esc_url( apply_filters( 'activecampaign_for_woocommerce_support_url', 'https://activecampaign.com/contact/' ) ) . '" aria-label="' . esc_attr__( 'Contact Support', 'activecampaign' ) . '">' . esc_html__( 'Contact Support', 'activecampaign' ) . '</a>',
+		'support' => '<a href="' . esc_url( apply_filters( 'activecampaign_for_woocommerce_support_url', 'https://activecampaign.com/contact/' ) ) . '" aria-label="' . esc_attr__( 'Contact Support', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . '">' . esc_html__( 'Contact Support', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . '</a>',
 	);
 
 	return array_merge( $links, $row_meta );

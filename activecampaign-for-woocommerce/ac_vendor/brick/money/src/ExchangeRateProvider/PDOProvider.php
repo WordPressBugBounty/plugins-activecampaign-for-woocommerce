@@ -3,6 +3,7 @@
 declare (strict_types=1);
 namespace AcVendor\Brick\Money\ExchangeRateProvider;
 
+use AcVendor\Brick\Math\BigNumber;
 use AcVendor\Brick\Money\ExchangeRateProvider;
 use AcVendor\Brick\Money\Exception\CurrencyConversionException;
 /**
@@ -13,15 +14,15 @@ final class PDOProvider implements ExchangeRateProvider
     /**
      * The SELECT statement.
      */
-    private \PDOStatement $statement;
+    private readonly \PDOStatement $statement;
     /**
      * The source currency code if fixed, or null if dynamic.
      */
-    private ?string $sourceCurrencyCode = null;
+    private readonly ?string $sourceCurrencyCode;
     /**
      * The target currency code if fixed, or null if dynamic.
      */
-    private ?string $targetCurrencyCode = null;
+    private readonly ?string $targetCurrencyCode;
     /**
      * Extra parameters set dynamically to resolve the query placeholders.
      */
@@ -35,34 +36,25 @@ final class PDOProvider implements ExchangeRateProvider
     public function __construct(\PDO $pdo, PDOProviderConfiguration $configuration)
     {
         $conditions = [];
-        if ($configuration->tableName === null) {
-            throw new \InvalidArgumentException('Invalid configuration: $tableName is not set.');
-        }
-        if ($configuration->exchangeRateColumnName === null) {
-            throw new \InvalidArgumentException('Invalid configuration: $exchangeRateColumnName is not set.');
-        }
-        if ($configuration->sourceCurrencyCode !== null && $configuration->targetCurrencyCode !== null) {
-            throw new \InvalidArgumentException('Invalid configuration: $sourceCurrencyCode and $targetCurrencyCode cannot be both set.');
-        }
         if ($configuration->whereConditions !== null) {
-            $conditions[] = '(' . $configuration->whereConditions . ')';
+            $conditions[] = sprintf('(%s)', $configuration->whereConditions);
         }
+        $sourceCurrencyCode = null;
+        $targetCurrencyCode = null;
         if ($configuration->sourceCurrencyCode !== null) {
-            $this->sourceCurrencyCode = $configuration->sourceCurrencyCode;
+            $sourceCurrencyCode = $configuration->sourceCurrencyCode;
         } elseif ($configuration->sourceCurrencyColumnName !== null) {
-            $conditions[] = $configuration->sourceCurrencyColumnName . ' = ?';
-        } else {
-            throw new \InvalidArgumentException('Invalid configuration: one of $sourceCurrencyCode or $sourceCurrencyColumnName must be set.');
+            $conditions[] = sprintf('%s = ?', $configuration->sourceCurrencyColumnName);
         }
         if ($configuration->targetCurrencyCode !== null) {
-            $this->targetCurrencyCode = $configuration->targetCurrencyCode;
+            $targetCurrencyCode = $configuration->targetCurrencyCode;
         } elseif ($configuration->targetCurrencyColumnName !== null) {
-            $conditions[] = $configuration->targetCurrencyColumnName . ' = ?';
-        } else {
-            throw new \InvalidArgumentException('Invalid configuration: one of $targetCurrencyCode or $targetCurrencyColumnName must be set.');
+            $conditions[] = sprintf('%s = ?', $configuration->targetCurrencyColumnName);
         }
-        $conditions = \implode(' AND ', $conditions);
-        $query = \sprintf('SELECT %s FROM %s WHERE %s', $configuration->exchangeRateColumnName, $configuration->tableName, $conditions);
+        $this->sourceCurrencyCode = $sourceCurrencyCode;
+        $this->targetCurrencyCode = $targetCurrencyCode;
+        $conditions = implode(' AND ', $conditions);
+        $query = sprintf('SELECT %s FROM %s WHERE %s', $configuration->exchangeRateColumnName, $configuration->tableName, $conditions);
         $this->statement = $pdo->prepare($query);
     }
     /**
@@ -70,19 +62,15 @@ final class PDOProvider implements ExchangeRateProvider
      *
      * This is used in conjunction with $whereConditions in the configuration class.
      * The number of parameters passed to this method must match the number of placeholders.
-     *
-     * @param mixed ...$parameters
-     *
-     * @return void
      */
-    public function setParameters(...$parameters) : void
+    public function setParameters(mixed ...$parameters): void
     {
         $this->parameters = $parameters;
     }
     /**
      * {@inheritdoc}
      */
-    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode)
+    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode): int|float|string
     {
         $parameters = $this->parameters;
         if ($this->sourceCurrencyCode === null) {
@@ -105,9 +93,9 @@ final class PDOProvider implements ExchangeRateProvider
                 $info = [];
                 /** @psalm-suppress MixedAssignment */
                 foreach ($this->parameters as $parameter) {
-                    $info[] = \var_export($parameter, \true);
+                    $info[] = var_export($parameter, \true);
                 }
-                $info = 'parameters: ' . \implode(', ', $info);
+                $info = 'parameters: ' . implode(', ', $info);
             } else {
                 $info = null;
             }

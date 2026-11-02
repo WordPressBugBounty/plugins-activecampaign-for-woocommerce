@@ -3,6 +3,7 @@
 declare (strict_types=1);
 namespace AcVendor\DI\Definition\Source;
 
+use AcVendor\DI\Definition\Definition;
 /**
  * Reads DI definitions from a file returning a PHP array.
  *
@@ -10,30 +11,21 @@ namespace AcVendor\DI\Definition\Source;
  */
 class DefinitionFile extends DefinitionArray
 {
-    /**
-     * @var bool
-     */
-    private $initialized = \false;
-    /**
-     * File containing definitions, or null if the definitions are given as a PHP array.
-     * @var string|null
-     */
-    private $file;
+    private bool $initialized = \false;
     /**
      * @param string $file File in which the definitions are returned as an array.
      */
-    public function __construct($file, Autowiring $autowiring = null)
+    public function __construct(private string $file, ?Autowiring $autowiring = null)
     {
         // Lazy-loading to improve performances
-        $this->file = $file;
         parent::__construct([], $autowiring);
     }
-    public function getDefinition(string $name)
+    public function getDefinition(string $name): ?Definition
     {
         $this->initialize();
         return parent::getDefinition($name);
     }
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         $this->initialize();
         return parent::getDefinitions();
@@ -41,13 +33,13 @@ class DefinitionFile extends DefinitionArray
     /**
      * Lazy-loading of the definitions.
      */
-    private function initialize()
+    private function initialize(): void
     {
         if ($this->initialized === \true) {
             return;
         }
-        $definitions = (require $this->file);
-        if (!\is_array($definitions)) {
+        $definitions = require $this->file;
+        if (!is_array($definitions)) {
             throw new \Exception("File {$this->file} should return an array of definitions");
         }
         $this->addDefinitions($definitions);

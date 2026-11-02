@@ -2,6 +2,26 @@
 
 **ActiveCampaign for WooCommerce**
 
+= 3.0.1 2026-11-02 =
+* Documentation: the plugin listing now states the current minimum requirements (PHP 8.1, WordPress 7.0, WooCommerce 10.0) and shows an upgrade notice before updating
+
+= 3.0.0 2026-11-02 =
+* Requires PHP 8.1 or newer, WordPress 7.0 or newer and WooCommerce 10.0 or newer; tested with WordPress 7.1 and WooCommerce 11.2
+* Security: all admin actions of the plugin now require the "Manage WooCommerce" capability; the API key is no longer written to log files
+* Fix: orders deleted or trashed on stores using High-Performance Order Storage were not removed from the sync table and were retried forever
+* Fix: the abandoned-cart checkout id was not saved on orders placed through the block checkout; quantity changes in the block cart are now tracked
+* Fix: plugin translations and database upgrades hooked on plugin load never ran; database indexes were not created when upgrading from very old versions
+* Fix: timezone and interval calculations in the abandoned cart sync, historical sync delay and connection health check
+* Fix: settings could be saved unverified when the connection check failed
+* Improvement: PHP 8.1 - 8.4 compatibility (no deprecation notices), updated libraries (PHP-DI 7, PSR Log 3, Brick Money 0.10)
+* Improvement: uninstalling removes every plugin option, transient and scheduled action
+* Improvement: admin pages show spinners, progress bars and a finished notice for connection test, settings save, historical sync and product sync
+* Fix: the marketing consent checkbox is shown on both the Checkout block and the classic checkout regardless of theme; the "checked by default" option is honoured by the Checkout block
+* Fix: the product sync no longer loads every variation of a variable product at once; stores with very large variable products could run out of memory and never finish the sync
+* Fix: a malformed WP-Cron entry of the recurring sync could stop every scheduled task of the site with a fatal error on PHP 8; the recurring hooks are now cleaned and rebuilt on update and on every settings save
+* Fix: the historical sync now includes orders the regular sync never processed and no longer reports a whole batch as failed because of a validation error in one group
+* Fix: an empty "Product URL patterns" field no longer disables Browse Abandonment; the default patterns are sent instead
+
 = 2.11.3 2026-10-20 =
 * Fix: Order line item prices are no longer rounded to whole currency units; refunded items are synced with the correct unit price
 

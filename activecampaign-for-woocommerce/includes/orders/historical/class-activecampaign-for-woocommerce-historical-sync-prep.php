@@ -55,19 +55,11 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		$subscription_historical_sync = new Subscription_Historical_Sync();
 		$subscription_historical_sync->execute();
 
-		// phpcs:disable
-		// Get all unsynced orders to exclude from this process. They should sync normally.
-		$exclude = $wpdb->get_col(
-			'SELECT wc_order_id 
-			FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME
-								   . ' WHERE `wc_order_id` IS NOT NULL 
-                AND `synced_to_ac` = ' . self::STATUS_UNSYNCED
-		);
-		// phpcs:enable
-
+		// Orders already in our table (whatever their status) are skipped by prep_loop(); UNSYNCED ones are
+		// picked up by mark_orders_for_prep() so a stalled regular sync does not hide them from the historical sync.
 		$current_page = 0;
 
-		$first_set_pagination = $this->get_order_ids_by_page( $current_page, $batch_limit, $exclude, null, true );
+		$first_set_pagination = $this->get_order_ids_by_page( $current_page, $batch_limit, null, null, true );
 
 		if ( isset( $first_set_pagination->total, $first_set_pagination->max_num_pages ) ) {
 			if ( ! isset( $first_set_pagination->orders ) ||
@@ -102,7 +94,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		while ( $current_page <= $max_pages ) {
 			try {
 				// $start_memory    = memory_get_usage();
-				$orders_id_array = $this->get_order_ids_by_page( $current_page, $batch_limit, $exclude );
+				$orders_id_array = $this->get_order_ids_by_page( $current_page, $batch_limit );
 
 				if ( ! isset( $orders_id_array[0] ) ) {
 					// no orders
@@ -116,7 +108,6 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 					array(
 						'page'        => $current_page,
 						'batch_limit' => $batch_limit,
-						'exclude'     => $exclude,
 						'message'     => $t->getMessage(),
 						'trace'       => $t->getTrace(),
 					)
@@ -194,7 +185,6 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		$in_str = implode(
 			',',
 			array(
-				self::STATUS_UNSYNCED,
 				self::STATUS_ON_HOLD,
 				self::STATUS_REFUND,
 				self::STATUS_ABANDONED_CART_RECOVERED,
@@ -202,7 +192,8 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Prep implements Executable,
 		);
 
 		// phpcs:disable
-		// Mark all orders in the table already as ready for prep so we aren't making unnecessary calls for data we already have
+		// Mark all orders in the table already as ready for prep so we aren't making unnecessary calls for data we already have.
+		// UNSYNCED (0) rows are included on purpose: they belong to orders the regular sync never processed (ECMM-3017).
 		$wpdb->query(
 			'
 			UPDATE ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . '

@@ -100,13 +100,13 @@ class Activecampaign_For_Woocommerce_Update_Cart_Command implements Activecampai
 	 * @param     Logger                                    $logger     The logger interface.
 	 */
 	public function __construct(
-		WC_Cart $cart = null,
-		WC_Customer $customer = null,
+		?WC_Cart $cart,
+		?WC_Customer $customer,
 		Admin $admin,
 		Ecom_Order_Factory $factory,
 		Ecom_Order_Repository $order_repository,
 		Ecom_Customer_Repository $customer_repository,
-		Logger $logger = null
+		?Logger $logger = null
 	) {
 		$this->cart                = $cart;
 		$this->customer            = $customer;

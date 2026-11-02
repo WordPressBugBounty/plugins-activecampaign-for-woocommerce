@@ -33,6 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     $( "#activecampaign-update-api-button" ).click(function(e) {
         e.preventDefault();
+        const $btn = $(this);
+        if ($btn.hasClass('disabled')) {
+            return;
+        }
         const form = $('#activecampaign-for-woocommerce-options-form');
         const nonceVal = $('#activecampaign_for_woocommerce_settings_nonce_field');
 
@@ -42,8 +46,11 @@ document.addEventListener("DOMContentLoaded", function () {
         data.activecampaign_for_woocommerce_settings_nonce_field = nonceVal.attr('value');
         data.action = 'api_test';
 
-        let url = $(this).attr("data-value");
+        let url = $btn.attr("data-value");
         let type = 'POST';
+
+        $btn.addClass('disabled');
+        $('#activecampaign-api-test-spinner').addClass('is-active');
 
         $.ajax({
             url: url,
@@ -54,9 +61,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert(response.data.notices[0].message);
             }
         }).fail(response => {
-            if (response.responseJSON.data.errors && response.responseJSON.data.errors.length > 0) {
-                alert(response.responseJSON.data.errors[0].message);
-            }
+            const errors = (response.responseJSON && response.responseJSON.data && response.responseJSON.data.errors) || [];
+            alert(errors.length > 0 ? errors[0].message : 'Connection test failed (' + response.status + ' ' + response.statusText + ').');
+        }).always(() => {
+            $btn.removeClass('disabled');
+            $('#activecampaign-api-test-spinner').removeClass('is-active');
         });
     });
 
@@ -370,19 +379,27 @@ document.addEventListener("DOMContentLoaded", function () {
         let data = form.serialize();
         $('.update-notice').remove();
         e.preventDefault();
+        // Saving also re-schedules the cron syncs server-side, which takes a while.
+        $('#ac-update-settings').prop('disabled', true);
+        $('#ac-update-settings-spinner').addClass('is-active');
         $.ajax({
             url,
             type,
             data
         }).done(response => {
             $("#update-notifications").append('<div class="update-notice notice-success notice is-dismissible"><p>Settings saved</p><button id="my-dismiss-admin-message" class="notice-dismiss" type="button"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
-            window.location.search += '&manual_setup=1';
+            const url = new URL(window.location.href);
+            url.searchParams.set('manual_setup', '1');
+            window.location.href = url.toString();
         }).fail(response => {
-            if(response.status !== 200 || response.responseJSON.success === false){
+            $('#ac-update-settings').prop('disabled', false);
+            $('#ac-update-settings-spinner').removeClass('is-active');
+            const json = response.responseJSON || {};
+            if(response.status !== 200 || json.success === false){
                 $("#update-notifications").append('<div class="update-notice error notice is-dismissible"><p>Settings not saved - ' + response.status + ' ' + response.statusText + '</p><button id="my-dismiss-admin-message" class="notice-dismiss" type="button"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
             }
-            if (response.responseJSON.data.errors && response.responseJSON.data.errors.length > 0) {
-                let errors = response.responseJSON.data.errors;
+            const errors = (json.data && json.data.errors) || [];
+            if (errors.length > 0) {
                 $.each(errors, function( key, error) {
                     $("#update-notifications").append('<div class="update-notice error notice is-dismissible"><p>' + error.message + '</p><button id="my-dismiss-admin-message" class="notice-dismiss" type="button"><span class="screen-reader-text">Dismiss this notice.</span></button></div>');
                 });

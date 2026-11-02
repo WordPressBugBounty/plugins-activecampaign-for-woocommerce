@@ -204,6 +204,24 @@ return array(
 		);
 	},
 
+	// The cart/customer/logger parameters are nullable without a default (PHP 8.4 forbids `Type $x = null` before
+	// required parameters); without these factories the container would autowire a fresh WC_Cart / WC_Customer.
+	Activecampaign_For_Woocommerce_Update_Cart_Command::class => static function (
+		Admin $admin,
+		Activecampaign_For_Woocommerce_Ecom_Order_Factory $factory,
+		Ecom_Order_Repository $order_repository,
+		Ecom_Customer_Repository $customer_repository
+	) {
+		return new Activecampaign_For_Woocommerce_Update_Cart_Command( null, null, $admin, $factory, $order_repository, $customer_repository );
+	},
+
+	User_Registered::class                            => static function (
+		Admin $admin,
+		Ecom_Customer_Repository $customer_repository
+	) {
+		return new User_Registered( $admin, null, $customer_repository );
+	},
+
 	Activecampaign_For_Woocommerce_Save_Abandoned_Cart_Command::class => static function (
 		Logger $logger
 	) {

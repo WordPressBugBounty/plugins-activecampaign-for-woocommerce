@@ -357,10 +357,7 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				$stored_id = $stored_row->id;
 			}
 
-			$was_abandoned = false;
-			if ( null !== $stored_row->abandoned_date ) {
-				$was_abandoned = true;
-			}
+			$was_abandoned = ! empty( $stored_row->abandoned_date );
 			if (
 				isset( wc()->session ) &&
 				! is_null( wc()->session ) &&
@@ -368,33 +365,6 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 				self::validate_object( wc()->session, 'get' )
 			) {
 				$abandoned_cart_id = wc()->session->get( 'activecampaign_abandoned_cart_id' );
-			}
-
-			if ( isset( $stored_id ) && empty( $stored_id ) ) {
-				if ( isset( $abandoned_cart_id ) && ! empty( $abandoned_cart_id ) ) {
-					$stored_id = $wpdb->get_var(
-					// phpcs:disable
-						$wpdb->prepare(
-							'SELECT id FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
-								WHERE id = %d 
-								OR ac_externalcheckoutid = %s 
-								OR activecampaignfwc_order_external_uuid = %s',
-							[ $abandoned_cart_id, $externalcheckoutid, $cart_uuid ]
-						)
-					// phpcs:enable
-					);
-				} else {
-					$stored_id = $wpdb->get_var(
-					// phpcs:disable
-						$wpdb->prepare(
-							'SELECT id FROM ' . $wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME . ' 
-								WHERE ac_externalcheckoutid = %s 
-								OR activecampaignfwc_order_external_uuid = %s',
-							[ $externalcheckoutid, $cart_uuid ]
-						)
-					// phpcs:enable
-					);
-				}
 			}
 		} catch ( Throwable $t ) {
 			$this->logger->error(
@@ -412,8 +382,8 @@ class Activecampaign_For_Woocommerce_New_Order_Created_Event {
 		}
 
 		try {
-			$dt = new DateTime( $wc_order->get_date_created(), new DateTimeZone( 'UTC' ) );
-			$dt->format( 'Y-m-d H:i:s' );
+			// get_date_created() is a WC_DateTime in the store timezone (or null); the table stores UTC.
+			$dt = $wc_order->get_date_created() ? ( clone $wc_order->get_date_created() )->setTimezone( new DateTimeZone( 'UTC' ) ) : new DateTime( 'now', new DateTimeZone( 'UTC' ) );
 
 			if ( ! isset( $customer_data['id'], $customer_data['email'] ) ) {
 				return;

@@ -3,6 +3,7 @@
 declare (strict_types=1);
 namespace AcVendor\Brick\Money\ExchangeRateProvider;
 
+use AcVendor\Brick\Math\BigNumber;
 use AcVendor\Brick\Money\Exception\CurrencyConversionException;
 use AcVendor\Brick\Money\ExchangeRateProvider;
 /**
@@ -27,9 +28,9 @@ final class ProviderChain implements ExchangeRateProvider
      *
      * @return ProviderChain This instance, for chaining.
      */
-    public function addExchangeRateProvider(ExchangeRateProvider $provider) : self
+    public function addExchangeRateProvider(ExchangeRateProvider $provider): self
     {
-        $hash = \spl_object_id($provider);
+        $hash = spl_object_id($provider);
         $this->providers[$hash] = $provider;
         return $this;
     }
@@ -42,16 +43,16 @@ final class ProviderChain implements ExchangeRateProvider
      *
      * @return ProviderChain This instance, for chaining.
      */
-    public function removeExchangeRateProvider(ExchangeRateProvider $provider) : self
+    public function removeExchangeRateProvider(ExchangeRateProvider $provider): self
     {
-        $hash = \spl_object_id($provider);
+        $hash = spl_object_id($provider);
         unset($this->providers[$hash]);
         return $this;
     }
     /**
      * {@inheritdoc}
      */
-    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode)
+    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode): BigNumber|int|float|string
     {
         foreach ($this->providers as $provider) {
             try {

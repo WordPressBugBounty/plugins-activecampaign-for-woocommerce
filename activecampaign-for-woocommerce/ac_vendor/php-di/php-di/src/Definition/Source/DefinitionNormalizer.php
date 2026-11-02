@@ -20,30 +20,24 @@ use AcVendor\DI\Definition\ValueDefinition;
  */
 class DefinitionNormalizer
 {
-    /**
-     * @var Autowiring
-     */
-    private $autowiring;
-    public function __construct(Autowiring $autowiring)
+    public function __construct(private Autowiring $autowiring)
     {
-        $this->autowiring = $autowiring;
     }
     /**
      * Normalize a definition that is *not* nested in another one.
      *
      * This is usually a definition declared at the root of a definition array.
      *
-     * @param mixed $definition
      * @param string $name The definition name.
      * @param string[] $wildcardsReplacements Replacements for wildcard definitions.
      *
      * @throws InvalidDefinition
      */
-    public function normalizeRootDefinition($definition, string $name, array $wildcardsReplacements = null) : Definition
+    public function normalizeRootDefinition(mixed $definition, string $name, ?array $wildcardsReplacements = null): Definition
     {
         if ($definition instanceof DefinitionHelper) {
             $definition = $definition->getDefinition($name);
-        } elseif (\is_array($definition)) {
+        } elseif (is_array($definition)) {
             $definition = new ArrayDefinition($definition);
         } elseif ($definition instanceof \Closure) {
             $definition = new FactoryDefinition($name, $definition);
@@ -56,30 +50,28 @@ class DefinitionNormalizer
             $definition->replaceWildcards($wildcardsReplacements);
         }
         if ($definition instanceof AutowireDefinition) {
+            /** @var AutowireDefinition $definition */
             $definition = $this->autowiring->autowire($name, $definition);
         }
         $definition->setName($name);
         try {
             $definition->replaceNestedDefinitions([$this, 'normalizeNestedDefinition']);
         } catch (InvalidDefinition $e) {
-            throw InvalidDefinition::create($definition, \sprintf('Definition "%s" contains an error: %s', $definition->getName(), $e->getMessage()), $e);
+            throw InvalidDefinition::create($definition, sprintf('Definition "%s" contains an error: %s', $definition->getName(), $e->getMessage()), $e);
         }
         return $definition;
     }
     /**
      * Normalize a definition that is nested in another one.
      *
-     * @param mixed $definition
-     * @return mixed
-     *
      * @throws InvalidDefinition
      */
-    public function normalizeNestedDefinition($definition)
+    public function normalizeNestedDefinition(mixed $definition): mixed
     {
         $name = '<nested definition>';
         if ($definition instanceof DefinitionHelper) {
             $definition = $definition->getDefinition($name);
-        } elseif (\is_array($definition)) {
+        } elseif (is_array($definition)) {
             $definition = new ArrayDefinition($definition);
         } elseif ($definition instanceof \Closure) {
             $definition = new FactoryDefinition($name, $definition);

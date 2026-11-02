@@ -1039,7 +1039,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 
 		if ( ! empty( $order_data['date_created'] ) ) {
 			try {
-				$created_date = new DateTime( $order_data['date_created'], new DateTimeZone( 'UTC' ) );
+				$created_date = $this->to_utc_datetime( $order_data['date_created'] );
 				$this->set_order_date( $created_date->format( DATE_ATOM ) );
 				$this->set_external_created_date( $created_date->format( DATE_ATOM ) );
 			} catch ( Throwable $t ) {
@@ -1055,7 +1055,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		// If somehow the date field is not populated use a fallback
 		if ( empty( $this->get_external_created_date() ) ) {
 			try {
-				$created_date = new DateTime( $wc_order->get_date_created(), new DateTimeZone( 'UTC' ) );
+				$created_date = $this->to_utc_datetime( $wc_order->get_date_created() );
 				$this->set_order_date( $created_date->format( DATE_ATOM ) );
 				$this->set_external_created_date( $created_date->format( DATE_ATOM ) );
 			} catch ( Throwable $t ) {
@@ -1080,7 +1080,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 
 		if ( ! empty( $order_data['date_modified'] ) ) {
 			try {
-				$modified_date = new DateTime( $order_data['date_modified'], new DateTimeZone( 'UTC' ) );
+				$modified_date = $this->to_utc_datetime( $order_data['date_modified'] );
 				$this->set_external_updated_date( $modified_date->format( DATE_ATOM ) );
 			} catch ( Throwable $t ) {
 				$logger->error(
@@ -1095,7 +1095,7 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 		// If somehow the date field is not populated use a fallback
 		if ( empty( $this->get_external_updated_date() ) ) {
 			try {
-				$modified_date = new DateTime( $wc_order->get_date_modified(), new DateTimeZone( 'UTC' ) );
+				$modified_date = $this->to_utc_datetime( $wc_order->get_date_modified() );
 				$this->set_order_date( $modified_date->format( DATE_ATOM ) );
 				$this->set_external_updated_date( $modified_date->format( DATE_ATOM ) );
 			} catch ( Throwable $t ) {
@@ -1324,5 +1324,20 @@ class Activecampaign_For_Woocommerce_Cofe_Ecom_Order implements Ecom_Model, Has_
 	 */
 	private static function date_format( $wc_date_field ): ?string {
 		return null !== $wc_date_field ? $wc_date_field->__toString() : null;
+	}
+	/**
+	 * Converts a WC_DateTime / DateTime (store timezone) or a date string to a DateTime in UTC.
+	 *
+	 * @param DateTimeInterface|string|null $value The date to convert.
+	 *
+	 * @return DateTime
+	 * @throws Exception When the value cannot be parsed.
+	 */
+	private function to_utc_datetime( $value ) {
+		if ( $value instanceof DateTimeInterface ) {
+			return new DateTime( '@' . $value->getTimestamp() ); // '@' timestamps are always UTC
+		}
+
+		return new DateTime( (string) $value, new DateTimeZone( 'UTC' ) );
 	}
 }

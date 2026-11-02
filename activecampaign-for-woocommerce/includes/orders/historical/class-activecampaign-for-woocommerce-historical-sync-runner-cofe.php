@@ -114,8 +114,8 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 
 		// Delay run is for cases where the AC system is not available
 		if ( false !== $delay_run ) {
-			$interval         = date_diff( $now, $delay_run );
-			$interval_minutes = $interval->format( '%i' );
+			// Whole minutes since the delay was set (DateInterval::format('%i') is only the 0-59 minutes component).
+			$interval_minutes = intdiv( abs( $now->getTimestamp() - $delay_run->getTimestamp() ), 60 );
 			if ( $interval_minutes >= 5 ) {
 				$this->logger->info( 'Continue sync. A wait delay was set on historical sync due to a connection issue with ActiveCampaign.' );
 				delete_option( 'activecampaign_for_woocommerce_historical_sync_delay' );
@@ -355,6 +355,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 	private function bulk_sync_data( &$order_ids ) {
 		$cofe_order_group_count = 0;
 		$cofe_order_group_split = array();
+		$cofe_order_group_ids   = array();
 		$word_count             = 0;
 
 		foreach ( $order_ids as $k => $order_id ) {
@@ -432,6 +433,7 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 				}
 
 				$cofe_order_group_split[ $cofe_order_group_count ][] = $serialized_cofe_order;
+				$cofe_order_group_ids[ $cofe_order_group_count ][]   = $order_id;
 			} catch ( Throwable $t ) {
 				$this->logger->warning(
 					'Historical sync order failed to serialize and may not sync.',
@@ -442,20 +444,26 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 						'trace'    => $t->getTrace(),
 					)
 				);
+				// Not in any group, so it must not be marked SYNCED with the batch; it stays queued for the next run.
+				unset( $order_ids[ $k ] );
 			}
 		}
 
-		foreach ( $cofe_order_group_split as $group ) {
+		foreach ( $cofe_order_group_split as $group_index => $group ) {
+			// Only the IDs of this group: a validation error in one group must not re-queue the orders of the others.
+			$group_order_ids = $cofe_order_group_ids[ $group_index ];
+
 			if ( ! empty( $group ) ) {
-				$r = $this->run_bulk_sync_mutation( $group, $order_ids );
+				$r = $this->run_bulk_sync_mutation( $group, $group_order_ids );
 			}
 
 			if ( isset( $r ) && 'grammar_tokens' === $r ) {
-				$chunks = array_chunk( $group, count( $group ) / 3, false );
+				$chunks = array_chunk( $group, (int) ceil( count( $group ) / 3 ), false );
 
 				foreach ( $chunks as $chunk ) {
 					if ( ! empty( $chunk ) ) {
-						$this->run_bulk_sync_mutation( $chunk, $order_ids );
+						// ponytail: chunks of serialized orders have no ID map, so every chunk still gets the whole group's IDs.
+						$this->run_bulk_sync_mutation( $chunk, $group_order_ids );
 					}
 				}
 			}
@@ -486,8 +494,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 
 		if ( is_array( $response ) && isset( $response['type'] ) ) {
 			if ( 'validation_error' === $response['type'] ) {
+				$failed_ids = array_map( 'strval', (array) $response['errors'] );
+
 				foreach ( $order_ids as $k => $order ) {
-					if ( in_array( $order, $response['errors'], true ) ) {
+					if ( in_array( (string) $order, $failed_ids, true ) ) {
 						$this->add_failed_order_to_status( $order );
 						$this->mark_order_as_failed( $order );
 						unset( $order_ids[ $k ] );
@@ -790,8 +800,10 @@ class Activecampaign_For_Woocommerce_Historical_Sync_Runner_Cofe implements Exec
 
 		if ( is_array( $response ) && isset( $response['type'] ) ) {
 			if ( 'validation_error' === $response['type'] ) {
+				$failed_ids = array_map( 'strval', (array) $response['errors'] );
+
 				foreach ( $subscription_ids as $k => $order ) {
-					if ( in_array( $order, $response['errors'], true ) ) {
+					if ( in_array( (string) $order, $failed_ids, true ) ) {
 						$this->add_failed_subscription_to_status( $order );
 						$this->mark_subscription_as_failed( $order );
 						unset( $subscription_ids[ $k ] );

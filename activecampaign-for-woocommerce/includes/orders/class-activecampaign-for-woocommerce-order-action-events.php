@@ -316,8 +316,8 @@ class Activecampaign_For_Woocommerce_Order_Action_Events {
 			if ( isset( $order_id ) && ! empty( $order_id ) ) {
 				$post_type = get_post_type( $order_id );
 
-				// If it's not an order just ignore it, this could be anything
-				if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
+				// If it's not an order just ignore it, this could be anything (with HPOS there is no post, so ask WooCommerce)
+				if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type && ! ( wc_get_order( $order_id ) instanceof WC_Order ) ) {
 					$logger->debug_excess(
 						'Order deleted update was triggered but the post is not a shop order type.',
 						array(

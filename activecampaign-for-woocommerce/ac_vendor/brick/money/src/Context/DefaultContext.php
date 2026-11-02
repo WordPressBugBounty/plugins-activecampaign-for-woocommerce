@@ -7,6 +7,7 @@ use AcVendor\Brick\Money\Context;
 use AcVendor\Brick\Money\Currency;
 use AcVendor\Brick\Math\BigDecimal;
 use AcVendor\Brick\Math\BigNumber;
+use AcVendor\Brick\Math\RoundingMode;
 /**
  * Adjusts a number to the default scale for the currency.
  */
@@ -15,21 +16,21 @@ final class DefaultContext implements Context
     /**
      * @inheritdoc
      */
-    public function applyTo(BigNumber $amount, Currency $currency, int $roundingMode) : BigDecimal
+    public function applyTo(BigNumber $amount, Currency $currency, RoundingMode $roundingMode): BigDecimal
     {
         return $amount->toScale($currency->getDefaultFractionDigits(), $roundingMode);
     }
     /**
      * {@inheritdoc}
      */
-    public function getStep() : int
+    public function getStep(): int
     {
         return 1;
     }
     /**
      * {@inheritdoc}
      */
-    public function isFixedScale() : bool
+    public function isFixedScale(): bool
     {
         return \true;
     }

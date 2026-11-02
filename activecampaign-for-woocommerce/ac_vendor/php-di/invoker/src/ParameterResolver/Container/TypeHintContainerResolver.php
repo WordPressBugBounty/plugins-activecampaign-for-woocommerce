@@ -21,12 +21,12 @@ class TypeHintContainerResolver implements ParameterResolver
     {
         $this->container = $container;
     }
-    public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters, array $resolvedParameters) : array
+    public function getParameters(ReflectionFunctionAbstract $reflection, array $providedParameters, array $resolvedParameters): array
     {
         $parameters = $reflection->getParameters();
         // Skip parameters already resolved
         if (!empty($resolvedParameters)) {
-            $parameters = \array_diff_key($parameters, $resolvedParameters);
+            $parameters = array_diff_key($parameters, $resolvedParameters);
         }
         foreach ($parameters as $index => $parameter) {
             $parameterType = $parameter->getType();

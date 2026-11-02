@@ -59,7 +59,7 @@ class Activecampaign_For_Woocommerce_Set_Connection_Id_Cache_Command implements 
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct( Admin $admin, Repository $repository, Logger $logger = null ) {
+	public function __construct( Admin $admin, Repository $repository, ?Logger $logger = null ) {
 		$this->repository = $repository;
 		$this->admin      = $admin;
 		if ( ! $logger ) {

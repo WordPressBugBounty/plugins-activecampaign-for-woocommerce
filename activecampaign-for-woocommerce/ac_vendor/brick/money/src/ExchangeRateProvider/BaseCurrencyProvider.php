@@ -20,11 +20,11 @@ final class BaseCurrencyProvider implements ExchangeRateProvider
     /**
      * The provider for rates relative to the base currency.
      */
-    private ExchangeRateProvider $provider;
+    private readonly ExchangeRateProvider $provider;
     /**
      * The code of the currency all the exchanges rates are based on.
      */
-    private string $baseCurrencyCode;
+    private readonly string $baseCurrencyCode;
     /**
      * @param ExchangeRateProvider $provider         The provider for rates relative to the base currency.
      * @param string               $baseCurrencyCode The code of the currency all the exchanges rates are based on.
@@ -37,7 +37,7 @@ final class BaseCurrencyProvider implements ExchangeRateProvider
     /**
      * {@inheritdoc}
      */
-    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode) : BigNumber
+    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode): BigNumber
     {
         if ($sourceCurrencyCode === $this->baseCurrencyCode) {
             return BigNumber::of($this->provider->getExchangeRate($sourceCurrencyCode, $targetCurrencyCode));

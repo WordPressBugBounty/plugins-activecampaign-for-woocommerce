@@ -34,23 +34,12 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 	private $logger;
 
 	/**
-	 * Minimum WP version
+	 * Highest tested PHP version (major.minor, inclusive), keep in sync with the release notes.
+	 * The minimum PHP and WordPress versions are read from the plugin header, see get_version_requirements().
 	 *
-	 * @var string|int
+	 * @var string
 	 */
-	private $minimum_required_wp = 6;
-	/**
-	 * Min PHP
-	 *
-	 * @var float
-	 */
-	private $min_php_version = 7.4;
-	/**
-	 * Max PHP version
-	 *
-	 * @var float
-	 */
-	private $max_php_version = 8.3;
+	private $max_tested_php = '8.4';
 
 	/**
 	 * Initialize the class and set its properties.
@@ -300,9 +289,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 	private function get_woocommerce_data( $data ) {
 		$logger = new Logger();
 
-		$data['legacy_api']                 = null;
-		$data['woocommerce_version']        = null;
-		$data['woocommerce_latest_version'] = null;
+		$data['legacy_api'] = null;
 
 		try {
 
@@ -348,7 +335,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		}
 
 		$data['wp_version']  = $this->get_wp_version();
-		$data['php_version'] = $this->get_local_php_verison();
+		$data['php_version'] = $this->get_local_php_version();
 
 		try {
 			$data['legacy_api'] = get_option( 'woocommerce_api_enabled' );
@@ -362,56 +349,48 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			);
 		}
 
-		try {
-			$data['woocommerce_version'] = WC()->version;
-		} catch ( Throwable $t ) {
-			$logger->warning(
-				'ActiveCampaign status page could not retrieve WooCommerce version. WooCommerce setup may not be complete or may have an error.',
-				array(
-					'message' => $t->getMessage(),
-					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				)
-			);
-		}
-
-		try {
-			$data['woocommerce_latest_version'] = get_transient( 'woocommerce_system_status_wp_version_check' );
-		} catch ( Throwable $t ) {
-			$logger->warning(
-				'ActiveCampaign status page could not retrieve WooCommerce latest version. WooCommerce setup may not be complete or may have an error.',
-				array(
-					'message' => $t->getMessage(),
-					'trace'   => $logger->clean_trace( $t->getTrace() ),
-				)
-			);
-		}
-
 		return $data;
 	}
 
-	private function get_local_php_verison() {
-		$data['local_php']     = null;
-		$data['min_php']       = false;
-		$data['max_php']       = false;
-		$data['php_supported'] = false;
+	/**
+	 * Minimum PHP / WordPress / WooCommerce versions from the plugin header plus the highest tested PHP version.
+	 *
+	 * @return array{min_php: string, min_wp: string, min_wc: string, max_tested_php: string}
+	 */
+	public function get_version_requirements() {
+		$header = get_file_data(
+			dirname( __DIR__ ) . '/activecampaign-for-woocommerce.php',
+			array(
+				'min_php' => 'Requires PHP',
+				'min_wp'  => 'Requires at least',
+				'min_wc'  => 'WC requires at least',
+			)
+		);
 
-		if ( PHP_VERSION ) {
-			$data['local_php'] = PHP_VERSION;
-		}
+		$header['max_tested_php'] = $this->max_tested_php;
 
-		if ( version_compare( $data['local_php'], $this->min_php_version, '>=' ) && version_compare( $data['local_php'], $this->max_php_version, '<' ) ) {
-			$data['php_supported'] = true;
-		}
+		return $header;
+	}
 
-		if ( isset( $this->min_php_version ) && version_compare( $data['local_php'], $this->min_php_version, '>=' ) ) {
-			$data['min_php'] = true;
-		}
+	/**
+	 * Whether a PHP version is inside the supported range (compared on major.minor).
+	 *
+	 * @param string $version A PHP version string, defaults to the running one.
+	 *
+	 * @return array{local_php: string, php_supported: bool, below_min: bool, min_php: string, max_tested_php: string}
+	 */
+	public function get_local_php_version( $version = PHP_VERSION ) {
+		$requirements = $this->get_version_requirements();
+		$major_minor  = implode( '.', array_slice( explode( '.', $version ), 0, 2 ) );
+		$below_min    = version_compare( $major_minor, $requirements['min_php'], '<' );
 
-		if ( isset( $this->max_php_version ) && version_compare( $data['local_php'], $this->max_php_version, '>' ) ) {
-			$data['max_php'] = true;
-		}
-
-		return $data;
+		return array(
+			'local_php'      => $version,
+			'php_supported'  => ! $below_min && version_compare( $major_minor, $requirements['max_tested_php'], '<=' ),
+			'below_min'      => $below_min,
+			'min_php'        => $requirements['min_php'],
+			'max_tested_php' => $requirements['max_tested_php'],
+		);
 	}
 
 	private function get_wp_version() {
@@ -422,7 +401,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 
 		$latest_version = null;
 
-		if ( version_compare( $wp_version, $this->minimum_required_wp, '>=' ) ) {
+		if ( version_compare( $wp_version, $this->get_version_requirements()['min_wp'], '>=' ) ) {
 			$data['meets'] = true;
 		}
 
@@ -438,7 +417,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 			}
 		}
 
-		if ( version_compare( $wp_version, $latest_version, '<' ) ) {
+		if ( null !== $latest_version && version_compare( $wp_version, $latest_version, '<' ) ) {
 			$data['newer'] = true;
 		}
 
@@ -615,8 +594,8 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 				$data['viewed_log_show_log'] = ob_get_contents();
 				ob_end_clean();
 			} elseif ( isset( $post_data['log_file'] ) && ! empty( $post_data['log_file'] ) ) {
-				$data['viewed_log']           = $post_data['log_file'];
-				$data['viewed_log_full_path'] = $data['logdir'] . $post_data['log_file'];// load the first log file
+				$data['viewed_log']           = basename( $post_data['log_file'] );
+				$data['viewed_log_full_path'] = $data['logdir'] . $data['viewed_log'];
 
 				ob_start();
 				include $data['viewed_log_full_path'];
@@ -652,7 +631,7 @@ trait Activecampaign_For_Woocommerce_Admin_Status {
 		$post_data = $this->extract_post_data();
 
 		if ( isset( $post_data['log_file'] ) && ! empty( $post_data['log_file'] ) ) {
-			$viewed_log_full_path = $logdir . $post_data['log_file']; // load the first log file
+			$viewed_log_full_path = $logdir . basename( $post_data['log_file'] );
 		}
 
 		try {

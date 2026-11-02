@@ -62,13 +62,6 @@ class Activecampaign_For_Woocommerce_Public {
 	private $logger;
 
 	/**
-	 * Marker for if the checkbox was successfully populated on the page
-	 *
-	 * @var bool $checkbox_populated
-	 */
-	private $checkbox_populated;
-
-	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @param     string $plugin_name     The name of the plugin.
@@ -78,7 +71,7 @@ class Activecampaign_For_Woocommerce_Public {
 	 *
 	 * @since 1.0.0
 	 */
-	public function __construct( $plugin_name, $version, Admin $admin, Logger $logger = null ) {
+	public function __construct( $plugin_name, $version, Admin $admin, ?Logger $logger = null ) {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 		$this->admin       = $admin;
@@ -91,10 +84,6 @@ class Activecampaign_For_Woocommerce_Public {
 	public function init() {
 		if ( ! $this->logger ) {
 			$this->logger = new Logger();
-		}
-
-		if ( ! $this->checkbox_populated ) {
-			$this->checkbox_populated = false;
 		}
 	}
 
@@ -203,58 +192,43 @@ class Activecampaign_For_Woocommerce_Public {
 	 *
 	 * @return CheckoutFields|void
 	 */
-	public function handle_woocommerce_blocks_checkout_form( $checkout ) {
+	public function handle_woocommerce_blocks_checkout_form( $checkout = null ) {
 		$this->init();
 
 		try {
-			$options                                   = $this->admin->get_local_settings();
-			$activecampaign_for_woocommerce_is_checked = $this->accepts_marketing_checkbox_is_checked();
-			$activecampaign_for_woocommerce_accepts_marketing_label = esc_html( $this->label_for_accepts_marketing_checkbox() );
-			$location          = 'contact';
-			$hidden_validation = false;
+			$options  = $this->admin->get_local_settings();
+			$location = 'contact';
 
-			if ( isset( $options['accepts_marketing_checkbox_location_option'] ) && ! empty( $options['accepts_marketing_checkbox_location_option'] ) ) {
-				// contact or address are only valid options
-				// TODO: Later iteration should allow admin to select which location and use it here.
+			if ( ! empty( $options['accepts_marketing_checkbox_location_option'] ) ) {
+				// contact or address are the only valid options
 				$location = $options['accepts_marketing_checkbox_location_option'];
 			}
 
-			if ( isset( $options['checkbox_display_option'] ) && 'not_visible' === $options['checkbox_display_option'] ) {
-				$hidden_validation = [
-					'type'       => 'object',
-					'properties' => [
-						'cart' => [
-							'properties' => [
-								'accepts_marketing_show' => [
-									'const' => false,
-								],
-							],
-						],
-					],
-				];
-			}
+			$field_id = ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '/accepts_marketing';
 
-			$data_custom = 'unchecked';
-			if ( true === $activecampaign_for_woocommerce_is_checked ) {
-				$data_custom = 'checked';
-			}
+			// Initial state for a customer without a stored value (WC >= 8.9). The Checkout block takes its state from
+			// the Store API, so this is the only way a default actually reaches the submitted order.
+			add_filter(
+				'woocommerce_get_default_value_for_' . $field_id,
+				function ( $value, $group, $wc_object ) {
+					return $wc_object instanceof WC_Customer ? $this->accepts_marketing_checkbox_is_checked() : $value;
+				},
+				10,
+				3
+			);
 
 			return woocommerce_register_additional_checkout_field(
 				array(
-					'id'         => ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_SNAKE . '/accepts_marketing',
-					'label'      => $activecampaign_for_woocommerce_accepts_marketing_label,
-					'location'   => $location,
-					'priority'   => 99,
-					'required'   => false,
-					'hidden'     => $hidden_validation,
-					'type'       => 'checkbox',
-					'attributes' => array(
-						'data-custom' => $data_custom,
-					),
+					'id'       => $field_id,
+					'label'    => esc_html( $this->label_for_accepts_marketing_checkbox() ),
+					'location' => $location,
+					'priority' => 99,
+					'required' => false,
+					'type'     => 'checkbox',
 				)
 			);
-		} catch (Throwable $t ) {
-			$this->logger->warning( 'Accepts marketing encountered an error while attempting to register the checkout field', [$t->getMessage()] );
+		} catch ( Throwable $t ) {
+			$this->logger->warning( 'Accepts marketing encountered an error while attempting to register the checkout field', [ $t->getMessage() ] );
 		}
 	}
 
@@ -268,67 +242,25 @@ class Activecampaign_For_Woocommerce_Public {
 	public function handle_woocommerce_checkout_form() {
 		$this->init();
 
-		/**
-		 * Request-global guard. This method is bound to two fallback hooks
-		 * ( woocommerce_after_checkout_billing_form and woocommerce_after_checkout_form )
-		 * and some themes (e.g. Divi) fire both and/or re-render the checkout form,
-		 * which can output the checkbox more than once. A static survives across every
-		 * hook fire in the request even when the instance flag does not, guaranteeing
-		 * the field is rendered at most once.
-		 */
+		// Bound to several template hooks, and some themes (e.g. Divi) re-render the checkout form: render once per request.
 		static $rendered = false;
 		if ( $rendered ) {
 			return;
 		}
+		$rendered = true;
 
-		if ( ! $this->checkbox_populated ) {
-			if ( $this->admin->get_local_settings() ) {
-				$options = $this->admin->get_local_settings();
-			} else {
-				$options = get_option( 'activecampaign_for_woocommerce_settings' );
-			}
+		$label = '<label for="activecampaign_for_woocommerce_accepts_marketing" class="woocommerce-form__label woocommerce-form__label-for-checkbox inline"><span>' . esc_html( $this->label_for_accepts_marketing_checkbox() ) . '</span></label>';
 
-			if ( isset( $options['checkbox_display_option'] ) ) {
-				$setting = $options['checkbox_display_option'];
-
-				/**
-				 * There are three settings available, but only this one results in not displaying the checkbox at all.
-				 */
-				if ( 'not_visible' === $setting ) {
-					$this->logger->debug( 'checkbox_display_option is set to not_visible. We will not display it.' );
-
-					return;
-				}
-			} else {
-				$this->logger->error(
-					'The value for checkbox_display_option not found in database. This should not happen and may mean the setting has not been saved to the database.',
-					array(
-						'suggested_action' => 'Go to the plugin settings page and save the opt-in setting again. If the issue persists please contact support.',
-						'ac_code'          => 'PUB_193',
-					)
-				);
-			}
-
-			$activecampaign_for_woocommerce_is_checked              = $this->accepts_marketing_checkbox_is_checked();
-			$activecampaign_for_woocommerce_accepts_marketing_label = esc_html( $this->label_for_accepts_marketing_checkbox() );
-
-			// Label html must be built before the function
-			$label = '<label for="activecampaign_for_woocommerce_accepts_marketing" class="woocommerce-form__label woocommerce-form__label-for-checkbox inline"><span>' . $activecampaign_for_woocommerce_accepts_marketing_label . '</span></label>';
-
-			woocommerce_form_field(
-				'activecampaign_for_woocommerce_accepts_marketing',
-				array(
-					'type'     => 'checkbox',
-					'class'    => array( 'woocommerce-form__input', 'woocommerce-form__input-checkbox', 'input-checkbox' ),
-					'label'    => $label,
-					'required' => false,
-				),
-				$activecampaign_for_woocommerce_is_checked
-			);
-
-			$this->checkbox_populated = true;
-			$rendered                 = true;
-		}
+		woocommerce_form_field(
+			'activecampaign_for_woocommerce_accepts_marketing',
+			array(
+				'type'     => 'checkbox',
+				'class'    => array( 'woocommerce-form__input', 'woocommerce-form__input-checkbox', 'input-checkbox' ),
+				'label'    => $label,
+				'required' => false,
+			),
+			$this->accepts_marketing_checkbox_is_checked()
+		);
 	}
 
 	/**
@@ -488,7 +420,7 @@ class Activecampaign_For_Woocommerce_Public {
 	 * @param string $tracking_id the tracking ID to use.
 	 */
 	public function activecampaign_frontend_sitetracking_scripts( $tracking_id, $use_staging_url = false ) {
-		$ac_forms_settings = get_option( 'settings_activecampaign' ); // This is the setting from the other AC plugin
+		$ac_forms_settings = (array) get_option( 'settings_activecampaign' ); // This is the setting from the other AC plugin
 
 		if (
 			isset( $ac_forms_settings['activecampaign_site_tracking_default'], $ac_forms_settings['site_tracking'] ) &&

@@ -24,7 +24,7 @@ $activecampaign_for_woocommerce_page_url     = wc_get_current_admin_url();
 				</svg>
 				<h1>
 					<?php
-					esc_html_e( 'ActiveCampaign for WooCommerce', 'activecampaign' );
+					esc_html_e( 'ActiveCampaign for WooCommerce', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 					?>
 				</h1>
 			</div>
@@ -66,7 +66,7 @@ $activecampaign_for_woocommerce_page_url     = wc_get_current_admin_url();
 		<span class="mr-400">
 		<a href="https://help.activecampaign.com/hc/en-us/articles/115000652490-WooCommerce-Deep-Data-integration-overview"
 			target="_blank"
-			rel="noopener noreferrer"><span><?php esc_html_e( 'Learn more about ActiveCampaign for WooCommerce', 'activecampaign' ); ?></span><svg
+			rel="noopener noreferrer"><span><?php esc_html_e( 'Learn more about ActiveCampaign for WooCommerce', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span><svg
 					class="is-styled css-ws9hmn" height="16px" width="16px" role="img" viewBox="0 0 16 16"
 					xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd"
 															d="M5 0H0V16H16V11H14V14H2V2H5V0ZM8.99995 2H12.5857L6.29285 8.29289L7.70706 9.70711L14 3.41421V7H16V0H8.99995V2Z"
@@ -74,9 +74,12 @@ $activecampaign_for_woocommerce_page_url     = wc_get_current_admin_url();
 		</span>
 			<hr/>
 			<?php if ( isset( $activecampaign_for_woocommerce_page_url ) && preg_match( "/.page=activecampaign_for_woocommerce(?:&manual_setup=1)?\b/", $activecampaign_for_woocommerce_page_url ) ) { ?>
-				<button id="ac-update-settings" class="activecampaign-for-woocommerce button button-primary">
-					<?php esc_html_e( 'Update settings', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
-				</button>
+				<span style="display:inline-flex;align-items:center;gap:8px;">
+					<button id="ac-update-settings" class="activecampaign-for-woocommerce button button-primary">
+						<?php esc_html_e( 'Update settings', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+					</button>
+					<span id="ac-update-settings-spinner" class="spinner" style="float:none;margin:0;"></span>
+				</span>
 			<?php } ?>
 		</div>
 	</header>

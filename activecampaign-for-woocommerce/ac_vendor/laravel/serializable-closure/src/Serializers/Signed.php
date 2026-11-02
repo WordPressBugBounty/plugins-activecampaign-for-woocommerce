@@ -36,7 +36,7 @@ class Signed implements Serializable
      */
     public function __invoke()
     {
-        return \call_user_func_array($this->closure, \func_get_args());
+        return call_user_func_array($this->closure, func_get_args());
     }
     /**
      * Gets the closure.
@@ -51,29 +51,35 @@ class Signed implements Serializable
      * Get the serializable representation of the closure.
      *
      * @return array
+     *
+     * @throws \Laravel\SerializableClosure\Exceptions\MissingSecretKeyException
      */
     public function __serialize()
     {
         if (!static::$signer) {
             throw new MissingSecretKeyException();
         }
-        return static::$signer->sign(\serialize(new Native($this->closure)));
+        return static::$signer->sign(serialize(new Native($this->closure)));
     }
     /**
      * Restore the closure after serialization.
      *
-     * @param  array  $signature
+     * @param  array{serializable: string, hash: string}  $signature
      * @return void
      *
      * @throws \Laravel\SerializableClosure\Exceptions\InvalidSignatureException
+     * @throws \Laravel\SerializableClosure\Exceptions\MissingSecretKeyException
      */
     public function __unserialize($signature)
     {
-        if (static::$signer && !static::$signer->verify($signature)) {
+        if (!static::$signer) {
+            throw new MissingSecretKeyException();
+        }
+        if (!static::$signer->verify($signature)) {
             throw new InvalidSignatureException();
         }
         /** @var \Laravel\SerializableClosure\Contracts\Serializable $serializable */
-        $serializable = \unserialize($signature['serializable']);
+        $serializable = unserialize($signature['serializable']);
         $this->closure = $serializable->getClosure();
     }
 }

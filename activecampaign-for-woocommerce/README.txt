@@ -1,10 +1,10 @@
 === ActiveCampaign for WooCommerce ===
 Contributors: acteamintegrations, bartboy011
 Tags: email marketing, ecommerce, woocommerce, activecampaign, abandoned cart
-Requires at least: 6.0
-Tested up to: 6.8.1
-Stable tag: 2.11.3
-Requires PHP: 7.4
+Requires at least: 7.0
+Tested up to: 7.1.3
+Stable tag: 3.0.1
+Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,8 +40,9 @@ Showcase specific product catalogs in your marketing emails.
 
 == Here’s what you’ll need to configure this integration: ==
 
-* WooCommerce 7.4 (or more recent version)
-* The ActiveCampaign for WooCommerce WordPress plugin 2.10.2 .
+* WordPress 7.0 or newer, PHP 8.1 or newer
+* WooCommerce 10.0 or newer
+* The latest version of the ActiveCampaign for WooCommerce plugin
 
 **Learn more: [Connect WooCommerce to ActiveCampaign](https://help.activecampaign.com/hc/en-us/articles/115000652490-Connect-WooCommerce-to-ActiveCampaign)**
 
@@ -58,19 +59,21 @@ Showcase specific product catalogs in your marketing emails.
 == Installation ==
 
 = WooCommerce Compatibility =
-* Tested up to version: 9.8.5
-* Minimal version requirement: 7.4.0
+* Tested up to version: 11.2.1
+* Minimal version requirement: 10.0
 * HPOS Compatible
 * WooCommerce Blocks now supported
 
 = Minimum Requirements =
-* WordPress supported PHP version (PHP 7.4 or greater is recommended)
+* PHP 8.1 or greater
+* WordPress 7.0 or greater (tested up to 7.1.3)
+* WooCommerce 10.0 or greater (tested up to 11.2.1)
 * Latest release versions of WordPress and WooCommerce are recommended
 * MySQL version 5.6 or greater
 
 = Before You Start =
 - Our plugin requires you to have the WooCommerce plugin installed and activated in WordPress.
-- Your hosting environment should meet WooCommerce's minimum requirements, including PHP 7.0 or greater.
+- Your hosting environment must meet the minimum requirements above, including PHP 8.1 or greater. WordPress will not install this version on stores below these minimums; such stores keep running their current 2.11.x version.
 
 = Installation Steps =
 1. In your ActiveCampaign account, navigate to Settings.
@@ -85,6 +88,26 @@ Showcase specific product catalogs in your marketing emails.
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 3.0.1 2026-11-02 =
+* Documentation: the plugin listing now states the current minimum requirements (PHP 8.1, WordPress 7.0, WooCommerce 10.0) and shows an upgrade notice before updating
+
+= 3.0.0 2026-11-02 =
+* Requires PHP 8.1 or newer, WordPress 7.0 or newer and WooCommerce 10.0 or newer; tested with WordPress 7.1 and WooCommerce 11.2
+* Security: all admin actions of the plugin now require the "Manage WooCommerce" capability; the API key is no longer written to log files
+* Fix: orders deleted or trashed on stores using High-Performance Order Storage were not removed from the sync table and were retried forever
+* Fix: the abandoned-cart checkout id was not saved on orders placed through the block checkout; quantity changes in the block cart are now tracked
+* Fix: plugin translations and database upgrades hooked on plugin load never ran; database indexes were not created when upgrading from very old versions
+* Fix: timezone and interval calculations in the abandoned cart sync, historical sync delay and connection health check
+* Fix: settings could be saved unverified when the connection check failed
+* Improvement: PHP 8.1 - 8.4 compatibility (no deprecation notices), updated libraries (PHP-DI 7, PSR Log 3, Brick Money 0.10)
+* Improvement: uninstalling removes every plugin option, transient and scheduled action
+* Improvement: admin pages show spinners, progress bars and a finished notice for connection test, settings save, historical sync and product sync
+* Fix: the marketing consent checkbox is shown on both the Checkout block and the classic checkout regardless of theme; the "checked by default" option is honoured by the Checkout block
+* Fix: the product sync no longer loads every variation of a variable product at once; stores with very large variable products could run out of memory and never finish the sync
+* Fix: a malformed WP-Cron entry of the recurring sync could stop every scheduled task of the site with a fatal error on PHP 8; the recurring hooks are now cleaned and rebuilt on update and on every settings save
+* Fix: the historical sync now includes orders the regular sync never processed and no longer reports a whole batch as failed because of a validation error in one group
+* Fix: an empty "Product URL patterns" field no longer disables Browse Abandonment; the default patterns are sent instead
 
 = 2.11.3 2026-10-20 =
 * Fix: Order line item prices are no longer rounded to whole currency units; refunded items are synced with the correct unit price
@@ -172,3 +195,11 @@ Showcase specific product catalogs in your marketing emails.
 * Bugfix - Edge case where some orders would convert to subscriptions and vanish from the store
 
 See CHANGELOG file for all changes
+
+== Upgrade Notice ==
+
+= 3.0.1 =
+Requires PHP 8.1, WordPress 7.0 and WooCommerce 10.0 or newer. Stores on older versions will not receive this update and keep running 2.11.x. Settings and connection are preserved on update.
+
+= 3.0.0 =
+Requires PHP 8.1, WordPress 7.0 and WooCommerce 10.0 or newer. Stores on older versions will not receive this update and keep running 2.11.x. Settings and connection are preserved on update.

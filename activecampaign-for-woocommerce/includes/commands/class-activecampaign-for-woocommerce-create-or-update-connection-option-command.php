@@ -101,15 +101,11 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 	 * @param Repository $repository The connection option repository singleton.
 	 * @param Logger     $logger The logger interface.
 	 */
-	public function __construct( Admin $admin, Repository $repository, Logger $logger = null ) {
+	public function __construct( Admin $admin, Repository $repository, ?Logger $logger = null ) {
 		$this->admin      = $admin;
 		$this->repository = $repository;
 
-		if ( ! $this->logger ) {
-			$this->logger = new Logger();
-		} else {
-			$this->logger = $logger;
-		}
+		$this->logger = $logger ?? new Logger();
 	}
 
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
@@ -307,63 +303,22 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 	}
 
 	/**
-	 * Get and sync product URL patterns.
-	 */
-	public function get_sync_product_url_patterns() {
-		$logger = new Logger();
-
-		// get the local stored pattern
-		if (isset( $this->settings['ba_product_url_patterns'] ) ) {
-			$local_pattern = json_decode( $this->settings['ba_product_url_patterns'] );
-		}
-
-		if ( ! empty( $this->connection_options ) ) {
-			if ( empty( $local_pattern ) ) {
-				$local_pattern = array();
-			}
-
-			foreach ( $this->connection_options as $c_op ) {
-				if (
-					( 'browse_abandonment.product_url_patterns' === $c_op->get_option() ||
-					'ba_product_url_patterns' === $c_op->get_option() ) && ! empty( $c_op->get_value() )
-				) {
-					$ac_pattern = json_decode( $c_op->get_value() );
-
-					// Merge the AC pattern stored and the local pattern and make it unique
-					if ( ! empty( $local_pattern ) && ! empty( $ac_pattern ) ) {
-						// We have a pattern stored, we should merge them
-						$merged = array_unique( array_merge( $ac_pattern, $local_pattern ) );
-					} elseif ( ! empty( $ac_pattern ) ) {
-						// Get only the AC pattern
-						$merged = array_unique( $ac_pattern );
-					}
-				}
-			}
-
-			if ( ! empty( $merged ) ) {
-				// Set the merged pattern
-				$this->settings['ba_product_url_patterns'] = wp_json_encode( $merged );
-			}
-		}
-
-		// If we have never set the patterns set a default
-		if (empty( $this->settings['ba_product_url_patterns'] ) ) {
-			$this->settings['ba_product_url_patterns'] = $this->get_pattern_default();
-		}
-	}
-
-	/**
 	 * Call AC to store Option Ids used to determine create or update patterns
 	 */
 	private function store_connection_option_ids_from_ac() {
 		$ac_ids = array();
+
+		if ( empty( $this->storage['connection_id'] ) ) {
+			return $ac_ids;
+		}
+
 		try {
 			$connection_options = $this->repository->find_all_by_filter(
 				'connectionid',
 				$this->storage['connection_id']
 			);
 
-			foreach ( $connection_options as $connection_option ) {
+			foreach ( (array) $connection_options as $connection_option ) {
 				array_push( $ac_ids, $connection_option['id'] );
 			}
 		} catch ( Activecampaign_For_Woocommerce_Resource_Not_Found_Exception $e ) {
@@ -414,7 +369,8 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 					$missing_connection_option->set_option( $option );
 					$missing_connection_option->set_connectionid( $this->storage['connection_id'] );
 
-					if ('ba_product_url_patterns' === $option_name && is_null( $this->settings[ $option_name ] ) ) {
+					// An empty value (cleared form field, failed JS validation) must never reach AC: it silently disables BA (ECMM-3016).
+					if ( 'ba_product_url_patterns' === $option_name && empty( $this->settings[ $option_name ] ) ) {
 						$missing_connection_option->set_value( $this->get_pattern_default() );
 					} else {
 						$missing_connection_option->set_value( $this->settings[ $option_name ] );
@@ -485,7 +441,7 @@ class Activecampaign_For_Woocommerce_Create_Or_Update_Connection_Option_Command 
 				}
 			}
 
-			if (( $connection_option->get_option() === 'ba_product_url_patterns' || 'browse_abandonment.product_url_patterns' === $connection_option->get_option() ) && is_null( $connection_option->get_value() ) ) {
+			if ( ( 'ba_product_url_patterns' === $connection_option->get_option() || 'browse_abandonment.product_url_patterns' === $connection_option->get_option() ) && empty( $connection_option->get_value() ) ) {
 				$connection_option->set_value( $this->get_pattern_default() );
 			}
 

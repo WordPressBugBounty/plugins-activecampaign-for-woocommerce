@@ -112,6 +112,9 @@ if ( ! isset( $activecampaign_for_woocommerce_product_sync_data['products'] ) ||
 					<div id="activecampaign-run-product-sync-running" class="sync-run-status">
 						Status: Sync Running
 					</div>
+					<div id="activecampaign-run-product-sync-complete" class="sync-run-status notice notice-success inline" style="margin:5px 0;">
+						<p><?php esc_html_e( 'Status: Sync finished successfully', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></p>
+					</div>
 					<div id="activecampaign-run-product-sync-reset" class="sync-run-status">
 						Status: Sync Reset
 					</div>

@@ -141,6 +141,11 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 			'interval' => 600,
 			'display'  => __( 'Ten Minutes', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 		);
+		// Used by the WP-Cron fallback of the 60 s recurring sync events.
+		$schedules['every_minute'] = array(
+			'interval' => 60,
+			'display'  => __( 'Every Minute', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+		);
 
 		return $schedules;
 	}
@@ -612,7 +617,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 
 			wp_send_json_success(
 				[
-					'message' => __( 'Integration unblocked.', 'activecampaign' ),
+					'message' => __( 'Integration unblocked.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 				]
 			);
 		} catch ( Exception $e ) {
@@ -716,8 +721,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 			}
 
 			if ( false !== $last_run ) {
-				$interval         = date_diff( $now, $last_run );
-				$interval_minutes = $interval->format( '%i' );
+				// Whole minutes since the last run (DateInterval::format('%i') is only the 0-59 minutes component).
+				$interval_minutes = intdiv( abs( $now->getTimestamp() - $last_run->getTimestamp() ), 60 );
 			} else {
 				$interval_minutes = 0;
 			}
@@ -1054,7 +1059,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 	 * @param     string $level     The level of severity of the message.
 	 */
 	public function add_async_processing_notification( $message, $level = 'info' ) {
-		$current_storage = $this->get_local_settings();
+		$current_storage = (array) $this->get_local_settings(); // false when the option does not exist yet
 
 		if ( ! isset( $current_storage['notifications'] ) ) {
 			$current_storage['notifications'] = array();
@@ -1151,7 +1156,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				isset( $new_data['api_url'], $current_data['api_url'] ) &&
 				$new_data['api_url'] !== $current_data['api_url']
 			) ||
-			isset( $new_data['api_url'] ) && ! isset( $current_data['api_url'] )
+			( isset( $new_data['api_url'] ) && ! isset( $current_data['api_url'] ) )
 		) {
 			return true;
 		}
@@ -1191,7 +1196,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 		$logger = new Logger();
 
 		if ( $request->has_param( 'api_url' ) && $request->has_param( 'api_key' ) ) {
-			$params  = $request->get_params();
+			// Only the credentials may be set through this endpoint.
+			$params  = array_intersect_key( $request->get_params(), array( 'api_url' => true, 'api_key' => true ) );
 			$options = $this->get_local_settings();
 
 			$defaults = $this->get_default_settings();
@@ -1203,7 +1209,7 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 				}
 			}
 
-			$logger->info( 'Saving integration settings from ActiveCampaign...', array( $params ) );
+			$logger->info( 'Saving integration settings from ActiveCampaign...', array( 'keys' => array_keys( $params ) ) );
 
 			$this->update_settings( $params );
 
@@ -1375,8 +1381,8 @@ class Activecampaign_For_Woocommerce_Admin implements Synced_Status {
 			$order_id  = $args[0];
 			$post_type = get_post_type( $order_id );
 
-			// If it's not an order just ignore it
-			if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type ) {
+			// If it's not an order just ignore it (with HPOS there is no post, so ask WooCommerce)
+			if ( 'shop_order' !== $post_type && 'shop_order_placehold' !== $post_type && ! ( wc_get_order( $order_id ) instanceof WC_Order ) ) {
 				return;
 			}
 

@@ -147,13 +147,18 @@ document.addEventListener("DOMContentLoaded", function () {
         $('#activecampaign_connection_modal #connection_integration_link').val('');
     }
 
-    function showStatus(type, message){
+    let statusTimer;
+    function showStatus(type, message, autoHide = true){
+        // One timer at a time, otherwise an old auto-hide removes a newer message.
+        clearTimeout(statusTimer);
         if (type === 'error'){
             $('#activecampaign_connection_list .notice').removeClass('notice-success').addClass('notice-error').html(message).show();
-            setTimeout(function(){$('#activecampaign_connection_list .notice').hide();}, 50000);
+            statusTimer = setTimeout(function(){$('#activecampaign_connection_list .notice').hide();}, 50000);
         }else if(type ==='success'){
             $('#activecampaign_connection_list .notice').removeClass('notice-error').addClass('notice-success').html(message).show();
-            setTimeout(function(){$('#activecampaign_connection_list .notice').hide();}, 10000);
+            if (autoHide) {
+                statusTimer = setTimeout(function(){$('#activecampaign_connection_list .notice').hide();}, 10000);
+            }
         }
     }
 
@@ -208,6 +213,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     $("#activecampaign-send-create-connection-button").click(function(e){
         e.preventDefault();
+        const $btn = $(this);
+        if ($btn.hasClass('disabled')) {
+            return false;
+        }
 
         let data = {};
         data.activecampaign_for_woocommerce_settings_nonce_field = nonceVal.attr('value');
@@ -228,7 +237,9 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        let type = 'POST';
+        // Creating a connection means several calls to ActiveCampaign; tell the user and block a second click.
+        $btn.addClass('disabled');
+        showStatus('success', 'Creating the connection, please wait...', false);
 
         ajaxCall(data).then((data) => {
             showStatus('success', 'New connection created.');
@@ -237,6 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
             location.reload();
         })
         .catch((error) => {
+            $btn.removeClass('disabled');
             showStatus('error', error);
         });
     });

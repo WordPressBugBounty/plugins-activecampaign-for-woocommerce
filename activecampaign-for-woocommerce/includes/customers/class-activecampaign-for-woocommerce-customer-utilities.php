@@ -34,12 +34,40 @@ class Activecampaign_For_Woocommerce_Customer_Utilities {
 	private $logger;
 
 	/**
+	 * Working state of the customer being built.
+	 *
+	 * @var Activecampaign_For_Woocommerce_Ecom_Customer|null
+	 */
+	private $customer;
+
+	/**
+	 * The AC connection id used for the customer being built.
+	 *
+	 * @var string|int|null
+	 */
+	private $connection_id;
+
+	/**
+	 * The e-mail of the customer being built.
+	 *
+	 * @var string|null
+	 */
+	private $customer_email;
+
+	/**
+	 * Whether the customer being built accepts marketing.
+	 *
+	 * @var bool|int|null
+	 */
+	private $accepts_marketing;
+
+	/**
 	 * Activecampaign_For_Woocommerce_Customer_Utilities constructor.
 	 *
 	 * @param     Logger|null $logger     The Logger.
 	 */
 	public function __construct(
-		Logger $logger = null
+		?Logger $logger = null
 	) {
 		if ( ! $logger ) {
 			$this->logger = new Logger();

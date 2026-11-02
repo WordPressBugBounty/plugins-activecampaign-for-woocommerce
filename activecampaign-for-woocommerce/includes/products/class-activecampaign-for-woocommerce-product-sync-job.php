@@ -197,6 +197,8 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 						foreach ( $children as $child_id ) {
 							$child = wc_get_product( $child_id );
 							$this->add_product_data( $status, $child, $connection_id, $cofe_data, $product );
+							// Drop the variation from the object cache; otherwise every child stays in memory until the request ends.
+							clean_post_cache( $child_id );
 						}
 					}
 				} catch ( Throwable $t ) {
@@ -551,6 +553,8 @@ class Activecampaign_For_Woocommerce_Product_Sync_Job implements Executable {
 						foreach ( $children as $child_id ) {
 							$child = wc_get_product( $child_id );
 							$this->add_product_data( $status, $child, $connection_id, $cofe_data, $product, $delete );
+							// Drop the variation from the object cache; otherwise every child stays in memory until the request ends.
+							clean_post_cache( $child_id );
 						}
 					}
 				} catch ( Throwable $t ) {

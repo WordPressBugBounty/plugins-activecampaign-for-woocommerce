@@ -70,12 +70,12 @@ class Activecampaign_For_Woocommerce_Account_Status_Manager {
 
 			return sprintf(
 			/* translators: %s: The date and time for admin view. */
-				__( 'Your integration has been blocked until %s.', 'activecampaign' ),
+				__( 'Your integration has been blocked until %s.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 				'<strong>' . $readable_date . '</strong>'
 			);
 		}
 
-		return __( 'Integration is currently inactive. Please check your credentials.', 'activecampaign' );
+		return __( 'Integration is currently inactive. Please check your credentials.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN );
 	}
 
 	/**

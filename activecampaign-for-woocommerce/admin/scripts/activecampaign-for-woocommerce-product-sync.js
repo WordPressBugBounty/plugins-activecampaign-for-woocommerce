@@ -146,9 +146,8 @@ jQuery(document).ready(function($) {
                 $('#activecampaign-run-product-sync-start-record span').html(s.start_record);
                 $('#activecampaign-run-product-sync-fails span').html(JSON.stringify(s.failed_id_array));
                 $('#activecampaign-run-product-sync-sync-started span').html(s.start_time);
-                $('#activecampaign-run-product-sync-sync-last-update span').html(s.last_update);
+                $('#activecampaign-run-product-sync-last-update span').html(s.last_update);
 
-                $('#activecampaign-run-product-sync-running-status').html(JSON.stringify(s));
                 $('#activecampaign-run-product-sync-debug').html(JSON.stringify(s));
             }
 
@@ -169,6 +168,17 @@ jQuery(document).ready(function($) {
                 if(s.is_finished && !response.data.is_scheduled){
                     disableStopButtons();
                     $('#activecampaign-cancel-product-sync').hide();
+                    // last_sync is the previous run: say nothing while a new run is in progress, and a
+                    // cancelled run has its own line. halt() also sets is_finished, so it is not a success.
+                    if (!response.data.status && !s.is_cancelled) {
+                        var halted = s.is_halted === true;
+                        var failed = halted || (s.failed_id_array && s.failed_id_array.length > 0);
+                        var msg = halted ? 'Status: Sync stopped because of an error, check the logs'
+                            : (failed ? 'Status: Sync finished, some records failed (see below)' : 'Status: Sync finished successfully');
+                        $('#activecampaign-run-product-sync-complete')
+                            .toggleClass('notice-warning', failed).toggleClass('notice-success', !failed)
+                            .find('p').text(msg).end().show();
+                    }
                 }
 
                 $('#activecampaign-run-product-sync-debug').html(JSON.stringify(response.data.last_sync));
@@ -185,8 +195,6 @@ jQuery(document).ready(function($) {
         }).fail(response => {
             console.log('Product response failed', response);
             startUpdateCheck(6000);
-            $('#activecampaign-run-product-sync-status').html('Response failed from ' + ajaxurl);
-
         });
     }
 });

@@ -86,7 +86,7 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	 * @param string|null              $ac_debug    Whether or not to enable debug logging via the INFO level.
 	 */
 	public function __construct(
-		WC_Logger_Interface $logger = null,
+		?WC_Logger_Interface $logger = null,
 		$plugin_name = ACTIVECAMPAIGN_FOR_WOOCOMMERCE_PLUGIN_NAME_KEBAB,
 		$ac_debug = null
 	) {
@@ -148,10 +148,11 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	public function error( $message, array $context = array() ): void {
 		// Unstable issues
 		$this->plugin_subname = 'errors';
-		$this->add_wc_error_log_entry($message, $context, 'error');
-		$context = $this->resolveErrorContext( $context );
-		$message = $this->formatMessageWithContext( $message, $context );
-		$this->logger->error( $message, $context );
+		$context   = $this->resolveErrorContext( $context );
+		$formatted = $this->formatMessageWithContext( $message, $context ); // redacts $context in place
+		// This entry goes straight to the WooCommerce log table, so it gets the redacted pair as well.
+		$this->add_wc_error_log_entry( $this->redact_message( $message ), $context, 'error' );
+		$this->logger->error( $formatted, $context );
 	}
 
 	/**
@@ -186,12 +187,13 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	 * {@inheritdoc}
 	 */
 	public function debug( $message, array $context = array() ): void {
+		if ( ! $this->ac_debug ) {
+			return; // nothing is written, so skip the context walk and redaction as well
+		}
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
-		if ( $this->ac_debug ) {
-			// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
-			$this->logger->info( "[ActiveCampaign Debug] $message", $context );
-		}
+		// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
+		$this->logger->info( "[ActiveCampaign Debug] $message", $context );
 		// DO NOT record debug messages if debug is off. It's a waste of log space and makes a mess.
 	}
 
@@ -199,12 +201,13 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	 * {@inheritdoc}
 	 */
 	public function debug_calls( $message, array $context = array() ) {
+		if ( ! $this->ac_debug_calls ) {
+			return; // nothing is written, so skip the context walk and redaction as well
+		}
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
-		if ( $this->ac_debug_calls ) {
-			// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
-			$this->logger->info( "[ActiveCampaign Debug Call] $message", $context );
-		}
+		// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
+		$this->logger->info( "[ActiveCampaign Debug Call] $message", $context );
 		// DO NOT record debug messages if debug is off. It's a waste of log space and makes a mess.
 	}
 
@@ -212,12 +215,13 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	 * {@inheritdoc}
 	 */
 	public function debug_excess( $message, array $context = array() ) {
+		if ( ! $this->ac_debug_excess ) {
+			return; // nothing is written, so skip the context walk and redaction as well
+		}
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
-		if ( $this->ac_debug_excess ) {
-			// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
-			$this->logger->info( "[ActiveCampaign Debug Excessive Messages] $message", $context );
-		}
+		// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
+		$this->logger->info( "[ActiveCampaign Debug Excessive Messages] $message", $context );
 		// DO NOT record debug messages if debug is off. It's a waste of log space and makes a mess.
 	}
 
@@ -229,12 +233,13 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 	 * @param     array $context
 	 */
 	public function dev( $message, array $context = array() ) {
+		if ( ! $this->ac_debug ) {
+			return; // nothing is written, so skip the context walk and redaction as well
+		}
 		$context = $this->resolveContext( $context );
 		$message = $this->formatMessageWithContext( $message, $context );
-		if ( $this->ac_debug ) {
-			// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
-			$this->logger->info( "[ActiveCampaign DEV TESTING (DELETE THIS BEFORE PUSHING)] $message", $context );
-		}
+		// If debug logging is turned on in the AC plugin settings, send all debug logs via the INFO level. Bypasses PHP settings.
+		$this->logger->info( "[ActiveCampaign DEV TESTING (DELETE THIS BEFORE PUSHING)] $message", $context );
 		// DO NOT allow dev level log entries to go into prod code. This is for dev debugging only.
 	}
 
@@ -330,12 +335,72 @@ class Activecampaign_For_Woocommerce_Logger extends WC_Log_Handler_DB implements
 		}
 		$context['request_id'] = RequestIdService::get_request_id();
 
-		// Make absolutely sure we sanitize sensitive data
-		$formatted = $message . "\nContext: " . wp_json_encode( $context, JSON_PRETTY_PRINT );
-		return preg_replace( '/(user_pass).*[,}]|(password).*[,}]|(cardnumber).*[,}]|(exp.date).*[,}]|(cvc).*[,}]/i', '$1\":\"*REMOVED*\"', $formatted );
+		// Redact the array itself, not only its printed form: the WooCommerce handlers store the context next to
+		// the message (callers pass $context on by reference).
+		$context = $this->redact_sensitive_values( $context );
 
-		// The logger doesn't seem to actually use the context array, so we'll merge it in with the message
-		// return $message . "\nContext: " . wp_json_encode( $context, JSON_PRETTY_PRINT );
+		return $this->redact_message( $message ) . "\nContext: " . wp_json_encode( $context, JSON_PRETTY_PRINT );
+	}
+
+	/**
+	 * Keys (or key fragments) whose values must never be logged. Shared by the array and the message redaction.
+	 */
+	const SENSITIVE_KEYS = 'user_pass|password|api[\\s._-]?key|api[\\s._-]?token|cardnumber|exp[\\s._-]?date|cvc';
+
+	/**
+	 * Replaces the value of every credential-like key (at any depth, objects included) with *REMOVED*.
+	 *
+	 * @param array $context The log context.
+	 *
+	 * @return array
+	 */
+	private function redact_sensitive_values( array $context ) {
+		foreach ( $context as $key => $value ) {
+			if ( is_string( $key ) && preg_match( '/' . self::SENSITIVE_KEYS . '/i', $key ) ) {
+				$context[ $key ] = '*REMOVED*';
+				continue;
+			}
+
+			if ( is_object( $value ) ) {
+				// Objects are walked through their JSON form (a JsonSerializable may yield a scalar); fail closed if it
+				// cannot be encoded or decoded.
+				$encoded = wp_json_encode( $value );
+				$value   = false === $encoded ? null : json_decode( $encoded, true );
+				if ( null === $value ) {
+					$context[ $key ] = '*REMOVED*';
+					continue;
+				}
+				$context[ $key ] = $value;
+			}
+
+			if ( is_array( $value ) ) {
+				$context[ $key ] = $this->redact_sensitive_values( $value );
+			} elseif ( is_string( $value ) ) {
+				// Response bodies, exception messages and dumps are logged as plain strings.
+				$context[ $key ] = $this->redact_message( $value );
+			}
+		}
+
+		return $context;
+	}
+
+	/**
+	 * Redacts `key: value`, `key=value`, `'key' => 'value'`, `[key] => value` and `"key": "value"` fragments in free text (exception
+	 * messages, dumped headers, JSON or array dumps). Fails closed: if the regex engine gives up, the text is withheld
+	 * rather than logged raw.
+	 *
+	 * @param string $message The log message.
+	 *
+	 * @return string
+	 */
+	private function redact_message( $message ) {
+		$redacted = preg_replace(
+			'/(' . self::SENSITIVE_KEYS . ')(["\'\]]?[ \t]*(?:=>|[:=])[ \t]*)("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\'|[^\s,}&;)]+)/i',
+			'$1$2"*REMOVED*"',
+			(string) $message
+		);
+
+		return null === $redacted ? '[text withheld: credential redaction failed]' : $redacted;
 	}
 
 

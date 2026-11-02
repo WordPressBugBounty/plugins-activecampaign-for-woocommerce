@@ -174,6 +174,9 @@ $activecampaign_for_woocommerce_has_subscriptions = $this->get_has_subscriptions
 					<?php esc_html_e( 'Historical sync may be stuck or running very slow.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
 				</h4>
 				<hr/>
+				<div id="activecampaign-historical-sync-run-shortly" style="display:none;border:1px dashed #2271b1;padding:5px 10px;margin-bottom:10px;">
+					<?php esc_html_e( 'Historical sync scheduled. It runs in the background through WP-Cron / Action Scheduler (about every minute), so you can leave this page; the counts below refresh automatically.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?>
+				</div>
 				<div id="activecampaign-sync-run-section">
 					<div id="activecampaign-run-historical-sync-current-record">
 						<h2>Sync counts</h2>
@@ -217,7 +220,7 @@ $activecampaign_for_woocommerce_has_subscriptions = $this->get_has_subscriptions
 									</th>
 							</tr>
 							<tr id="activecampaign-data-contacts">
-								<td>Contacts</td>
+								<td>Contacts<br/><progress id="activecampaign-historical-sync-contacts-progress" max="1" value="0" style="width:100%;"></progress></td>
 								<td><span id="activecampaign-historical-sync-contacts-count"></span></td>
 								<td>N/A</td>
 								<td><span id="activecampaign-historical-sync-contacts-queue">-</span></td>
@@ -237,7 +240,7 @@ $activecampaign_for_woocommerce_has_subscriptions = $this->get_has_subscriptions
 								</tr>
 							<?php endif; ?>
 							<tr id="activecampaign-data-orders">
-								<td>Orders</td>
+								<td>Orders<br/><progress id="activecampaign-historical-sync-orders-progress" max="1" value="0" style="width:100%;"></progress></td>
 								<td><span id="activecampaign-run-historical-sync-total-count"></span></td>
 								<td><span id="activecampaign-run-historical-sync-prepared-count"></span></td>
 								<td><span id="activecampaign-run-historical-sync-pending-count"></span></td>

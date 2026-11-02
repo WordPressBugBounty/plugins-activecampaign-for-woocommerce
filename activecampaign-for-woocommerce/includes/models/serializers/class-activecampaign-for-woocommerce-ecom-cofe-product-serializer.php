@@ -97,13 +97,16 @@ class Activecampaign_For_Woocommerce_Ecom_Cofe_Product_Serializer {
 					$cofe_product['variantDimensions'] = $dimensions;
 				}
 
+				// isOnSale: the sale state belongs to the variations, which are serialized on their own. Never ask the
+				// variable parent: WC_Product_Variable::is_on_sale() loads every child variation and exhausts memory
+				// on products with very large variation counts (same pattern as DEFECT-42891).
 				$cofe_product['type']                = $product->get_type();
 				$cofe_product['status']              = $product->get_status();
 				$cofe_product['numberOfSales']       = self::int_field( $product->get_total_sales() );
 				$cofe_product['isVirtual']           = $product->get_virtual();
 				$cofe_product['isDownloadable']      = $product->get_downloadable();
 				$cofe_product['isVisible']           = self::convert_to_bool( $product->is_visible() );
-				$cofe_product['isOnSale']            = $product->is_on_sale();
+				$cofe_product['isOnSale']            = $product instanceof WC_Product_Variable ? false : $product->is_on_sale();
 				$cofe_product['isDeleted']           = 'trash' === strtolower( $product->get_status() );
 				$cofe_product['isBackordersAllowed'] = $product->backorders_allowed();
 				if ( $product->is_in_stock() !== null ) {

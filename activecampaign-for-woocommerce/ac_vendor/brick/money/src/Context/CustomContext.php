@@ -4,9 +4,10 @@ declare (strict_types=1);
 namespace AcVendor\Brick\Money\Context;
 
 use AcVendor\Brick\Math\BigDecimal;
+use AcVendor\Brick\Math\BigNumber;
+use AcVendor\Brick\Math\RoundingMode;
 use AcVendor\Brick\Money\Context;
 use AcVendor\Brick\Money\Currency;
-use AcVendor\Brick\Math\BigNumber;
 /**
  * Adjusts a number to a custom scale, and optionally step.
  */
@@ -15,13 +16,13 @@ final class CustomContext implements Context
     /**
      * The scale of the monies using this context.
      */
-    private int $scale;
+    private readonly int $scale;
     /**
      * An optional cash rounding step. Must be a multiple of 2 and/or 5.
      *
      * For example, scale=4 and step=5 would allow amounts of 0.0000, 0.0005, 0.0010, etc.
      */
-    private int $step;
+    private readonly int $step;
     /**
      * @param int $scale The scale of the monies using this context.
      * @param int $step  An optional cash rounding step. Must be a multiple of 2 and/or 5.
@@ -34,7 +35,7 @@ final class CustomContext implements Context
     /**
      * {@inheritdoc}
      */
-    public function applyTo(BigNumber $amount, Currency $currency, int $roundingMode) : BigDecimal
+    public function applyTo(BigNumber $amount, Currency $currency, RoundingMode $roundingMode): BigDecimal
     {
         if ($this->step === 1) {
             return $amount->toScale($this->scale, $roundingMode);
@@ -44,14 +45,14 @@ final class CustomContext implements Context
     /**
      * {@inheritdoc}
      */
-    public function getStep() : int
+    public function getStep(): int
     {
         return $this->step;
     }
     /**
      * {@inheritdoc}
      */
-    public function isFixedScale() : bool
+    public function isFixedScale(): bool
     {
         return \true;
     }
@@ -60,7 +61,7 @@ final class CustomContext implements Context
      *
      * @return int
      */
-    public function getScale() : int
+    public function getScale(): int
     {
         return $this->scale;
     }

@@ -16,7 +16,7 @@ final class AutoContext implements Context
     /**
      * {@inheritdoc}
      */
-    public function applyTo(BigNumber $amount, Currency $currency, int $roundingMode) : BigDecimal
+    public function applyTo(BigNumber $amount, Currency $currency, RoundingMode $roundingMode): BigDecimal
     {
         if ($roundingMode !== RoundingMode::UNNECESSARY) {
             throw new \InvalidArgumentException('AutoContext only supports RoundingMode::UNNECESSARY');
@@ -26,14 +26,14 @@ final class AutoContext implements Context
     /**
      * {@inheritdoc}
      */
-    public function getStep() : int
+    public function getStep(): int
     {
         return 1;
     }
     /**
      * {@inheritdoc}
      */
-    public function isFixedScale() : bool
+    public function isFixedScale(): bool
     {
         return \false;
     }

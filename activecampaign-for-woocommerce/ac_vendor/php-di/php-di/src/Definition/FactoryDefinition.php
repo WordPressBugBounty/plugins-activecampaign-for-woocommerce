@@ -12,9 +12,8 @@ class FactoryDefinition implements Definition
 {
     /**
      * Entry name.
-     * @var string
      */
-    private $name;
+    private string $name;
     /**
      * Callable that returns the value.
      * @var callable
@@ -24,45 +23,45 @@ class FactoryDefinition implements Definition
      * Factory parameters.
      * @var mixed[]
      */
-    private $parameters = [];
+    private array $parameters;
     /**
      * @param string $name Entry name
-     * @param callable $factory Callable that returns the value associated to the entry name.
+     * @param callable|array|string $factory Callable that returns the value associated to the entry name.
      * @param array $parameters Parameters to be passed to the callable
      */
-    public function __construct(string $name, $factory, array $parameters = [])
+    public function __construct(string $name, callable|array|string $factory, array $parameters = [])
     {
         $this->name = $name;
         $this->factory = $factory;
         $this->parameters = $parameters;
     }
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
-    public function setName(string $name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
     /**
-     * @return callable Callable that returns the value associated to the entry name.
+     * @return callable|array|string Callable that returns the value associated to the entry name.
      */
-    public function getCallable()
+    public function getCallable(): callable|array|string
     {
         return $this->factory;
     }
     /**
      * @return array Array containing the parameters to be passed to the callable, indexed by name.
      */
-    public function getParameters() : array
+    public function getParameters(): array
     {
         return $this->parameters;
     }
-    public function replaceNestedDefinitions(callable $replacer)
+    public function replaceNestedDefinitions(callable $replacer): void
     {
-        $this->parameters = \array_map($replacer, $this->parameters);
+        $this->parameters = array_map($replacer, $this->parameters);
     }
-    public function __toString()
+    public function __toString(): string
     {
         return 'Factory';
     }

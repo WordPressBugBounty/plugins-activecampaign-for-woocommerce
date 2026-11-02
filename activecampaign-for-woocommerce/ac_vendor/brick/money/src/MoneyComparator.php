@@ -19,7 +19,7 @@ final class MoneyComparator
     /**
      * The exchange rate provider.
      */
-    private ExchangeRateProvider $exchangeRateProvider;
+    private readonly ExchangeRateProvider $exchangeRateProvider;
     /**
      * Class constructor.
      *
@@ -46,7 +46,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If the exchange rate is not available.
      */
-    public function compare(Money $a, Money $b) : int
+    public function compare(Money $a, Money $b): int
     {
         $aCurrencyCode = $a->getCurrency()->getCurrencyCode();
         $bCurrencyCode = $b->getCurrency()->getCurrencyCode();
@@ -67,7 +67,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If the exchange rate is not available.
      */
-    public function isEqual(Money $a, Money $b) : bool
+    public function isEqual(Money $a, Money $b): bool
     {
         return $this->compare($a, $b) === 0;
     }
@@ -79,7 +79,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If the exchange rate is not available.
      */
-    public function isLess(Money $a, Money $b) : bool
+    public function isLess(Money $a, Money $b): bool
     {
         return $this->compare($a, $b) < 0;
     }
@@ -91,7 +91,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If the exchange rate is not available.
      */
-    public function isLessOrEqual(Money $a, Money $b) : bool
+    public function isLessOrEqual(Money $a, Money $b): bool
     {
         return $this->compare($a, $b) <= 0;
     }
@@ -103,7 +103,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If the exchange rate is not available.
      */
-    public function isGreater(Money $a, Money $b) : bool
+    public function isGreater(Money $a, Money $b): bool
     {
         return $this->compare($a, $b) > 0;
     }
@@ -115,7 +115,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If the exchange rate is not available.
      */
-    public function isGreaterOrEqual(Money $a, Money $b) : bool
+    public function isGreaterOrEqual(Money $a, Money $b): bool
     {
         return $this->compare($a, $b) >= 0;
     }
@@ -136,7 +136,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If an exchange rate is not available.
      */
-    public function min(Money $money, Money ...$monies) : Money
+    public function min(Money $money, Money ...$monies): Money
     {
         $min = $money;
         foreach ($monies as $money) {
@@ -163,7 +163,7 @@ final class MoneyComparator
      *
      * @throws CurrencyConversionException If an exchange rate is not available.
      */
-    public function max(Money $money, Money ...$monies) : Money
+    public function max(Money $money, Money ...$monies): Money
     {
         $max = $money;
         foreach ($monies as $money) {

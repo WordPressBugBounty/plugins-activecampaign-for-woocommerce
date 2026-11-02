@@ -15,7 +15,7 @@ final class ISOCurrencyProvider
      *
      * @psalm-var array<string, array{string, int, string, int}>
      */
-    private array $currencyData;
+    private readonly array $currencyData;
     /**
      * An associative array of currency numeric code to currency code.
      *
@@ -53,14 +53,14 @@ final class ISOCurrencyProvider
      */
     private function __construct()
     {
-        $this->currencyData = (require __DIR__ . '/../data/iso-currencies.php');
+        $this->currencyData = require __DIR__ . '/../data/iso-currencies.php';
     }
     /**
      * Returns the singleton instance of ISOCurrencyProvider.
      *
      * @return ISOCurrencyProvider
      */
-    public static function getInstance() : ISOCurrencyProvider
+    public static function getInstance(): ISOCurrencyProvider
     {
         if (self::$instance === null) {
             self::$instance = new ISOCurrencyProvider();
@@ -76,11 +76,11 @@ final class ISOCurrencyProvider
      *
      * @throws UnknownCurrencyException If the currency code is not known.
      */
-    public function getCurrency($currencyCode) : Currency
+    public function getCurrency(string|int $currencyCode): Currency
     {
-        if (\is_int($currencyCode)) {
+        if (is_int($currencyCode)) {
             if ($this->numericToCurrency === null) {
-                $this->numericToCurrency = (require __DIR__ . '/../data/numeric-to-currency.php');
+                $this->numericToCurrency = require __DIR__ . '/../data/numeric-to-currency.php';
             }
             if (isset($this->numericToCurrency[$currencyCode])) {
                 return $this->getCurrency($this->numericToCurrency[$currencyCode]);
@@ -103,7 +103,7 @@ final class ISOCurrencyProvider
      *
      * @return Currency[] The currencies, indexed by currency code.
      */
-    public function getAvailableCurrencies() : array
+    public function getAvailableCurrencies(): array
     {
         if ($this->isPartial) {
             foreach ($this->currencyData as $currencyCode => $data) {
@@ -111,7 +111,7 @@ final class ISOCurrencyProvider
                     $this->currencies[$currencyCode] = new Currency(...$data);
                 }
             }
-            \ksort($this->currencies);
+            ksort($this->currencies);
             $this->isPartial = \false;
         }
         return $this->currencies;
@@ -125,10 +125,10 @@ final class ISOCurrencyProvider
      *
      * @throws UnknownCurrencyException If the country code is not known, or the country has no single currency.
      */
-    public function getCurrencyForCountry(string $countryCode) : Currency
+    public function getCurrencyForCountry(string $countryCode): Currency
     {
         $currencies = $this->getCurrenciesForCountry($countryCode);
-        $count = \count($currencies);
+        $count = count($currencies);
         if ($count === 1) {
             return $currencies[0];
         }
@@ -150,10 +150,10 @@ final class ISOCurrencyProvider
      *
      * @return Currency[]
      */
-    public function getCurrenciesForCountry(string $countryCode) : array
+    public function getCurrenciesForCountry(string $countryCode): array
     {
         if ($this->countryToCurrency === null) {
-            $this->countryToCurrency = (require __DIR__ . '/../data/country-to-currency.php');
+            $this->countryToCurrency = require __DIR__ . '/../data/country-to-currency.php';
         }
         $result = [];
         if (isset($this->countryToCurrency[$countryCode])) {

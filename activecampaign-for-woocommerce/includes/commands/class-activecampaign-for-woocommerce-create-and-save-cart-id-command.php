@@ -35,12 +35,8 @@ class Activecampaign_For_Woocommerce_Create_And_Save_Cart_Id_Command implements 
 	 *
 	 * @param Logger $logger The Logger interface.
 	 */
-	public function __construct( Logger $logger = null ) {
-		if ( ! $this->logger ) {
-			$this->logger = new Logger();
-		} else {
-			$this->logger = $logger;
-		}
+	public function __construct( ?Logger $logger = null ) {
+		$this->logger = $logger ?? new Logger();
 	}
 
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter

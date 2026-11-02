@@ -820,9 +820,12 @@ $activecampaign_for_woocommerce_checkbox_display_options = array(
 						<input type="text" name="api_key" id="api_key"
 								value="<?php echo esc_html( $activecampaign_for_woocommerce_api_key ); ?>">
 					</div>
-					<a href="#" id="activecampaign-update-api-button"
-						data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-						class="activecampaign-for-woocommerce button secondary"><span><?php esc_html_e( 'Test connection', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span></a>
+					<div style="display:flex;align-items:center;gap:8px;">
+						<a href="#" id="activecampaign-update-api-button"
+							data-value="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+							class="activecampaign-for-woocommerce button secondary"><span><?php esc_html_e( 'Test connection', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ); ?></span></a>
+						<span id="activecampaign-api-test-spinner" class="spinner" style="float:none;margin:0;"></span>
+					</div>
 					<hr/>
 					<?php $this->load_status_mapping_block(); ?>
 					<hr/>

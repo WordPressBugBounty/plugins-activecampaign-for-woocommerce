@@ -38,7 +38,7 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 
 				add_meta_box(
 					'woocommerce-subscription-activecampaign',
-					__( 'ActiveCampaign Data', 'activecampaign' ),
+					__( 'ActiveCampaign Data', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
 					'Activecampaign_For_Woocommerce_Admin_Subscription_Page::subscription_meta_box_display',
 					$screen,
 					'normal',

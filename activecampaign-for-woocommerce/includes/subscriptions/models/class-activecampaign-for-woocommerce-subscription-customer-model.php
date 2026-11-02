@@ -83,6 +83,13 @@ class Activecampaign_For_Woocommerce_Subscription_Customer_Model implements Ecom
 	private $phone;
 
 	/**
+	 * The external (WooCommerce) id of the customer.
+	 *
+	 * @var string|int|null
+	 */
+	private $externalid;
+
+	/**
 	 * Returns the id.
 	 *
 	 * @return string

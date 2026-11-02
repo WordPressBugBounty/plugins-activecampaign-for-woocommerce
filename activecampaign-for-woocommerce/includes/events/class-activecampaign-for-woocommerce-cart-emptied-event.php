@@ -175,7 +175,7 @@ class Activecampaign_For_Woocommerce_Cart_Emptied_Event implements Triggerable {
 		Ecom_Order_Repository $order_repository,
 		Ecom_Product_Factory $product_factory,
 		Ecom_Customer_Repository $customer_repository,
-		Logger $logger = null
+		?Logger $logger = null
 	) {
 		$this->admin               = $admin;
 		$this->factory             = $factory;

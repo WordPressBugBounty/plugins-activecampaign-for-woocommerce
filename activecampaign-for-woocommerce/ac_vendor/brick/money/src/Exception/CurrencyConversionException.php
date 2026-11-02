@@ -8,8 +8,8 @@ namespace AcVendor\Brick\Money\Exception;
  */
 class CurrencyConversionException extends MoneyException
 {
-    private string $sourceCurrencyCode;
-    private string $targetCurrencyCode;
+    private readonly string $sourceCurrencyCode;
+    private readonly string $targetCurrencyCode;
     /**
      * CurrencyConversionException constructor.
      *
@@ -17,9 +17,9 @@ class CurrencyConversionException extends MoneyException
      * @param string $sourceCurrencyCode
      * @param string $targetCurrencyCode
      */
-    public function __construct(string $message, string $sourceCurrencyCode, string $targetCurrencyCode)
+    public function __construct(string $message, string $sourceCurrencyCode, string $targetCurrencyCode, ?\Throwable $previous = null)
     {
-        parent::__construct($message);
+        parent::__construct($message, 0, $previous);
         $this->sourceCurrencyCode = $sourceCurrencyCode;
         $this->targetCurrencyCode = $targetCurrencyCode;
     }
@@ -30,25 +30,25 @@ class CurrencyConversionException extends MoneyException
      *
      * @return CurrencyConversionException
      */
-    public static function exchangeRateNotAvailable(string $sourceCurrencyCode, string $targetCurrencyCode, ?string $info = null) : self
+    public static function exchangeRateNotAvailable(string $sourceCurrencyCode, string $targetCurrencyCode, ?string $info = null, ?\Throwable $previous = null): self
     {
-        $message = \sprintf('No exchange rate available to convert %s to %s', $sourceCurrencyCode, $targetCurrencyCode);
+        $message = sprintf('No exchange rate available to convert %s to %s', $sourceCurrencyCode, $targetCurrencyCode);
         if ($info !== null) {
             $message .= ' (' . $info . ')';
         }
-        return new self($message, $sourceCurrencyCode, $targetCurrencyCode);
+        return new self($message, $sourceCurrencyCode, $targetCurrencyCode, $previous);
     }
     /**
      * @return string
      */
-    public function getSourceCurrencyCode() : string
+    public function getSourceCurrencyCode(): string
     {
         return $this->sourceCurrencyCode;
     }
     /**
      * @return string
      */
-    public function getTargetCurrencyCode() : string
+    public function getTargetCurrencyCode(): string
     {
         return $this->targetCurrencyCode;
     }

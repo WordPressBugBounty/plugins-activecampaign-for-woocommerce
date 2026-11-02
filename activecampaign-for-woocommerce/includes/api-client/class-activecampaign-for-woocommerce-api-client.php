@@ -179,7 +179,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	 *
 	 * @since      1.0.0
 	 */
-	public function __construct( $api_uri = null, $api_key = null, Logger $logger = null, $debug = null ) {
+	public function __construct( $api_uri = null, $api_key = null, ?Logger $logger = null, $debug = null ) {
 		$this->api_uri = $api_uri;
 		$this->api_key = $api_key;
 
@@ -211,7 +211,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	 *
 	 * @since      1.0.0
 	 */
-	public function configure_client( Client $client = null, $extra_path = '' ) {
+	public function configure_client( ?Client $client = null, $extra_path = '' ) {
 		if ( $client ) {
 			$this->client = $client;
 

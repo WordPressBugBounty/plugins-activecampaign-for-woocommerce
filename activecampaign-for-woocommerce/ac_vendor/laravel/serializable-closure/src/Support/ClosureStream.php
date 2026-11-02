@@ -7,6 +7,8 @@ class ClosureStream
 {
     /**
      * The stream protocol.
+     *
+     * @var string
      */
     const STREAM_PROTO = 'laravel-serializable-closure';
     /**
@@ -44,8 +46,8 @@ class ClosureStream
      */
     public function stream_open($path, $mode, $options, &$opened_path)
     {
-        $this->content = "<?php\nreturn " . \substr($path, \strlen(static::STREAM_PROTO . '://')) . ';';
-        $this->length = \strlen($this->content);
+        $this->content = "<?php\nreturn " . substr($path, strlen(static::STREAM_PROTO . '://')) . ';';
+        $this->length = strlen($this->content);
         return \true;
     }
     /**
@@ -56,7 +58,7 @@ class ClosureStream
      */
     public function stream_read($count)
     {
-        $value = \substr($this->content, $this->pointer, $count);
+        $value = substr($this->content, $this->pointer, $count);
         $this->pointer += $count;
         return $value;
     }
@@ -88,7 +90,7 @@ class ClosureStream
      */
     public function stream_stat()
     {
-        $stat = \stat(__FILE__);
+        $stat = stat(__FILE__);
         // @phpstan-ignore-next-line
         $stat[7] = $stat['size'] = $this->length;
         return $stat;
@@ -102,7 +104,7 @@ class ClosureStream
      */
     public function url_stat($path, $flags)
     {
-        $stat = \stat(__FILE__);
+        $stat = stat(__FILE__);
         // @phpstan-ignore-next-line
         $stat[7] = $stat['size'] = $this->length;
         return $stat;
@@ -151,7 +153,7 @@ class ClosureStream
     public static function register()
     {
         if (!static::$isRegistered) {
-            static::$isRegistered = \stream_wrapper_register(static::STREAM_PROTO, __CLASS__);
+            static::$isRegistered = stream_wrapper_register(static::STREAM_PROTO, __CLASS__);
         }
     }
 }

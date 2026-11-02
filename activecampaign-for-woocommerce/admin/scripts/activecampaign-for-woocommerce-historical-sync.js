@@ -40,6 +40,7 @@ jQuery(document).ready(function($) {
     }
 
     function resetCounts() {
+        $('#activecampaign-historical-sync-contacts-progress, #activecampaign-historical-sync-orders-progress').attr({max: 1, value: 0});
         $('#activecampaign-run-historical-sync-contact-record-num').html('-');
         $('#activecampaign-historical-sync-contacts-count').html('-');
 
@@ -89,6 +90,7 @@ jQuery(document).ready(function($) {
                 $('#activecampaign-historical-sync-contacts-queue').html(run_status.contact_queue + ' (apx.)');
                 $('#activecampaign-run-historical-sync-contact-record-num').html(run_status.contact_count);
                 $('#activecampaign-run-historical-sync-contact-failed-num').html(run_status.contact_failed_count);
+                $('#activecampaign-historical-sync-contacts-progress').attr({max: run_status.contact_total || 1, value: run_status.contact_count || 0});
 
                 // Subscription status
                 $('#activecampaign-run-historical-sync-sub-total-count').html('-');
@@ -101,19 +103,16 @@ jQuery(document).ready(function($) {
                 // Order status
                 $('#activecampaign-historical-sync-order-status').show();
                 $('#activecampaign-historical-sync-order-status span').html(run_status.run_sync.orders);
+                $('#activecampaign-historical-sync-run-shortly').toggle('scheduled' === run_status.run_sync.orders);
                 $('#activecampaign-run-historical-sync-total-count').html(run_status.total_orders);
                 $('#activecampaign-run-historical-sync-prepared-count').html(run_status.prepared);
                 $('#activecampaign-run-historical-sync-pending-count').html(run_status.pending);
                 $('#activecampaign-run-historical-sync-synced-count').html(run_status.synced);
                 $('#activecampaign-run-historical-sync-incompatible-count').html(run_status.incompatible);
                 $('#activecampaign-run-historical-sync-error-count').html(run_status.error);
+                $('#activecampaign-historical-sync-orders-progress').attr({max: run_status.total_orders || 1, value: run_status.synced || 0});
 
-                // Show fields
-                $('#activecampaign-run-historical-sync-contact-block').show();
                 $('#activecampaign-data-contacts').show();
-                $('#sync-run-contact-line').show();
-                $('#activecampaign-historical-sync-run-data-prep').show();
-                $('#activecampaign-historical-sync-data-prep-finished').show();
 
                 // Debug section
                 $('#activecampaign-run-historical-sync-current-record-status').html(JSON.stringify(response.data));
@@ -135,24 +134,19 @@ jQuery(document).ready(function($) {
                         startUpdateCheck(16000);
                     }
                     if(idle > 60) {
-                        $('#activecampaign-sync-idle-header').show();
-
                         startUpdateCheck(30000);
                     }
                 }else{
                     idle = 0;
                     startUpdateCheck(4000);
-                    $('#activecampaign-historical-sync-order-data').show();
                     $('#activecampaign-data-orders').show();
                 }
             }else{
-                $('#activecampaign-sync-finished-header').show();
                 resetCounts();
             }
         }).fail(response => {
+            console.log('Historical sync status request failed', response);
             startUpdateCheck(8000);
-            $('#activecampaign-run-historical-sync-status').html('Response failed from ' + ajaxurl);
-
         });
     }
 

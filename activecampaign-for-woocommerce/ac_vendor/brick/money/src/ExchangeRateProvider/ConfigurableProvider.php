@@ -22,7 +22,7 @@ final class ConfigurableProvider implements ExchangeRateProvider
      *
      * @return ConfigurableProvider This instance, for chaining.
      */
-    public function setExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode, $exchangeRate) : self
+    public function setExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode, $exchangeRate): self
     {
         $this->exchangeRates[$sourceCurrencyCode][$targetCurrencyCode] = $exchangeRate;
         return $this;
@@ -30,7 +30,7 @@ final class ConfigurableProvider implements ExchangeRateProvider
     /**
      * {@inheritdoc}
      */
-    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode)
+    public function getExchangeRate(string $sourceCurrencyCode, string $targetCurrencyCode): BigNumber|int|float|string
     {
         if (isset($this->exchangeRates[$sourceCurrencyCode][$targetCurrencyCode])) {
             return $this->exchangeRates[$sourceCurrencyCode][$targetCurrencyCode];

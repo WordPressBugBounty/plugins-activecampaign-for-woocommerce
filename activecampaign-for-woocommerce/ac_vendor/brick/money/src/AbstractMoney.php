@@ -8,26 +8,29 @@ use AcVendor\Brick\Math\BigNumber;
 use AcVendor\Brick\Math\RoundingMode;
 use AcVendor\Brick\Math\Exception\MathException;
 use AcVendor\Brick\Math\Exception\RoundingNecessaryException;
+use JsonSerializable;
+use Stringable;
 /**
  * Base class for Money and RationalMoney.
+ *
+ * Please consider this class sealed: extending this class yourself is not supported, and breaking changes (such as
+ * adding new abstract methods) can happen at any time, even in a minor version.
  */
-abstract class AbstractMoney implements MoneyContainer
+abstract class AbstractMoney implements MoneyContainer, Stringable, JsonSerializable
 {
-    public abstract function getAmount() : BigNumber;
-    public abstract function getCurrency() : Currency;
+    abstract public function getAmount(): BigNumber;
+    abstract public function getCurrency(): Currency;
     /**
      * Converts this money to a Money in the given Context.
      *
-     * @psalm-param RoundingMode::* $roundingMode
-     *
-     * @param Context $context      The context.
-     * @param int     $roundingMode The rounding mode, if necessary.
+     * @param Context      $context      The context.
+     * @param RoundingMode $roundingMode The rounding mode, if necessary.
      *
      * @return Money
      *
      * @throws RoundingNecessaryException If RoundingMode::UNNECESSARY is used but rounding is necessary.
      */
-    public final function to(Context $context, int $roundingMode = RoundingMode::UNNECESSARY) : Money
+    final public function to(Context $context, RoundingMode $roundingMode = RoundingMode::UNNECESSARY): Money
     {
         return Money::create($this->getAmount(), $this->getCurrency(), $context, $roundingMode);
     }
@@ -38,7 +41,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return BigNumber[]
      */
-    public final function getAmounts() : array
+    final public function getAmounts(): array
     {
         return [$this->getCurrency()->getCurrencyCode() => $this->getAmount()];
     }
@@ -47,7 +50,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return int -1 if the number is negative, 0 if zero, 1 if positive.
      */
-    public final function getSign() : int
+    final public function getSign(): int
     {
         return $this->getAmount()->getSign();
     }
@@ -56,7 +59,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return bool
      */
-    public final function isZero() : bool
+    final public function isZero(): bool
     {
         return $this->getAmount()->isZero();
     }
@@ -65,7 +68,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return bool
      */
-    public final function isNegative() : bool
+    final public function isNegative(): bool
     {
         return $this->getAmount()->isNegative();
     }
@@ -74,7 +77,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return bool
      */
-    public final function isNegativeOrZero() : bool
+    final public function isNegativeOrZero(): bool
     {
         return $this->getAmount()->isNegativeOrZero();
     }
@@ -83,7 +86,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return bool
      */
-    public final function isPositive() : bool
+    final public function isPositive(): bool
     {
         return $this->getAmount()->isPositive();
     }
@@ -92,91 +95,69 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return bool
      */
-    public final function isPositiveOrZero() : bool
+    final public function isPositiveOrZero(): bool
     {
         return $this->getAmount()->isPositiveOrZero();
     }
     /**
      * Compares this money to the given amount.
      *
-     * @param AbstractMoney|BigNumber|int|float|string $that
-     *
      * @return int [-1, 0, 1] if `$this` is less than, equal to, or greater than `$that`.
      *
      * @throws MathException          If the argument is an invalid number.
      * @throws MoneyMismatchException If the argument is a money in a different currency.
      */
-    public final function compareTo($that) : int
+    final public function compareTo(AbstractMoney|BigNumber|int|float|string $that): int
     {
         return $this->getAmount()->compareTo($this->getAmountOf($that));
     }
     /**
      * Returns whether this money is equal to the given amount.
      *
-     * @param AbstractMoney|BigNumber|int|float|string $that
-     *
-     * @return bool
-     *
      * @throws MathException          If the argument is an invalid number.
      * @throws MoneyMismatchException If the argument is a money in a different currency.
      */
-    public final function isEqualTo($that) : bool
+    final public function isEqualTo(AbstractMoney|BigNumber|int|float|string $that): bool
     {
         return $this->getAmount()->isEqualTo($this->getAmountOf($that));
     }
     /**
      * Returns whether this money is less than the given amount.
      *
-     * @param AbstractMoney|BigNumber|int|float|string $that
-     *
-     * @return bool
-     *
      * @throws MathException          If the argument is an invalid number.
      * @throws MoneyMismatchException If the argument is a money in a different currency.
      */
-    public final function isLessThan($that) : bool
+    final public function isLessThan(AbstractMoney|BigNumber|int|float|string $that): bool
     {
         return $this->getAmount()->isLessThan($this->getAmountOf($that));
     }
     /**
      * Returns whether this money is less than or equal to the given amount.
      *
-     * @param AbstractMoney|BigNumber|int|float|string $that
-     *
-     * @return bool
-     *
      * @throws MathException          If the argument is an invalid number.
      * @throws MoneyMismatchException If the argument is a money in a different currency.
      */
-    public final function isLessThanOrEqualTo($that) : bool
+    final public function isLessThanOrEqualTo(AbstractMoney|BigNumber|int|float|string $that): bool
     {
         return $this->getAmount()->isLessThanOrEqualTo($this->getAmountOf($that));
     }
     /**
      * Returns whether this money is greater than the given amount.
      *
-     * @param AbstractMoney|BigNumber|int|float|string $that
-     *
-     * @return bool
-     *
      * @throws MathException          If the argument is an invalid number.
      * @throws MoneyMismatchException If the argument is a money in a different currency.
      */
-    public final function isGreaterThan($that) : bool
+    final public function isGreaterThan(AbstractMoney|BigNumber|int|float|string $that): bool
     {
         return $this->getAmount()->isGreaterThan($this->getAmountOf($that));
     }
     /**
      * Returns whether this money is greater than or equal to the given amount.
      *
-     * @param AbstractMoney|BigNumber|int|float|string $that
-     *
-     * @return bool
-     *
      * @throws MathException          If the argument is an invalid number.
      * @throws MoneyMismatchException If the argument is a money in a different currency.
      */
-    public final function isGreaterThanOrEqualTo($that) : bool
+    final public function isGreaterThanOrEqualTo(AbstractMoney|BigNumber|int|float|string $that): bool
     {
         return $this->getAmount()->isGreaterThanOrEqualTo($this->getAmountOf($that));
     }
@@ -190,7 +171,7 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @return bool
      */
-    public final function isAmountAndCurrencyEqualTo(AbstractMoney $that) : bool
+    final public function isAmountAndCurrencyEqualTo(AbstractMoney $that): bool
     {
         return $this->getAmount()->isEqualTo($that->getAmount()) && $this->getCurrency()->is($that->getCurrency());
     }
@@ -201,11 +182,9 @@ abstract class AbstractMoney implements MoneyContainer
      *
      * @param AbstractMoney|BigNumber|int|float|string $that A money or amount.
      *
-     * @return BigNumber|int|float|string
-     *
      * @throws MoneyMismatchException If currencies don't match.
      */
-    protected final function getAmountOf($that)
+    final protected function getAmountOf(AbstractMoney|BigNumber|int|float|string $that): BigNumber|int|float|string
     {
         if ($that instanceof AbstractMoney) {
             if (!$that->getCurrency()->is($this->getCurrency())) {
@@ -214,5 +193,9 @@ abstract class AbstractMoney implements MoneyContainer
             return $that->getAmount();
         }
         return $that;
+    }
+    final public function jsonSerialize(): array
+    {
+        return ['amount' => (string) $this->getAmount(), 'currency' => $this->getCurrency()->jsonSerialize()];
     }
 }

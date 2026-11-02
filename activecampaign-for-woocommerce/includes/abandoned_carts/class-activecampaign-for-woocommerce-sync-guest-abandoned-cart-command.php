@@ -119,12 +119,12 @@ class Activecampaign_For_Woocommerce_Sync_Guest_Abandoned_Cart_Command implement
 	 * @param     Logger                                    $logger     The ActiveCampaign WooCommerce logger.
 	 */
 	public function __construct(
-		WC_Cart $cart = null,
-		WC_Customer $customer = null,
-		WC_Session $wc_session = null,
+		?WC_Cart $cart,
+		?WC_Customer $customer,
+		?WC_Session $wc_session,
 		Admin $admin,
 		Ecom_Customer_Repository $customer_repository,
-		Logger $logger = null
+		?Logger $logger = null
 	) {
 		$this->cart                = $cart;
 		$this->customer            = $customer;

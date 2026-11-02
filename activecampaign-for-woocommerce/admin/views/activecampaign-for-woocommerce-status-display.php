@@ -212,11 +212,16 @@
 					:
 				</td>
 				<td>
-					<?php if ( $activecampaign_for_woocommerce_status_data['wc_environment']['version'] > 7 ) : ?>
+					<?php $activecampaign_for_woocommerce_min_wc = $this->get_version_requirements()['min_wc']; ?>
+					<?php if ( version_compare( $activecampaign_for_woocommerce_status_data['wc_environment']['version'], $activecampaign_for_woocommerce_min_wc, '>=' ) ) : ?>
 						<?php $this->output_yes_mark( esc_html( $activecampaign_for_woocommerce_status_data['wc_environment']['version'] ) ); ?>
 					<?php else : ?>
-						<mark class="error"><span class="dashicons dashicons-warning"></span> Version is below tested compatibility requirements.</mark>
-					Version: <?php echo esc_html( $activecampaign_for_woocommerce_status_data['wc_environment']['version'] ); ?>
+						<mark class="error"><span class="dashicons dashicons-warning"></span>
+							<?php
+							/* translators: 1: installed WooCommerce version, 2: minimum WooCommerce version */
+							printf( esc_html__( '%1$s - This plugin requires WooCommerce %2$s or newer.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ), esc_html( $activecampaign_for_woocommerce_status_data['wc_environment']['version'] ), esc_html( $activecampaign_for_woocommerce_min_wc ) );
+							?>
+						</mark>
 					<?php endif; ?>
 				</td>
 			</tr>
@@ -261,14 +266,22 @@
 				</td>
 				<td>
 					<?php
-					if ( $activecampaign_for_woocommerce_status_data['php_version']['php_supported'] ) {
-						$this->output_yes_mark( esc_html( $activecampaign_for_woocommerce_status_data['wc_environment']['php_version'] ) );
+					$activecampaign_for_woocommerce_php = $activecampaign_for_woocommerce_status_data['php_version'];
+					if ( $activecampaign_for_woocommerce_php['php_supported'] ) {
+						$this->output_yes_mark( esc_html( $activecampaign_for_woocommerce_php['local_php'] ) );
 					} else {
-						$activecampaign_for_woocommerce_update_link = ' <a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . esc_html__( 'How to update your PHP version', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . '</a>';
+						$activecampaign_for_woocommerce_notice = '<span class="dashicons dashicons-warning"></span> ' . sprintf(
+							/* translators: 1: lowest supported PHP version, 2: highest tested PHP version */
+							__( 'ActiveCampaign has been tested with PHP %1$s to %2$s; on this version some features may not work or be supported.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+							$activecampaign_for_woocommerce_php['min_php'],
+							$activecampaign_for_woocommerce_php['max_tested_php']
+						);
 
-						$activecampaign_for_woocommerce_notice = '<span class="dashicons dashicons-warning"></span> ' . __( 'ActiveCampaign will run under this version of PHP, however, some features are not compatible and may not be supported. We recommend using PHP version 7.4 to 8.2 for the best compatibility.', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . $activecampaign_for_woocommerce_update_link;
+						if ( $activecampaign_for_woocommerce_php['below_min'] ) {
+							$activecampaign_for_woocommerce_notice .= ' <a href="https://docs.woocommerce.com/document/how-to-update-your-php-version/" target="_blank">' . esc_html__( 'How to update your PHP version', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ) . '</a>';
+						}
 
-						echo '<mark class="recommendation">' . esc_html( $activecampaign_for_woocommerce_status_data['php_version']['local_php'] ) . ' - ' . wp_kses_post( $activecampaign_for_woocommerce_notice ) . '</mark>';
+						echo '<mark class="recommendation">' . esc_html( $activecampaign_for_woocommerce_php['local_php'] ) . ' - ' . wp_kses_post( $activecampaign_for_woocommerce_notice ) . '</mark>';
 					}
 					?>
 				</td>

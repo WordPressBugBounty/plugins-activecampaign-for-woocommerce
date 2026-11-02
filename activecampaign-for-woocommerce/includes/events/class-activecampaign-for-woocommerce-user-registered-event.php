@@ -83,7 +83,7 @@ class Activecampaign_For_Woocommerce_User_Registered_Event implements Triggerabl
 	 */
 	public function __construct(
 		Admin $admin,
-		Logger $logger = null,
+		?Logger $logger,
 		Ecom_Customer_Repository $customer_repository
 	) {
 		$this->admin               = $admin;

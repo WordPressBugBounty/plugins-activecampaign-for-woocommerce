@@ -14,10 +14,10 @@ use ReflectionNamedType;
  */
 class ReflectionBasedAutowiring implements DefinitionSource, Autowiring
 {
-    public function autowire(string $name, ObjectDefinition $definition = null)
+    public function autowire(string $name, ?ObjectDefinition $definition = null): ?ObjectDefinition
     {
         $className = $definition ? $definition->getClassName() : $name;
-        if (!\class_exists($className) && !\interface_exists($className)) {
+        if (!class_exists($className) && !interface_exists($className)) {
             return $definition;
         }
         $definition = $definition ?: new ObjectDefinition($name);
@@ -30,21 +30,21 @@ class ReflectionBasedAutowiring implements DefinitionSource, Autowiring
         }
         return $definition;
     }
-    public function getDefinition(string $name)
+    public function getDefinition(string $name): ?ObjectDefinition
     {
         return $this->autowire($name);
     }
     /**
      * Autowiring cannot guess all existing definitions.
      */
-    public function getDefinitions() : array
+    public function getDefinitions(): array
     {
         return [];
     }
     /**
      * Read the type-hinting from the parameters of the function.
      */
-    private function getParametersDefinition(\ReflectionFunctionAbstract $constructor) : array
+    private function getParametersDefinition(\ReflectionFunctionAbstract $constructor): array
     {
         $parameters = [];
         foreach ($constructor->getParameters() as $index => $parameter) {

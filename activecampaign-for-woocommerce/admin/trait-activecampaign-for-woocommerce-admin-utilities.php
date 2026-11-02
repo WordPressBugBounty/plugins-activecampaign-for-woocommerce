@@ -68,11 +68,9 @@ trait Activecampaign_For_Woocommerce_Admin_Utilities {
 				$logger->warning(
 					'Invalid nonce:',
 					array(
-						'action_name' => $action_name,
-						'request'     => $_REQUEST,
-						'get'         => $_GET,
-						'post'        => $_POST,
-						'ac_code'     => 'ADUTIL_66',
+						'action_name'  => $action_name,
+						'request_keys' => array_keys( $_REQUEST ),
+						'ac_code'      => 'ADUTIL_66',
 					)
 				);
 			} catch ( Throwable $t ) {

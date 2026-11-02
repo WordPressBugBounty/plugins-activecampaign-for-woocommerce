@@ -12,8 +12,8 @@ use AcVendor\DI\Definition\ObjectDefinition;
  */
 class NoAutowiring implements Autowiring
 {
-    public function autowire(string $name, ObjectDefinition $definition = null)
+    public function autowire(string $name, ?ObjectDefinition $definition = null): ?ObjectDefinition
     {
-        throw new InvalidDefinition(\sprintf('Cannot autowire entry "%s" because autowiring is disabled', $name));
+        throw new InvalidDefinition(sprintf('Cannot autowire entry "%s" because autowiring is disabled', $name));
     }
 }

@@ -199,7 +199,6 @@ trait Activecampaign_For_Woocommerce_Admin_Abandoned_Cart {
 			);
 			wp_send_json_error( 'There was an error resetting abandoned carts. ' . $t->getMessage() );
 		}
-
 	}
 
 	/**

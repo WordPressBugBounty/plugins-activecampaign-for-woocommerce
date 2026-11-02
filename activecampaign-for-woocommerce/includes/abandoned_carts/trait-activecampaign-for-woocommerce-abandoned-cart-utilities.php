@@ -23,6 +23,13 @@ use Activecampaign_For_Woocommerce_Scheduler_Handler as AC_Scheduler;
  * @author     acteamintegrations <team-integrations@activecampaign.com>
  */
 trait Activecampaign_For_Woocommerce_Abandoned_Cart_Utilities {
+	/**
+	 * The abandoned cart wait time (hours) from the settings.
+	 *
+	 * @var string|int
+	 */
+	private $expire_time;
+
 
 	/**
 	 * Get an abandoned cart by row id.

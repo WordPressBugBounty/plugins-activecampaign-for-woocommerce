@@ -3,7 +3,7 @@ Contributors: acteamintegrations, bartboy011
 Tags: email marketing, ecommerce, woocommerce, activecampaign, abandoned cart
 Requires at least: 7.0
 Tested up to: 7.1.3
-Stable tag: 3.0.1
+Stable tag: 3.1.0
 Requires PHP: 8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -88,6 +88,12 @@ Showcase specific product catalogs in your marketing emails.
 10. Click "Update Settings".
 
 == Changelog ==
+
+= 3.1.0 2026-11-04 =
+* Fix: while ActiveCampaign could not be reached, admin pages could wait up to a minute on every load for the plan check; the plugin now keeps the last known features and checks again every 15 minutes
+* Fix: the ActiveCampaign Data box on the order and subscription pages no longer keeps the page waiting when ActiveCampaign cannot be reached; it shows "Temporarily unavailable" instead
+* Fix: the ActiveCampaign Data box was empty on orders placed before the plugin was set up or already cleaned up from the plugin table
+* Fix: when the ActiveCampaign account is in maintenance, the plugin pauses its requests until the maintenance ends, and orders placed meanwhile are synced afterwards
 
 = 3.0.1 2026-11-02 =
 * Documentation: the plugin listing now states the current minimum requirements (PHP 8.1, WordPress 7.0, WooCommerce 10.0) and shows an upgrade notice before updating

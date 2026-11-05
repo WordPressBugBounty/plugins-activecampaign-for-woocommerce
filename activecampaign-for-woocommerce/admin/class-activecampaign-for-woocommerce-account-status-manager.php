@@ -128,15 +128,16 @@ class Activecampaign_For_Woocommerce_Account_Status_Manager {
 		$delay     = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_INACTIVE_TIME_DELAY, 0 );
 		$delay_from = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_BLOCKED_TIMESTAMP, 0 );
 		$run_at     = $delay_from + $delay;
-		if ( function_exists( 'as_schedule_single_action' ) && did_action( 'action_scheduler_init' ) ) {
+		// Replace a pending unblock: an older, earlier one would lift a newer, longer block.
+		$schedule = function () use ( $run_at, $args ) {
+			as_unschedule_all_actions( 'activecampaign_for_woocommerce_auto_unblock_account', $args, 'activecampaign_for_woocommerce' );
 			as_schedule_single_action( $run_at, 'activecampaign_for_woocommerce_auto_unblock_account', $args, 'activecampaign_for_woocommerce' );
+		};
+
+		if ( function_exists( 'as_schedule_single_action' ) && did_action( 'action_scheduler_init' ) ) {
+			$schedule();
 		} else {
-			add_action(
-				'action_scheduler_init',
-				function () use ( $run_at, $args ) {
-					as_schedule_single_action( $run_at, 'activecampaign_for_woocommerce_auto_unblock_account', $args, 'activecampaign_for_woocommerce' );
-				}
-			);
+			add_action( 'action_scheduler_init', $schedule );
 		}
 
 		$logger        = new Logger();
@@ -154,5 +155,7 @@ class Activecampaign_For_Woocommerce_Account_Status_Manager {
 		self::unblock_account();
 		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_INACTIVE_TIME_DELAY );
 		delete_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_ACCOUNT_BLOCKED_TIMESTAMP );
+		// The order page skips its AC lookups for a while after a failure; show fresh data again.
+		delete_transient( Activecampaign_For_Woocommerce_Admin_WC_Order_Page::AC_UNAVAILABLE_TRANSIENT );
 	}
 }

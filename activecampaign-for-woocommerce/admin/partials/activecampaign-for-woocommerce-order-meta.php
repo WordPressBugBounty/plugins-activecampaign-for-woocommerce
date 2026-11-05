@@ -8,8 +8,10 @@
  * @package    Activecampaign_For_Woocommerce
  * @subpackage Activecampaign_For_Woocommerce/admin/partials
  */
-function activecampaign_for_woocommerce_convert_date_to_local( $datetime ) {
-	return wp_date( 'Y-m-d H:i:s', strtotime( $datetime ) ) . ' ' . wp_timezone_string();
+if ( ! function_exists( 'activecampaign_for_woocommerce_convert_date_to_local' ) ) {
+	function activecampaign_for_woocommerce_convert_date_to_local( $datetime ) {
+		return wp_date( 'Y-m-d H:i:s', strtotime( $datetime ) ) . ' ' . wp_timezone_string();
+	}
 }
 ?>
 

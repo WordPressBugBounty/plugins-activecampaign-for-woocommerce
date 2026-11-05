@@ -127,6 +127,12 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 			return;
 		}
 
+		if ( Activecampaign_For_Woocommerce_Account_Status_Manager::is_blocked() ) {
+			$this->logger->debug( 'Order status sync skipped: the integration is paused.' );
+
+			return;
+		}
+
 		$wc_order_status = null;
 
 		try {
@@ -231,6 +237,12 @@ class Activecampaign_For_Woocommerce_New_Order_Sync_Job implements Executable, S
 
 		if ( ! $this->is_configured() || ! $this->is_connected() ) {
 			$this->logger->debug( 'Order sync skipped: plugin not configured or connected.' );
+
+			return;
+		}
+
+		if ( Activecampaign_For_Woocommerce_Account_Status_Manager::is_blocked() ) {
+			$this->logger->debug( 'Order sync skipped: the integration is paused.' );
 
 			return;
 		}

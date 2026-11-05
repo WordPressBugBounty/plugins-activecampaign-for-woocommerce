@@ -8,7 +8,6 @@
  * @package    Activecampaign_For_Woocommerce
  * @subpackage Activecampaign_For_Woocommerce/admin
  */
-use Activecampaign_For_Woocommerce_Api_Client as Api_Client;
 use Activecampaign_For_Woocommerce_AC_Contact_Repository as Contact_Repository;
 use Activecampaign_For_Woocommerce_Synced_Status_Interface as Synced_Status;
 use Activecampaign_For_Woocommerce_Logger as Logger;
@@ -38,11 +37,12 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 
 				add_meta_box(
 					'woocommerce-subscription-activecampaign',
-					__( 'ActiveCampaign Data', ACTIVECAMPAIGN_FOR_WOOCOMMERCE_LOCALIZATION_DOMAIN ),
+					Activecampaign_For_Woocommerce_Admin_WC_Order_Page::meta_box_title(),
 					'Activecampaign_For_Woocommerce_Admin_Subscription_Page::subscription_meta_box_display',
 					$screen,
 					'normal',
-					'default'
+					'default',
+					Activecampaign_For_Woocommerce_Admin_WC_Order_Page::meta_box_args()
 				);
 			} catch ( Throwable $t ) {
 				$logger = new Logger();
@@ -63,14 +63,13 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 	 */
 	public static function subscription_meta_box_display( $post_or_subscription_object ) {
 		global $wpdb;
-		$logger = new Logger();
+		$api_client = Activecampaign_For_Woocommerce_Admin_WC_Order_Page::api_client_or_placeholder();
 
-		$settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
+		if ( ! $api_client ) {
+			return;
+		}
 
-		$api_uri = isset( $settings['api_url'] ) ? $settings['api_url'] : null;
-		$api_key = isset( $settings['api_key'] ) ? $settings['api_key'] : null;
-
-		$contact_repository                  = new Contact_Repository( new Api_Client( $api_uri, $api_key, $logger ) );
+		$contact_repository                  = new Contact_Repository( $api_client );
 		$activecampaign_for_woocommerce_data = array();
 
 		$order = ( $post_or_subscription_object instanceof WP_Post ) ? wc_get_order( $post_or_subscription_object->ID ) : $post_or_subscription_object;
@@ -96,7 +95,13 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 			);
 
 			if ( ! isset( $table_data, $table_data->id ) ) {
-				$order_ac    = ( new Activecampaign_For_Woocommerce_Admin_Subscription_Page() )->check_for_synced_order( $wc_order_id );
+				$order_ac = Activecampaign_For_Woocommerce_Admin_WC_Order_Page::find_synced_order( $wc_order_id, $api_client );
+
+				if ( false === $order_ac ) {
+					Activecampaign_For_Woocommerce_Admin_WC_Order_Page::render_ac_unavailable();
+					return;
+				}
+
 				$order_ac_id = $order_ac->get_id();
 			}
 
@@ -105,7 +110,13 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 				isset( $table_data->synced_to_ac ) &&
 				in_array( $table_data->synced_to_ac, array( 0, '0' ) )
 			) {
-				$order_ac    = ( new Activecampaign_For_Woocommerce_Admin_Subscription_Page() )->check_for_synced_order( $wc_order_id );
+				$order_ac = Activecampaign_For_Woocommerce_Admin_WC_Order_Page::find_synced_order( $wc_order_id, $api_client );
+
+				if ( false === $order_ac ) {
+					Activecampaign_For_Woocommerce_Admin_WC_Order_Page::render_ac_unavailable();
+					return;
+				}
+
 				$order_ac_id = $order_ac->get_id();
 			}
 
@@ -117,11 +128,11 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 				$table_data = self::get_table_data( $wc_order_id );
 			}
 
-			$ac_contact = get_transient( 'activecampaign_for_woocommerce_contact' . $order->get_billing_email() );
+			$ac_contact = Activecampaign_For_Woocommerce_Admin_WC_Order_Page::find_contact( $contact_repository, $api_client, $order->get_billing_email(), 3600 );
 
-			if ( ! isset( $ac_contact ) || false === $ac_contact ) {
-				$ac_contact = $contact_repository->find_by_email( $order->get_billing_email() );
-				set_transient( 'activecampaign_for_woocommerce_contact' . $order->get_billing_email(), $ac_contact, 3600 );
+			if ( false === $ac_contact ) {
+				Activecampaign_For_Woocommerce_Admin_WC_Order_Page::render_ac_unavailable();
+				return;
 			}
 
 			if ( is_null( $table_data->customer_email ) ) {
@@ -144,18 +155,6 @@ class Activecampaign_For_Woocommerce_Admin_Subscription_Page implements Synced_S
 
 			require_once plugin_dir_path( __FILE__ ) . 'partials/activecampaign-for-woocommerce-subscription-meta.php';
 		}
-	}
-
-	public function check_for_synced_order( $wc_order_id ) {
-		$settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
-
-		$api_uri          = isset( $settings['api_url'] ) ? $settings['api_url'] : null;
-		$api_key          = isset( $settings['api_key'] ) ? $settings['api_key'] : null;
-		$logger           = new Logger();
-		$order_repository = new Activecampaign_For_Woocommerce_Ecom_Order_Repository( new Api_Client( $api_uri, $api_key, $logger ) );
-
-		$order_ac = $order_repository->find_by_externalid( $wc_order_id );
-		return $order_ac;
 	}
 
 	private static function get_table_data( $wc_order_id ) {

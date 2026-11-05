@@ -129,6 +129,20 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	private $retries_allowed = 1;
 
 	/**
+	 * Request timeout in seconds.
+	 *
+	 * @var int
+	 */
+	private $timeout = 30;
+
+	/**
+	 * The response of the last executed call, or null when the call got no response.
+	 *
+	 * @var ResponseInterface|null
+	 */
+	private $last_response;
+
+	/**
 	 * A list of methods that can be magic-called.
 	 *
 	 * @since      1.0.0
@@ -237,7 +251,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 				// 'base_uri' => 'http://host.docker.internal:14001/graphql',
 				// REAL CODE:
 				'base_uri'        => $this->get_api_uri_with_v3_path() . $extra_path,
-				'timeout'         => 30,
+				'timeout'         => $this->timeout,
 				'allow_redirects' => false,
 				'http_errors'     => false,
 				'headers'         => array(
@@ -321,6 +335,32 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	 */
 	public function set_max_retries( $r ) {
 		$this->retries_allowed = $r;
+	}
+
+	/**
+	 * Sets the request timeout. Call it before configure_client(): repositories configure the client
+	 * in their constructor.
+	 *
+	 * @param int $seconds The timeout in seconds.
+	 */
+	public function set_timeout( $seconds ) {
+		$this->timeout = $seconds;
+	}
+
+	/**
+	 * Whether the last executed call got no answer from AC: no response (timeout, connection
+	 * error, integration paused), a server error or rate limiting. Other 4xx are answers.
+	 *
+	 * @return bool
+	 */
+	public function last_call_failed() {
+		if ( ! $this->last_response instanceof ResponseInterface ) {
+			return true;
+		}
+
+		$code = $this->last_response->getStatusCode();
+
+		return $code >= 500 || 429 === $code;
 	}
 
 	/**
@@ -458,6 +498,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 	 * @since      1.0.0
 	 */
 	public function execute( $headers = null ) {
+		$this->last_response = null;
 
 		if ( Account_Status_Manager::is_blocked() ) {
 			return null;
@@ -483,6 +524,7 @@ class Activecampaign_For_Woocommerce_Api_Client {
 			}
 
 			$response = $this->client->request( $this->method, $endpoint, $options );
+			$this->last_response = $response;
 
 			if ( $response instanceof ResponseInterface && $this->ac_debug && $this->logger ) {
 				$this->logger->debug_calls(
@@ -498,6 +540,10 @@ class Activecampaign_For_Woocommerce_Api_Client {
 						'response_string'      => self::validate_object( $response, 'getBody' ) ? $response->getBody()->__toString() : null,
 					)
 				);
+			}
+
+			if ( $this->pause_on_maintenance( $response ) ) {
+				return null;
 			}
 		} catch ( GuzzleException $e ) {
 			$message = $e->getMessage();
@@ -860,6 +906,49 @@ class Activecampaign_For_Woocommerce_Api_Client {
 		}
 
 		return $endpoint;
+	}
+
+	/**
+	 * Pauses all outgoing requests when AC answers 503 with a Retry-After header.
+	 *
+	 * Hosted answers this way for an account in maintenance mode. The client runs with
+	 * http_errors => false, so a 503 arrives here as a response, not as a GuzzleException.
+	 *
+	 * @param mixed $response The response returned by Guzzle.
+	 *
+	 * @return bool Whether the integration has been paused.
+	 */
+	private function pause_on_maintenance( $response ) {
+		if ( ! $response instanceof ResponseInterface || 503 !== $response->getStatusCode() ) {
+			return false;
+		}
+
+		$retry_after = $this->is_header_available( $response->getHeaders(), self::RETRY_AFTER_HEADER );
+
+		if ( ! $retry_after || $retry_after < 1 ) {
+			return false;
+		}
+
+		// Hosted asks for 1 hour. Cap it, so a wrong header can't stop the integration for days.
+		$retry_after = min( $retry_after, DAY_IN_SECONDS );
+
+		Account_Status_Manager::block_account_until( $retry_after );
+		Account_Status_Manager::setup_scheduler_task_for_unblock_account();
+
+		$this->logger->error(
+			Account_Status_Manager::get_debug_error_log_message( $this->endpoint ),
+			array(
+				'suggested_action' => 'The ActiveCampaign account may be in maintenance mode. Outgoing requests are paused until the Retry-After time passes. You can remove the blockade manually in the plugin admin page.',
+				'endpoint'         => $this->endpoint,
+				'origin_endpoint'  => $this->origin_endpoint,
+				'method'           => $this->method,
+				'response_code'    => 503,
+				'retry_after'      => $retry_after,
+				'ac_code'          => 'API_899',
+			)
+		);
+
+		return true;
 	}
 
 	/**

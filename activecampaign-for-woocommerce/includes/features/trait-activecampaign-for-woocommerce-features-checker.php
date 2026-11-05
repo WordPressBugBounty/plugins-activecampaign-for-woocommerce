@@ -30,7 +30,7 @@ trait Activecampaign_For_Woocommerce_Features_Checker {
 	/**
 	 * Features array.
 	 *
-	 * @var array
+	 * @var array|null
 	 */
 	private $features;
 
@@ -72,7 +72,7 @@ trait Activecampaign_For_Woocommerce_Features_Checker {
 			$this->check_ac_plan();
 		}
 
-		if ( false === $this->features ) {
+		if ( empty( $this->features ) ) {
 			$logger->warning( 'You may not have the plan level necessary to access all features in the ActiveCampaign plugin. Please verify your ActiveCampaign account.' );
 			return false;
 		}
@@ -90,50 +90,97 @@ trait Activecampaign_For_Woocommerce_Features_Checker {
 
 	/**
 	 * Check for the plan level using cache first then verify from AC.
+	 *
+	 * The features transient holds either the last successful answer from AC (12 hours)
+	 * or, after a failed or still running call, the last known features (15 minutes).
+	 * This keeps every request from calling AC again while AC is unreachable (DEFECT-43483).
 	 */
 	public function check_ac_plan() {
-		if ( empty( $this->features ) ) {
-			$this->features = get_transient( 'activecampaign_for_woocommerce_features' );
+		$cached = get_transient( 'activecampaign_for_woocommerce_features' );
+
+		// An array, also an empty one, is a stored answer. Anything else means we have to ask AC,
+		// including the false that older versions cached after a failed call.
+		$last_known = get_option( 'activecampaign_for_woocommerce_features_last_known', false );
+
+		if ( is_array( $cached ) ) {
+			$this->features = $cached;
+
+			// Sites upgraded from older versions only have the transient: keep it as the fallback.
+			if ( false === $last_known && ! empty( $cached ) ) {
+				update_option( 'activecampaign_for_woocommerce_features_last_known', $cached );
+			}
+
+			return;
 		}
 
-		if ( ! $this->features ) {
-			$this->get_and_set_ecom_features_from_ac();
-			$this->cache_ac_features();
+		$last_known     = is_array( $last_known ) ? $last_known : array();
+		$this->features = $last_known;
+
+		// Saved before the call: when AC is down, or this request gets killed while waiting,
+		// other requests use the last known features instead of calling AC again.
+		// Without last known features (fresh connection) other requests keep asking AC instead
+		// of running without features until this call returns.
+		if ( ! empty( $last_known ) ) {
+			set_transient( 'activecampaign_for_woocommerce_features', $last_known, 15 * MINUTE_IN_SECONDS );
 		}
+
+		$feature_list = $this->get_ecom_features_from_ac();
+
+		if ( null === $feature_list ) {
+			set_transient( 'activecampaign_for_woocommerce_features', $last_known, 15 * MINUTE_IN_SECONDS );
+			$logger = new Logger();
+			$logger->warning(
+				'Could not retrieve the ActiveCampaign entitlements. Using the last known features and retrying in 15 minutes.',
+				array(
+					'last_known_features' => $last_known,
+					'ac_code'             => 'FC_132',
+				)
+			);
+
+			return;
+		}
+
+		$this->features = $feature_list;
+		set_transient( 'activecampaign_for_woocommerce_features', $feature_list, 12 * HOUR_IN_SECONDS );
+		update_option( 'activecampaign_for_woocommerce_features_last_known', $feature_list );
 	}
 
 	/**
 	 * Retrieves the plan level from AC.
+	 *
+	 * @return array|null The valid feature codes (possibly empty), or null when AC did not answer.
 	 */
-	private function get_and_set_ecom_features_from_ac() {
+	protected function get_ecom_features_from_ac() {
 		$logger   = new Logger();
 		$settings = get_option( ACTIVECAMPAIGN_FOR_WOOCOMMERCE_DB_SETTINGS_NAME );
 		$api_uri  = isset( $settings['api_url'] ) ? $settings['api_url'] : null;
 		$api_key  = isset( $settings['api_key'] ) ? $settings['api_key'] : null;
 
-		$ac_features_repo = new Ac_Features_Repository( new Api_Client( $api_uri, $api_key, $logger ) );
+		$client = new Api_Client( $api_uri, $api_key, $logger );
+		// No 10 second sleep and second attempt on a timeout: this call runs while a page renders.
+		$client->set_max_retries( 0 );
 
-		// grab it from AC
-		$account_features = $ac_features_repo->find_all_current();
+		try {
+			$account_features = ( new Ac_Features_Repository( $client ) )->find_all_current();
+		} catch ( Throwable $t ) {
+			$logger->warning(
+				'There was an error retrieving the ActiveCampaign entitlements.',
+				array(
+					'message' => $t->getMessage(),
+					'ac_code' => 'FC_166',
+				)
+			);
 
-		// Parse for a valid one
+			return null;
+		}
+
+		// Without an entitlements list in the response (timeout, 5xx page, error body) AC did not answer.
+		if ( ! is_array( $account_features->get_entitlements() ) ) {
+			return null;
+		}
+
 		$feature_list = $account_features->get_valid_entitlements();
 
-		if ( isset( $feature_list ) && null !== $feature_list && ! empty( $feature_list ) ) {
-			// Set the plan name global
-			$this->features = $feature_list;
-			$this->cache_ac_features();
-		}
-	}
-
-	/**
-	 * Saves the plan level to the local cache
-	 */
-	private function cache_ac_features() {
-		if ( ! $this->features ) {
-			$this->features = false;
-		}
-
-		set_transient( 'activecampaign_for_woocommerce_features', $this->features, 43200 );
+		return is_array( $feature_list ) ? $feature_list : array();
 	}
 }

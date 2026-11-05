@@ -158,6 +158,12 @@ trait Activecampaign_For_Woocommerce_Synced_Status_Handler {
 	 */
 	public function mark_order_as_failed( $wc_order_id ) {
 		global $wpdb;
+
+		// While the integration is paused (account maintenance) every call fails without reaching AC.
+		// Keep the order as it is, so it syncs once the pause is over.
+		if ( Activecampaign_For_Woocommerce_Account_Status_Manager::is_blocked() ) {
+			return;
+		}
 		$data = array( 'synced_to_ac' => self::STATUS_FAIL );
 		$wpdb->update(
 			$wpdb->prefix . ACTIVECAMPAIGN_FOR_WOOCOMMERCE_TABLE_NAME,
